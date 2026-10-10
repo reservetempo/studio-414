@@ -1,7 +1,8 @@
 /* Window chrome for the boxes: the mailing-list card (.signup), the comments box
    (.comments__inner) and the style switcher, "Display" (.switcher). Each is a 90s
    dialog window: a black frame with a 2px bevel, a solid fill, a title bar and, on
-   the first two, a resize grip in the bottom-right corner.
+   the first two, a resize grip in the bottom-right corner; Display, which can be
+   closed, has a close button in its title bar instead.
    boxes.js adds the drag handle over the title bar and the grip, and moves and sizes
    the boxes; the colours are the tokens in styles.css, swapped per colour in
    switcher.css. Where each box sits by default is in styles.css (the card),
@@ -24,6 +25,11 @@
   color-scheme: light;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* A closed box (Display, until its paint roller opens it: switcher.js). */
+.box[hidden] {
+  display: none;
 }
 
 /* Once moved or resized, boxes.js sets left, top, width and height in px on the box,
@@ -105,6 +111,43 @@
   outline-offset: -3px;
 }
 
+/* A close button, the "x" at the right of a title bar (Display), over the drag
+   handle: a small raised button with a pixel cross, as a 90s window has. */
+.box__close {
+  position: relative;
+  z-index: 1;
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 20px;
+  margin: 0 -3px 0 auto;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: var(--face);
+  color: var(--face-text);
+  box-shadow: var(--bevel-raised);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.box__close svg {
+  display: block;
+  width: 8px;
+  height: 7px;
+}
+
+.box__close:active {
+  padding: 2px 0 0 2px;
+  box-shadow: var(--bevel-pressed);
+}
+
+.box__close:focus-visible {
+  outline: 1px dotted var(--focus);
+  outline-offset: -4px;
+}
+
 /* ---------- Resize grip ---------- */
 
 /* The button is the hit area (larger for fingers); the ridges are drawn in its
@@ -152,6 +195,11 @@
     width: 32px;
     height: 32px;
   }
+
+  .box__close {
+    width: 30px;
+    height: 28px;
+  }
 }
 
 /* While a box is dragged or resized, keep its cursor everywhere and stop text being
@@ -179,5 +227,9 @@ html.is-sizing-box * {
 
   .box__grip::after {
     background: CanvasText;
+  }
+
+  .box__close {
+    border: 1px solid ButtonText;
   }
 }

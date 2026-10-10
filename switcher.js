@@ -10,6 +10,15 @@
   switcher.css), fixed to the screen. boxes.js lets it be dragged by its title bar
   like the other boxes.
 
+  Display starts closed. A paint roller button fixed in the bottom-left corner
+  (.switcher-toggle, a toolbar button that stays pressed in while Display is open)
+  opens it and, pressed again, closes it; so do the "x" in its title bar and Escape
+  anywhere inside it. Opening moves the focus to its title bar and closing gives it
+  back to the button. Closed is just the hidden attribute: boxes.js leaves a hidden box
+  alone and fits it to the screen again, where it was left, when it opens. Whether it
+  was left open is kept in localStorage under "studio414.display" ("open" or
+  "closed"), so a first visit starts closed.
+
   The panel also holds "Reset" for the layout of the boxes, shown only while a box
   (this window included) has been moved or resized. boxes.js reports that with a
   "studio414:layoutchange" event ({ detail: { custom } }); the button asks it to reset
@@ -31,6 +40,7 @@
 
   var MAX = 10;
   var KEY_PREFIX = 'studio414.style.';
+  var OPEN_KEY = 'studio414.display';
   var root = document.documentElement;
 
   var OPTIONS = {
@@ -167,6 +177,16 @@
     '<svg class="box__icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false" shape-rendering="crispEdges">' +
     '<path fill="currentColor" fill-rule="evenodd" d="M1 1h14v10H1zM2 2v8h12V2zM4 4h2v2H4zM7 4h2v2H7zM10 4h2v2h-2zM4 7h8v1H4zM7 11h2v2H7zM4 13h8v2H4z"/></svg>';
   titlebar.appendChild(element('span', 'box__title', 'Display'));
+
+  // The "x" at the right of the title bar (boxes.css), over the drag handle.
+  var closeButton = element('button', 'box__close');
+  closeButton.type = 'button';
+  closeButton.setAttribute('aria-label', 'Close Display');
+  closeButton.title = 'Close';
+  closeButton.innerHTML =
+    '<svg viewBox="0 0 8 7" aria-hidden="true" focusable="false" shape-rendering="crispEdges">' +
+    '<path fill="currentColor" d="M0 0h2v1H0zM6 0h2v1H6zM1 1h2v1H1zM5 1h2v1H5zM2 2h4v1H2zM3 3h2v1H3zM2 4h4v1H2zM1 5h2v1H1zM5 5h2v1H5zM0 6h2v1H0zM6 6h2v1H6z"/></svg>';
+  titlebar.appendChild(closeButton);
   panel.appendChild(titlebar);
 
   var body = element('div', 'switcher__body');
@@ -287,6 +307,63 @@
   credit.appendChild(creditLink);
   credit.appendChild(document.createTextNode(', under the SIL Open Font License.'));
 
+  /* ---------- Opening and closing: the paint roller ---------- */
+
+  // A 90s toolbar button with a pixel paint roller (16 x 16, drawn at twice the size):
+  // a black outline and handle, and a roller covered in the colour's own title-bar
+  // colour, with a lit top and a shaded bottom row (switcher.css).
+  var toggle = element('button', 'switcher-toggle');
+  toggle.type = 'button';
+  toggle.setAttribute('aria-label', 'Display: fonts and colours');
+  toggle.setAttribute('aria-controls', panel.id);
+  toggle.title = 'Display: fonts and colours';
+  toggle.innerHTML =
+    '<svg viewBox="0 0 16 16" aria-hidden="true" focusable="false" shape-rendering="crispEdges">' +
+    '<path class="switcher-toggle__paint" d="M2 2h9v4H2z"/>' +
+    '<path class="switcher-toggle__shine" d="M2 2h9v1H2z"/>' +
+    '<path class="switcher-toggle__shade" d="M2 5h9v1H2z"/>' +
+    '<path fill="currentColor" d="M1 1h11v1H1zM1 6h11v1H1zM1 2h1v4H1zM11 2h1v4h-1zM12 3h2v1h-2zM13 4h1v4h-1zM6 8h8v1H6zM6 9h1v1H6zM5 10h3v5H5zM6 15h1v1H6z"/></svg>';
+
+  function isOpen() {
+    return !panel.hidden;
+  }
+
+  // Opens or closes Display. focus: move the focus with it (into its title bar on
+  // opening, back to the paint roller on closing), as when the visitor does it.
+  function setOpen(open, focus) {
+    panel.hidden = !open;
+    toggle.setAttribute('aria-expanded', String(open));
+    writeStorage(OPEN_KEY, open ? 'open' : 'closed');
+    if (!focus) return;
+    if (open) {
+      // The drag handle over the title bar (boxes.js), or else the "x" beside it.
+      (panel.querySelector('.box__handle') || closeButton).focus();
+    } else {
+      toggle.focus();
+    }
+  }
+
+  toggle.addEventListener('click', function () {
+    setOpen(!isOpen(), true);
+  });
+
+  closeButton.addEventListener('click', function () {
+    setOpen(false, true);
+  });
+
+  panel.addEventListener('keydown', function (event) {
+    if (event.key !== 'Escape' || event.defaultPrevented) return;
+    // Escape during a drag puts the window back instead (boxes.js).
+    if (root.classList.contains('is-moving-box') || root.classList.contains('is-sizing-box')) return;
+    event.preventDefault();
+    setOpen(false, true);
+  });
+
+  // Closed on a first visit; as the visitor left it after that.
+  var startOpen = readStorage(OPEN_KEY) === 'open';
+  panel.hidden = !startOpen;
+  toggle.setAttribute('aria-expanded', String(startOpen));
+
   /* ---------- Updating ---------- */
 
   function render() {
@@ -316,6 +393,8 @@
   apply();
   render();
   document.body.appendChild(credit);
+  // The paint roller just before the window, so Tab goes from one into the other.
+  document.body.appendChild(toggle);
   document.body.appendChild(panel);
 
   // Keep a choice that came from the URL or storage, and show it in the address bar

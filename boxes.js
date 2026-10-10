@@ -29,6 +29,10 @@
   - "Reset" in Display sends "studio414:layoutreset", which puts every box back in
     the default layout. Every change sends "studio414:layoutchange"
     ({ detail: { custom } }), which shows or hides that button.
+  - A box can be closed (Display starts closed; switcher.js sets its hidden
+    attribute). A closed box has no size, so it is never measured, fitted or saved
+    while closed (its stored place is kept, and a drag of it is called off); when it
+    opens again it is fitted to the screen where it was left and comes to the front.
 */
 (function () {
   'use strict';
@@ -118,9 +122,10 @@
       detail: { custom: Object.keys(placed).length > 0 }
     }));
     // That shows or hides the Layout row in Display, which changes its height: keep
-    // it on screen if it has been moved.
+    // it on screen if it has been moved (and is open).
+    if (gesture) return;
     boxes.forEach(function (box) {
-      if (box.fixed && placed[box.id] && !gesture) render(box, fit(box, placed[box.id], false));
+      if (box.fixed) refit(box);
     });
   }
 
@@ -132,6 +137,11 @@
 
   function clamp(value, min, max) {
     return Math.max(min, Math.min(value, max));
+  }
+
+  // False while the box is closed (hidden, so display: none): it has no size then.
+  function isShown(box) {
+    return !box.el.hidden && box.el.getClientRects().length > 0;
   }
 
   function viewport() {
@@ -256,6 +266,15 @@
     el.style.top = (r.y - o.y) + 'px';
   }
 
+  // Puts a placed box where it was left, fitted to the screen. A closed box is left
+  // as it is; it is fitted when it opens.
+  function refit(box) {
+    var r = placed[box.id];
+    if (!r || !isShown(box)) return;
+    box.el.classList.add('is-placed');
+    render(box, fit(box, r, false));
+  }
+
   function unplace(box) {
     var el = box.el;
     el.classList.remove('is-placed');
@@ -272,13 +291,11 @@
 
   function applyAll() {
     boxes.forEach(function (box) {
-      var r = placed[box.id];
-      if (!r) {
+      if (placed[box.id]) {
+        refit(box);
+      } else {
         unplace(box);
-        return;
       }
-      box.el.classList.add('is-placed');
-      render(box, fit(box, r, false));
     });
     stack();
   }
@@ -352,7 +369,7 @@
       // Back to how it was: placed where it was, or in the default layout.
       if (g.before) {
         placed[g.box.id] = g.before;
-        render(g.box, fit(g.box, g.before, false));
+        refit(g.box);
       } else {
         delete placed[g.box.id];
         unplace(g.box);
@@ -411,7 +428,10 @@
     var handle = button('box__handle', 'Move the ' + name + ' box', box.grip
       ? 'Drag to move. Arrow keys move it, Shift+arrow keys resize it.'
       : 'Drag to move. Arrow keys move it.');
-    el.querySelector('.box__titlebar').appendChild(handle);
+    // At the end of the title bar, or before a close button there (Display's "x"), so
+    // Tab reaches the bar first.
+    var bar = el.querySelector('.box__titlebar');
+    bar.insertBefore(handle, bar.querySelector('.box__close'));
     handle.addEventListener('pointerdown', function (event) { begin(box, 'move', event); });
     handle.addEventListener('keydown', function (event) { nudge(box, 'move', event); });
     var controls = [handle];
@@ -445,6 +465,26 @@
     forget();
     announce();
   });
+
+  // A box closed (hidden) mid-drag puts the drag back; a box opened again is fitted
+  // to the screen where it was left, and comes to the front.
+  if (window.MutationObserver) {
+    var observer = new MutationObserver(function (records) {
+      records.forEach(function (record) {
+        var box = boxes.filter(function (b) { return b.el === record.target; })[0];
+        if (!box) return;
+        if (!isShown(box)) {
+          if (gesture && gesture.box === box) finish(true);
+          return;
+        }
+        refit(box);
+        raise(box);
+      });
+    });
+    boxes.forEach(function (box) {
+      observer.observe(box.el, { attributes: true, attributeFilter: ['hidden'] });
+    });
+  }
 
   // Refit placed boxes to a resized or rotated window, once per frame at most.
   var refitQueued = false;

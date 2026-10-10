@@ -150,9 +150,13 @@ html[data-color="10"] {
    It is fixed to the screen, so it is at hand wherever the page is scrolled to.
    boxes.js moves it by its title bar (it has no resize grip: its rows have one size),
    keeps it on screen and stacks it with the other windows.
-   Where it starts: bottom-left; top-left on short screens where the card comes down
-   to the bottom; on phones a compact window along the bottom, low enough to clear the
-   card, or along the top on the shortest ones. */
+   It starts closed (hidden); the paint roller button in the bottom-left corner
+   (.switcher-toggle, below) opens it, and the "x" in its title bar (.box__close in
+   boxes.css) closes it.
+   Where it opens: bottom-left, over its paint roller; top-left on short screens where
+   the card comes down to the bottom; on phones a compact window along the bottom, low
+   enough to clear the card, or along the top on the shortest ones. Once moved, where
+   it was left. */
 
 .switcher {
   position: fixed;
@@ -301,6 +305,19 @@ html[data-color="10"] {
     min-height: 24px;
   }
 
+  /* The "x" keeps to the slim title bar; for a finger, its hit area reaches 4px further
+     out each side (32 x 24px). */
+  .switcher .box__close {
+    width: 24px;
+    height: 20px;
+  }
+
+  .switcher .box__close::after {
+    content: "";
+    position: absolute;
+    inset: -2px -4px;
+  }
+
   .switcher__body {
     gap: 3px;
     padding: 3px 1px 0;
@@ -363,6 +380,104 @@ html[data-color="10"] {
   .switcher {
     top: max(8px, env(safe-area-inset-top));
     bottom: auto;
+  }
+}
+
+/* ---------- The paint roller: opens and closes Display ----------
+   A square 90s toolbar button fixed in the bottom-left corner, clear of the workshop
+   button (top right), the 414, the card and, on wide screens, the comments box; on
+   phones the comments box in the page passes under it as the page scrolls, as under
+   Display. Display opens over it there, so: framed in black like the workshop button,
+   on the face colour (the black roller and handle keep 4.5:1 or more on every
+   colour's face, and the frame stands out against the page and the photo), with the
+   roller in the colour's title-bar colour.
+   Above the windows while Display is closed, so it is always at hand; pressed in and
+   under them while it is open, so Display covers it (and comes back on top of it when
+   it has the keyboard focus). */
+
+.switcher-toggle {
+  position: fixed;
+  left: max(16px, env(safe-area-inset-left));
+  bottom: max(16px, env(safe-area-inset-bottom));
+  /* Over the boxes (boxes.js stacks them from z-index 1 up), under the workshop
+     button (10). */
+  z-index: 9;
+  display: grid;
+  place-items: center;
+  /* The black frame is a border, inside the 44px, so Display opening over the button
+     covers it completely. */
+  width: 44px;
+  height: 44px;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--dk-shadow);
+  border-radius: 0;
+  background: var(--face);
+  color: var(--face-text);
+  box-shadow: var(--bevel-raised);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* The 16 x 16 pixel drawing at exactly twice its size, so every pixel stays crisp. */
+.switcher-toggle svg {
+  display: block;
+  width: 32px;
+  height: 32px;
+}
+
+.switcher-toggle__paint {
+  fill: var(--title);
+}
+
+.switcher-toggle__shine {
+  fill: #ffffff;
+  opacity: 0.55;
+}
+
+.switcher-toggle__shade {
+  fill: #000000;
+  opacity: 0.22;
+}
+
+/* Pressed while held, and stays pressed in while Display is open. */
+.switcher-toggle:active,
+.switcher-toggle[aria-expanded="true"] {
+  padding: 2px 0 0 2px;
+  box-shadow: var(--bevel-pressed);
+}
+
+.switcher-toggle[aria-expanded="true"] {
+  z-index: 0;
+}
+
+/* The dotted focus rectangle inside the button, and a ring outside it, as it sits
+   straight on the page or the photo (as the workshop button does). */
+.switcher-toggle:focus-visible {
+  z-index: 9;
+  outline: 1px dotted var(--focus);
+  outline-offset: -6px;
+}
+
+.switcher-toggle:focus-visible::after {
+  content: "";
+  position: absolute;
+  inset: -6px;
+  border: 2px solid var(--page-text);
+  pointer-events: none;
+}
+
+@media (max-width: 480px) {
+  .switcher-toggle {
+    left: max(8px, env(safe-area-inset-left));
+    bottom: max(8px, env(safe-area-inset-bottom));
+  }
+}
+
+/* High-contrast modes drop the bevels; the border keeps a frame round the button. */
+@media (forced-colors: active) {
+  .switcher-toggle {
+    border-color: ButtonText;
   }
 }
 

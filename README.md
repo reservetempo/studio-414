@@ -22,24 +22,24 @@ Over the photo hangs a giant **414**, the studio's name, like the digits on a "p
 - elsewhere it is up to 80% of the photo's width, and on screens narrower than the photo the digits rise a little out of the band of colour above it into the photo;
 - it is fitted to that room in every font (each face's "414" is measured in [`fonts.css`](fonts.css)), never causes sideways scrolling, and is decoration for the pointer: drags and clicks pass straight through it, and the windows always sit on top of it.
 
-Being the page colour, it would disappear into the darkened photo for most colours, so each digit is edged in the colour's title-bar text colour (white or black, as on the title bars): at least 3.3:1 against the photo behind it and 6:1 against the digit. On short screens where the Display window starts at the top, the 414 moves aside so the two never overlap.
+Being the page colour, it would disappear into the darkened photo for most colours, so each digit is edged in the colour's title-bar text colour (white or black, as on the title bars): at least 3.3:1 against the photo behind it and 6:1 against the digit. On short screens where the Display window opens at the top, the 414 moves aside so the two never overlap.
 
 ## The boxes
 
-The mailing-list card, the comment section and the Display window (the font and colour switcher) are drawn as classic Windows 95/98-style dialog windows: a black frame with a 2px bevel, a solid face, a title bar with a small pixel icon, sunken white fields, square buttons that press in, and, on the first two, a resize grip in the bottom-right corner. The window chrome is in [`boxes.css`](boxes.css); the colours are tokens in [`styles.css`](styles.css) (`--face`, `--title`, the bevel shades and so on), swapped per colour by the switcher.
+The mailing-list card, the comment section and the Display window (the font and colour switcher) are drawn as classic Windows 95/98-style dialog windows: a black frame with a 2px bevel, a solid face, a title bar with a small pixel icon, sunken white fields, square buttons that press in, and, on the first two, a resize grip in the bottom-right corner (Display has a close button in its title bar instead). The window chrome is in [`boxes.css`](boxes.css); the colours are tokens in [`styles.css`](styles.css) (`--face`, `--title`, the bevel shades and so on), swapped per colour by the switcher.
 
 Where they sit by default:
 
 - **Mailing list:** centred under the window in the photo, sized as a golden rectangle from the window's width, as before.
 - **Comments:** on screens at least 1100px wide and 640px tall, it floats over the photo on the white wall to the right of the window (clear of the window, inside 16px gutters, at most 460 x 680px). On narrower or shorter screens it sits in the page under the photo, full width less 16px gutters (at most 640px wide). The comments scroll inside it, newest at the bottom next to the form.
-- **Display:** fixed to the screen, so it stays at hand as the page scrolls: bottom-left (360px wide); in the top-left corner on short screens narrower than about 1070px, where the card comes down to the bottom; on phones a compact window along the bottom (slimmer title bar, 28px rows) that clears the card even on a 320 x 568 screen, or along the top on the very shortest phones.
+- **Display:** closed until its paint roller button opens it (see [Font and colour switcher](#font-and-colour-switcher)). Fixed to the screen, so it stays at hand as the page scrolls. It opens bottom-left, over its button (360px wide); in the top-left corner on short screens narrower than about 1070px, where the card comes down to the bottom; on phones as a compact window along the bottom (slimmer title bar, 28px rows) that clears the card even on a 320 x 568 screen, or along the top on the very shortest phones. Once moved, it opens where it was left.
 
 [`boxes.js`](boxes.js) makes all three movable:
 
 - Drag a box by its title bar, and resize the card and the comments box with the grip (Display has no grip: its rows have one size). It works with a mouse, a finger or a pen; on a phone, touching anywhere else still scrolls the page.
 - From the keyboard, Tab to a title bar: the arrow keys move the box and Shift+arrow keys resize it (Display just moves). On the grip the arrow keys resize it. Escape during a drag puts the box back.
 - A box can't be made smaller than its content needs (whatever font is picked), and it always stays within the width of the screen with its title bar reachable, also after the window is resized or the phone is turned. Display always stays wholly on screen.
-- The box last used comes to the front, Display included (it starts in front).
+- The box last used comes to the front, Display included (it comes to the front when it opens).
 - Each visitor's layout is kept in their browser's `localStorage` under `studio414.layout` (positions and sizes, and the stacking order): page pixels for the card and the comments box, which scroll with the page, and screen pixels for Display, which doesn't. A box that hasn't been moved keeps following the default layout. Stored positions are fitted to smaller screens when they're applied, and come back as they were on a larger one.
 - Once something has been moved (Display included), a **Layout: Reset** row appears in the Display window; it puts all three back where they started.
 
@@ -171,6 +171,8 @@ Emails are trimmed and lower-cased. If the same email starts a new checkout whil
 ## Font and colour switcher
 
 A small window titled **Display** lets visitors try 10 display fonts and 10 colours independently, so friends can browse combinations and say which they like in a comment ("colour 1 and font 6"). Option 0 of each is the default design (Terminal Grotesque, the Classic grey and navy), so nothing changes for anyone who never touches it; font 1 is EB Garamond, the original face. The window follows the selected colour like the others, and its title bar the selected font; its rows stay in EB Garamond so the controls keep their shape while you browse. See [The boxes](#the-boxes) for where it sits and how it moves.
+
+- **Opening and closing:** Display starts closed. A small button in the bottom-left corner of the screen, a pixel-art paint roller in the 90s style (its roller painted in the current colour), opens it, and stays pressed in while it is open; pressing it again closes it. So do the "×" in Display's title bar and Escape anywhere inside it. Opening moves the keyboard focus to Display's title bar, and closing puts it back on the button. The browser remembers whether it was left open (`localStorage`, `studio414.display`), so a first visit always starts with it closed. The button sits above the windows while Display is closed; Display opens over it.
 
 - **Font** changes the display typography: the big 414, the title bars, the card label, the sign-up button, the field labels, the Post comment button, comment author names and the "Commenting as" line. The fields and the comment text stay in EB Garamond.
 - **Colour** is a 90s window scheme for the three windows: the title bar, a tinted face with its own bevel shades, and the ink for author names and links. The title-bar colour is also the page background and the big 414. Text stays black on the face, the fields stay white, and every colour keeps text at 4.5:1 contrast or more and the bevel edges at 3:1 or more.
