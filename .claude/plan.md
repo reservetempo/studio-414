@@ -4,12 +4,6 @@ Managed by the main session (see CLAUDE.md). `/z <items>` adds tasks; `/z` works
 
 ## Next
 
-### 7. Flashing "Opening soon" sign with butterflies (user's step 5)
-- Goal: a flashing "Opening soon" sign with butterflies at the top left of the page, in the site's 90s style.
-- Files: `index.html`, `styles.css` (or a small new CSS file).
-- Check what's already at the top left (switcher, boxes, other fixed elements) and don't cover it. Works at phone width. With `prefers-reduced-motion`, nothing flashes or flutters.
-- Done when: previewed on desktop and at phone width.
-
 ### 8. "Email us" link under the mailing list form (user's step 6)
 - Goal: a small "Email us" link at the bottom left of the mailing list form, going to `mailto:plazastudioceramique@gmail.com`.
 - Files: `index.html`, `styles.css`.
@@ -28,3 +22,4 @@ Managed by the main session (see CLAUDE.md). `/z <items>` adds tasks; `/z` works
 - 4. Workshops list window: `100b454`. Button reads "Workshops", opens a list; each workshop opens its own sign-up with "All workshops" to go back. Workshop list kept in `workshop.js`; paid workshop id kept in `sessionStorage` for the Stripe return message.
 - 5. "See in calendar" month view: `b236d84`. New `calendar.js`/`calendar.css` and `<dialog id="calendar">`; `workshop.js` exposes `window.studioWorkshops`. Week starts on Sunday.
 - 6. Sign-up form: name, "buying for a friend", and x N spots: `bd3dd16`. Pay button shows the total; typed values are kept between openings, the count resets to x 1.
+- 7. Flashing "Opening soon" sign with butterflies: `3d6f4c9`. Marquee sign in `opening-soon.css`, inside the hero (scrolls away with the photo, not fixed); the 414 avoids its corner; reduced motion stops all animation.
