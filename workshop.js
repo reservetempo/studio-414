@@ -25,8 +25,10 @@
     set in comments-config.js (the same URL and anon / publishable key). Its API is
     described at the top of supabase/functions/workshop-checkout/index.ts:
       GET  -> 200 { workshops: [{ id, capacity, taken, remaining, ... }] }
-      POST { workshop, email } -> 200 { url }: Stripe Checkout, where the visitor is
-           sent to pay; or an { error } (invalid_email, already_signed_up, full, ...)
+      POST { workshop, email, name, quantity, friendName? } -> 200 { url }: Stripe
+           Checkout, where the visitor is sent to pay for price × quantity; or an
+           { error } (invalid_name, invalid_email, already_signed_up, full,
+           not_enough_spots with { remaining }, ...)
     They are fetched each time either window opens. Until they are in, the list shows
     no counts and the sign-up window says "Checking spots…"; if they can't be fetched
     (the function isn't deployed yet, or the network is down) it says sign-ups aren't
@@ -35,8 +37,16 @@
     time; until then it says "Workshop sign-up". Screen readers hear the count once,
     from a live region of its own. Once a workshop is sold out its form is off, and
     once every listed workshop is, the button at the top right says "Sold out".
-  - The server also wants a name (and takes a number of spots and a friend's name),
-    which the form doesn't ask for yet: see the README's "Still to do".
+  - The form asks for your name and email, and has a "Buying for a friend" box that
+    shows a "Friend's name" field, required while it's ticked (and not sent when it
+    isn't). Beside the price, "× 1" with − and + sets how many spots the order is for:
+    1 to the spots left (to QUANTITY_MAX until they are in), its buttons greyed at the
+    limits; the pay button gives the total ("Pay $119.98 with Stripe"). The form checks
+    what the server checks before sending; a field that's wrong is marked (aria-invalid,
+    and aria-describedby to the message saying what). If fewer spots are left than
+    asked for (not_enough_spots), the message says how many and the count comes down
+    to that. The count goes back to × 1 each time the window opens; what was typed
+    stays, as the email always has.
   - Stripe sends the visitor back to /?workshop=success, or to /?workshop=cancelled if
     they leave the checkout. Either one opens the window on load with a thank-you or a
     "nothing was charged" message, and the parameter is taken out of the address (any
@@ -62,6 +72,8 @@
 
   var REQUEST_TIMEOUT_MS = 15000;
   var EMAIL_MAX = 254;
+  var NAME_MAX = 100;             // your name and your friend's, as on the server
+  var QUANTITY_MAX = 10;          // spots in one order until the spots left are in
   var STEP = 10;
   // The count in the title ticks down a step every TICK_MS, and takes TICK_MAX_MS at most.
   var TICK_MS = 80;
@@ -132,9 +144,17 @@
   var nameEl = document.getElementById('workshop-name');
   var dateEl = document.getElementById('workshop-date');
   var priceEl = document.getElementById('workshop-price');
+  var quantityNumber = document.getElementById('workshop-quantity-number');
+  var quantityUnit = document.getElementById('workshop-quantity-unit');
+  var lessButton = document.getElementById('workshop-less');
+  var moreButton = document.getElementById('workshop-more');
   var spotsEl = document.getElementById('workshop-spots');
   var form = document.getElementById('workshop-form');
+  var yourNameInput = document.getElementById('workshop-your-name');
   var emailInput = document.getElementById('workshop-email');
+  var friendCheck = document.getElementById('workshop-for-friend');
+  var friendBox = document.getElementById('workshop-friend');
+  var friendInput = document.getElementById('workshop-friend-name');
   var payButton = document.getElementById('workshop-pay');
   var messageEl = document.getElementById('workshop-message');
   var noteEl = document.getElementById('workshop-note');
@@ -200,9 +220,9 @@
     return d.getUTCDate() + ' ' + MONTHS[d.getUTCMonth()];
   }
 
-  // "$59.99"
-  function priceText(w) {
-    return '$' + (w.price / 100).toFixed(2);
+  // "$59.99" for one spot, or "$119.98" for two.
+  function priceText(w, quantity) {
+    return '$' + (w.price * (quantity || 1) / 100).toFixed(2);
   }
 
   /* ---------- The checkout function ---------- */
@@ -273,6 +293,11 @@
 
   function isEmail(value) {
     return value.length <= EMAIL_MAX && /^[^\s@]+@[^\s@.]+(\.[^\s@.]+)+$/.test(value);
+  }
+
+  // A name as the server keeps it: trimmed, runs of spaces made one.
+  function cleanName(value) {
+    return value.trim().replace(/\s+/g, ' ');
   }
 
   /* ---------- The spots ---------- */
@@ -609,6 +634,7 @@
   /* ---------- The sign-up window ---------- */
 
   var current = null;             // the workshop it is for
+  var quantity = 1;               // the spots the order is for
   var paying = false;
   var mode = '';                  // '', or 'success' / 'cancelled' after Stripe
   var counting = 0;               // the animation frame of the count in the title, or 0
@@ -636,6 +662,20 @@
     dialog.setAttribute('aria-label', w.name + ' sign-up');
   }
 
+  // The most spots the order can be for: the spots left once they are in (0 when sold
+  // out), or QUANTITY_MAX until then. The server has the last word either way.
+  function quantityMax() {
+    var spots = current && spotsById[current.id];
+    return spots ? spots.remaining : QUANTITY_MAX;
+  }
+
+  // The friend's name shows, and is required, only while the box is ticked.
+  function showFriend() {
+    var on = friendCheck.checked;
+    friendBox.hidden = !on;
+    friendInput.required = on;
+  }
+
   function render() {
     var availability = availabilityOf(current);
     var spots = current && spotsById[current.id];
@@ -648,10 +688,27 @@
     // While the count ticks down (countDown), it sets the title itself.
     if (!counting) setTitle(spots ? countText(spots.remaining) : TITLE);
 
-    emailInput.disabled = availability === 'soldout';
+    var soldOut = availability === 'soldout';
+    yourNameInput.disabled = soldOut;
+    emailInput.disabled = soldOut;
+    friendCheck.disabled = soldOut;
+    friendInput.disabled = soldOut;
+    showFriend();
+
+    // The spots, kept within the limits (fewer may be left than when it was set).
+    var max = quantityMax();
+    quantity = Math.max(1, Math.min(quantity, max));
+    // Only when it changes, so screen readers hear "2 spots" once.
+    if (quantityNumber.textContent !== String(quantity)) {
+      quantityNumber.textContent = quantity;
+      quantityUnit.textContent = quantity === 1 ? ' spot' : ' spots';
+    }
+    lessButton.disabled = paying || soldOut || quantity <= 1;
+    moreButton.disabled = paying || soldOut || quantity >= max;
+
     payButton.disabled = paying || availability !== 'open';
     payButton.textContent = paying ? 'Opening Stripe…'
-      : current ? 'Pay ' + priceText(current) + ' with Stripe' : 'Pay with Stripe';
+      : current ? 'Pay ' + priceText(current, quantity) + ' with Stripe' : 'Pay with Stripe';
     if (paying) payButton.setAttribute('aria-busy', 'true');
     else payButton.removeAttribute('aria-busy');
   }
@@ -716,14 +773,22 @@
     else delete messageEl.dataset.state;
   }
 
-  function markInvalid(text) {
-    emailInput.setAttribute('aria-invalid', 'true');
+  var fields = [yourNameInput, emailInput, friendInput];
+
+  // Marks a field as wrong, tied to the message saying what, and goes to it.
+  function markInvalid(field, text) {
+    clearInvalid();
+    field.setAttribute('aria-invalid', 'true');
+    field.setAttribute('aria-describedby', messageEl.id);
     setMessage(text, 'error');
-    emailInput.focus();
+    field.focus();
   }
 
   function clearInvalid() {
-    emailInput.removeAttribute('aria-invalid');
+    fields.forEach(function (field) {
+      field.removeAttribute('aria-invalid');
+      field.removeAttribute('aria-describedby');
+    });
   }
 
   function setPaying(state) {
@@ -751,6 +816,7 @@
     if (current !== w) {
       setMessage('');
       clearInvalid();
+      quantity = 1;
     }
     setWorkshop(w);
     setMode(next || '');
@@ -764,7 +830,7 @@
     // bring up the keyboard over the window, onto the close button instead.
     var coarse = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
     if (mode === 'success') okButton.focus();
-    else if (!coarse && !emailInput.disabled) emailInput.focus();
+    else if (!coarse && !yourNameInput.disabled) yourNameInput.focus();
     else closeButton.focus();
   }
 
@@ -780,6 +846,7 @@
     if (dialog.open) return;
     if (!paying) setMessage('');
     clearInvalid();
+    quantity = 1;
     stopCount();
     heard = null;
     announce('');
@@ -806,11 +873,50 @@
     }
   }
 
-  emailInput.addEventListener('input', function () {
+  // Clear an earlier error once the visitor carries on filling in the form.
+  function edited() {
     clearInvalid();
-    // Clear an earlier error once the visitor carries on typing.
     if (!paying && messageEl.textContent) setMessage('');
+  }
+
+  fields.forEach(function (field) {
+    field.addEventListener('input', edited);
   });
+
+  friendCheck.addEventListener('change', function () {
+    showFriend();
+    edited();
+  });
+
+  // − and +. At a limit the button greys out: the focus moves to the other one.
+  function step(button, other, by) {
+    var focused = document.activeElement === button;
+    quantity += by;
+    render();
+    if (focused && button.disabled) {
+      if (!other.disabled) other.focus({ preventScroll: true });
+      else keepFocus();
+    }
+  }
+
+  lessButton.addEventListener('click', function () {
+    step(lessButton, moreButton, -1);
+  });
+
+  moreButton.addEventListener('click', function () {
+    step(moreButton, lessButton, 1);
+  });
+
+  // Fewer spots are left than the order was for: the window's count, the list and the
+  // button take the new number, and the order comes down to it.
+  function fewerLeft(w, left) {
+    var spots = spotsById[w.id];
+    spotsById[w.id] = { capacity: spots ? spots.capacity : Math.max(QUANTITY_MAX, left), remaining: left };
+    stopCount();
+    heard = left;
+    if (current === w) quantity = Math.min(quantity, left);
+    renderAll();
+  }
 
   form.addEventListener('submit', function (event) {
     event.preventDefault();
@@ -818,20 +924,48 @@
     if (paying || !w || availabilityOf(w) !== 'open') return;
 
     clearInvalid();
+    // The same checks as the server's, in the form's order.
+    var name = cleanName(yourNameInput.value);
     var email = emailInput.value.trim();
+    var forFriend = friendCheck.checked;
+    var friendName = forFriend ? cleanName(friendInput.value) : '';
+    var max = quantityMax();
+    if (!name) {
+      markInvalid(yourNameInput, 'Please enter your name.');
+      return;
+    }
+    if (name.length > NAME_MAX) {
+      markInvalid(yourNameInput, 'Please shorten your name to ' + NAME_MAX + ' characters or fewer.');
+      return;
+    }
     if (!email) {
-      markInvalid('Please enter your email address.');
+      markInvalid(emailInput, 'Please enter your email address.');
       return;
     }
     if (!emailInput.checkValidity() || !isEmail(email)) {
-      markInvalid('Please check your email address: it should look like you@example.com.');
+      markInvalid(emailInput, 'Please check your email address: it should look like you@example.com.');
       return;
     }
+    if (forFriend && !friendName) {
+      markInvalid(friendInput, 'Please enter your friend’s name, or untick “Buying for a friend”.');
+      return;
+    }
+    if (friendName.length > NAME_MAX) {
+      markInvalid(friendInput, 'Please shorten your friend’s name to ' + NAME_MAX + ' characters or fewer.');
+      return;
+    }
+    if (quantity !== Math.floor(quantity) || quantity < 1 || quantity > max) {
+      setMessage('Please choose from 1 to ' + max + ' spots.', 'error');
+      return;
+    }
+
+    var body = { workshop: w.id, email: email, name: name, quantity: quantity };
+    if (forFriend) body.friendName = friendName;
 
     setMessage('');
     setPaying(true);
 
-    request('POST', { workshop: w.id, email: email }).then(function (result) {
+    request('POST', body).then(function (result) {
       var data = result.data && typeof result.data === 'object' ? result.data : {};
       var url = result.ok ? checkoutUrl(data.url) : '';
       if (url) {
@@ -841,11 +975,26 @@
         return;
       }
       setPaying(false);
-      if (data.error === 'invalid_email') {
-        markInvalid('Stripe needs a working email address: please check yours.');
+      var left = data.error === 'not_enough_spots' ? data.remaining : null;
+      var leftKnown = typeof left === 'number' && left >= 0 && left === Math.floor(left);
+      if (data.error === 'invalid_name') {
+        markInvalid(yourNameInput, 'Please check your name: it can be up to ' + NAME_MAX + ' characters.');
+      } else if (data.error === 'invalid_email') {
+        markInvalid(emailInput, 'Stripe needs a working email address: please check yours.');
+      } else if (data.error === 'invalid_friend_name' && forFriend) {
+        markInvalid(friendInput, 'Please check your friend’s name: it can be up to ' + NAME_MAX + ' characters.');
+      } else if (data.error === 'invalid_quantity') {
+        setMessage('That many spots can’t go in one order. Please choose fewer; nothing was charged.', 'error');
+      } else if (leftKnown && left > 0) {
+        fewerLeft(w, left);
+        setMessage('Sorry, only ' + countText(left) + ', so the order is now for × ' + left +
+          '. Nothing was charged.', 'error');
+      } else if (data.error === 'not_enough_spots' && !leftKnown) {
+        loadSpots();
+        setMessage('Fewer spots are left than that. Please choose fewer; nothing was charged.', 'error');
       } else if (data.error === 'already_signed_up') {
         setMessage('That email is already signed up for this workshop, so there’s nothing to pay. Look for the Stripe receipt in its inbox.', 'error');
-      } else if (data.error === 'full') {
+      } else if (data.error === 'full' || leftKnown) {
         var spots = spotsById[w.id];
         spotsById[w.id] = { capacity: spots ? spots.capacity : 10, remaining: 0 };
         stopCount();

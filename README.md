@@ -68,5 +68,4 @@ The code is written but not deployed. Do everything in Stripe **test mode** firs
 ## Still to do
 
 - The "Join the mailing list" form isn't connected to any service yet: it only shows a thank-you message.
-- The sign-up window on the site (`workshop.js`) still sends only an email. It needs updating for the workshop list, name, number of spots and friend's name described at the top of `supabase/functions/workshop-checkout/index.ts`.
 - Past workshops drop off on their own, but after 5 December there's nothing left to book. Add the next workshops (see above), or take the workshop button down: removing the `workshop.js` script tag from `index.html` is enough, as the button stays hidden without it.

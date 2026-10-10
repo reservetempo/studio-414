@@ -499,6 +499,73 @@
   font-size: 1.0625rem;
 }
 
+/* The price, then "× 1" and the − and + buttons for the number of spots. */
+.workshop__price {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 10px;
+}
+
+.workshop__quantity {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.workshop__times {
+  min-width: 2.5em;
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+/* Small raised buttons, as on a 90s spin box, greyed and embossed at the limits. */
+.workshop__step {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 24px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: var(--button);
+  color: var(--button-text);
+  box-shadow: var(--bevel-raised);
+  cursor: pointer;
+}
+
+.workshop__step svg {
+  display: block;
+  width: 8px;
+  height: 8px;
+}
+
+.workshop__step:active:not(:disabled) {
+  padding: 2px 0 0 2px;
+  box-shadow: var(--bevel-pressed);
+}
+
+.workshop__step:focus-visible {
+  outline: 1px dotted var(--focus);
+  outline-offset: -4px;
+}
+
+.workshop__step:disabled {
+  color: var(--shadow);
+  cursor: not-allowed;
+}
+
+.workshop__step:disabled svg {
+  filter: drop-shadow(1px 1px 0 var(--hilight));
+}
+
+@media (pointer: coarse) {
+  .workshop__step {
+    width: 36px;
+    height: 32px;
+  }
+}
+
 /* How many spots are left, in the title bar once they are in (workshop.js), with
    lining figures so the count ticking down there sits level with the words. */
 .workshop .box__title {
@@ -583,6 +650,59 @@
 .workshop__input:disabled {
   background: var(--face);
   color: var(--face-muted);
+}
+
+/* "Buying for a friend": a sunken white box with a black tick, as 90s check boxes. */
+.workshop__check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  align-self: flex-start;
+  margin: 2px 0;
+  font-size: 1.0625rem;
+  line-height: 1.25;
+  cursor: pointer;
+}
+
+.workshop__check input {
+  -webkit-appearance: none;
+  appearance: none;
+  flex: none;
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  border: 1px solid;
+  border-color: var(--sunken-border);
+  border-radius: 0;
+  background: var(--field) no-repeat center / 7px 7px;
+  box-shadow: var(--sunken-edge);
+  cursor: pointer;
+}
+
+.workshop__check input:checked {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='7' height='7' viewBox='0 0 7 7' shape-rendering='crispEdges'%3E%3Cpath fill='%23000' d='M6 0h1v1H6zM5 1h2v1H5zM0 2h1v1H0zM4 2h3v1H4zM0 3h2v1H0zM3 3h3v1H3zM0 4h5v1H0zM1 5h3v1H1zM2 6h1v1H2z'/%3E%3C/svg%3E");
+}
+
+.workshop__check input:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 1px;
+}
+
+.workshop__check input:disabled {
+  background-color: var(--face);
+  cursor: not-allowed;
+}
+
+.workshop__check:has(input:disabled) {
+  color: var(--face-muted);
+  cursor: not-allowed;
+}
+
+/* The friend's name, under the box while it is ticked. */
+.workshop__friend {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 /* The default button, as on the card: raised, framed in black, spaced capitals. The
@@ -672,5 +792,11 @@
 
   .workshop__spots::before {
     forced-color-adjust: none;
+  }
+
+  /* The drawn tick is a background, which goes: the browser's own box instead. */
+  .workshop__check input {
+    -webkit-appearance: auto;
+    appearance: auto;
   }
 }

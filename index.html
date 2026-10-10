@@ -175,18 +175,46 @@
         <dt>Date</dt>
         <dd><time id="workshop-date"></time></dd>
         <dt>Price</dt>
-        <dd id="workshop-price"></dd>
+        <!-- The price per spot, then "× 1" and − / + for how many spots (1 to the
+             spots left, or to 10 until they are in). The total is on the pay button. -->
+        <dd class="workshop__price">
+          <span id="workshop-price"></span>
+          <span class="workshop__quantity" role="group" aria-label="Number of spots">
+            <output class="workshop__times" id="workshop-quantity"><span aria-hidden="true">× </span><span id="workshop-quantity-number">1</span><span class="visually-hidden" id="workshop-quantity-unit"> spot</span></output>
+            <button class="workshop__step" id="workshop-less" type="button" aria-label="Fewer spots" aria-controls="workshop-quantity">
+              <svg viewBox="0 0 8 8" aria-hidden="true" focusable="false" shape-rendering="crispEdges"><path fill="currentColor" d="M0 3h8v2H0z"/></svg>
+            </button>
+            <button class="workshop__step" id="workshop-more" type="button" aria-label="More spots" aria-controls="workshop-quantity">
+              <svg viewBox="0 0 8 8" aria-hidden="true" focusable="false" shape-rendering="crispEdges"><path fill="currentColor" d="M3 0h2v3h3v2H5v3H3V5H0V3h3z"/></svg>
+            </button>
+          </span>
+        </dd>
       </dl>
 
       <!-- Only while there is something to say: "Checking spots…" or "not open yet". -->
       <p class="workshop__spots" id="workshop-spots" role="status" aria-live="polite" data-state="loading">Checking spots…</p>
       <p class="visually-hidden" id="workshop-count" role="status" aria-live="polite"></p>
 
+      <!-- A field with something wrong gets aria-invalid and aria-describedby pointing
+           at #workshop-message, which says what (workshop.js). -->
       <form class="workshop__form" id="workshop-form" novalidate>
+        <label class="workshop__label" for="workshop-your-name">Your name</label>
+        <input class="workshop__input" id="workshop-your-name" name="name" type="text"
+               autocomplete="name" maxlength="100" required>
         <label class="workshop__label" for="workshop-email">Your email</label>
         <input class="workshop__input" id="workshop-email" name="email" type="email"
                placeholder="you@example.com" autocomplete="email" maxlength="254"
                spellcheck="false" autocapitalize="off" required>
+        <label class="workshop__check">
+          <input id="workshop-for-friend" type="checkbox" aria-controls="workshop-friend">
+          Buying for a friend
+        </label>
+        <!-- Only while the box is ticked; then the friend's name is required. -->
+        <div class="workshop__friend" id="workshop-friend" hidden>
+          <label class="workshop__label" for="workshop-friend-name">Friend’s name</label>
+          <input class="workshop__input" id="workshop-friend-name" name="friendName" type="text"
+                 autocomplete="off" maxlength="100">
+        </div>
         <button class="workshop__pay" id="workshop-pay" type="submit" disabled>Pay with Stripe</button>
         <p class="workshop__message" id="workshop-message" role="status" aria-live="polite"></p>
       </form>
