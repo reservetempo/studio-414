@@ -7,12 +7,13 @@
     and dates show even when the sign-up server can't be reached. A workshop drops off
     once its day has ended in the studio's time zone (STUDIO_TIME_ZONE), as on the
     server. Once none are left, the button at the top right hides.
-  - The flashy button fixed at the top right of the screen (#workshop-button,
-    "Workshops") opens the Workshops window (#workshops): one button per workshop,
-    soonest first, with its name, date and, once they are in, its spots left ("7 spots
-    left", "Sold out"). A sold-out workshop stays in the list, marked so. Its "See in
-    calendar" button opens the workshop calendar, a month grid of them (calendar.js,
-    which this file hands what it needs as window.studioWorkshops, at the end).
+  - The plain underlined "Workshops" fixed at the top right of the screen (a button,
+    #workshop-button) opens the Workshops window (#workshops): one button per
+    workshop, soonest first, with its name, date and, once they are in, its spots
+    left ("7 spots left", "Sold out"). A sold-out workshop stays in the list, marked
+    so. Its "See in calendar" button opens the workshop calendar, a month grid of them
+    (calendar.js, which this file hands what it needs as window.studioWorkshops, at
+    the end).
   - Clicking a workshop closes that window and opens its sign-up window (#workshop):
     its name, date and price, a form, and an "All workshops" button back to the list.
     The dialog is named after the workshop ("Paint a piece sign-up").
