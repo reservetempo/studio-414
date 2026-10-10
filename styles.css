@@ -1,0 +1,260 @@
+:root {
+  /* Leveled, web-sized copy of photos/IMG_9135.jpeg, cropped on the left so the
+     window is horizontally centred (2462 x 1920, about 1.28 : 1). */
+  --bg-image: url("photos/IMG_9135-centered.jpg");
+
+  /* The window frame in that photo (x 839-1623, y 695-880), as fractions
+     of the photo's width and height. It is 784 x 185, almost exactly phi^3 : 1. */
+  --window-cx: 0.5;
+  --window-bottom: 0.4583;
+  --window-w: 0.3184;
+  --window-h: 0.0964;
+
+  --phi: 1.618;
+
+  /* A soft gallery white rather than pure white, and a warm near-black. */
+  --text: #f3f1ec;
+  --text-muted: rgba(243, 241, 236, 0.78);
+  --ink: #1d1c1a;
+  --card-bg: rgba(22, 21, 20, 0.55);
+  --card-border: rgba(243, 241, 236, 0.3);
+  --input-bg: rgba(10, 10, 9, 0.24);
+  --input-bg-focus: rgba(10, 10, 9, 0.36);
+  --input-border: rgba(243, 241, 236, 0.55);
+  --input-text: var(--text);
+  --placeholder: rgba(243, 241, 236, 0.66);
+  /* The button is filled with the light tone, so it reads as a button over the
+     photo and over the dark page background alike. */
+  --accent: #e9e6df;
+  --accent-text: var(--ink);
+  --accent-hover: #d6d2c9;
+  --focus: var(--text);
+  --error: #f4bfb1;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: "EB Garamond", Garamond, "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  color: var(--text);
+  background-color: #2b2b2b;
+}
+
+.hero {
+  /* Size and offset of the photo in the hero. They are in cqw / cqh of the hero,
+     so they only mean anything inside it (.hero::before and .signup). */
+  --photo-w: 100cqw;
+  --photo-h: 100cqw * 1920 / 2462;
+  --photo-x: (100cqw - var(--photo-w)) / 2;
+  --photo-y: (100cqh - var(--photo-h)) / 2;
+
+  position: relative;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  /* Lets .signup and .hero::before measure the hero (cqw / cqh) to find the photo in it. */
+  container-type: size;
+  /* The photo always spans the full width at its own aspect ratio, centred vertically.
+     On screens at least as wide as the photo (2462 : 1920) that is exactly what
+     background-size: cover did: it overflows the top and bottom and is cropped there.
+     On narrower screens it keeps shrinking with the width instead of being cropped
+     at the sides, and the page background shows above and below it. */
+  background-image: var(--bg-image);
+  background-size: 100% auto;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+/* Darkens the whole hero, photo and background alike. Underneath that, once the
+   photo is shorter than the hero, its top and bottom edges fade into the page
+   background, over a twelfth of its height at most and never more than the gap
+   beside it, so there is no fade at all while the photo still fills the hero. */
+.hero::before {
+  --gap: max(0px, var(--photo-y));
+  --fade: min(var(--gap), var(--photo-h) / 12);
+  /* Eased rather than linear (a smoothstep, sampled in eighths so the steps between
+     stops stay gentle over the short fade), so neither end of the fade shows as a line. */
+  --fade-stops:
+    #2b2b2b,
+    rgba(43, 43, 43, 0.96) 12.5%, rgba(43, 43, 43, 0.84) 25%, rgba(43, 43, 43, 0.68) 37.5%,
+    rgba(43, 43, 43, 0.5) 50%,
+    rgba(43, 43, 43, 0.32) 62.5%, rgba(43, 43, 43, 0.16) 75%, rgba(43, 43, 43, 0.04) 87.5%,
+    transparent;
+
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(0, 0, 0, 0.25), rgba(0, 0, 0, 0.35)),
+    linear-gradient(to bottom, var(--fade-stops)),
+    linear-gradient(to top, var(--fade-stops));
+  background-size: 100% 100%, 100% var(--fade), 100% var(--fade);
+  background-position: 0 0, 0 var(--gap), 0 calc(100% - var(--gap));
+  background-repeat: no-repeat;
+}
+
+.signup {
+  /* Golden-ratio steps down from the window:
+     gap : window height : card height = 1/phi : 1 : phi,
+     and card width = window width / phi, which makes the card a golden rectangle. */
+  --card-w: clamp(min(300px, 100cqw - 32px), var(--photo-w) * var(--window-w) / var(--phi), 480px);
+  --card-top: calc(var(--photo-y) + var(--photo-h) * (var(--window-bottom) + var(--window-h) / var(--phi)));
+
+  position: absolute;
+  /* Centred under the window, but kept inside a 16px gutter. */
+  left: clamp(16px, var(--photo-x) + var(--photo-w) * var(--window-cx) - var(--card-w) / 2, 100cqw - 16px - var(--card-w));
+  top: min(var(--card-top), 100cqh - 16px - var(--card-w) / var(--phi));
+  width: var(--card-w);
+  aspect-ratio: var(--phi);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  /* Lets the fields stack when the card is too narrow for them side by side. */
+  container-type: inline-size;
+  /* In proportion to the card: 16.5px x 24px at its usual 300px, more on large screens. */
+  padding: calc(var(--card-w) * 0.055) calc(var(--card-w) * 0.08);
+  border: 1px solid var(--card-border);
+  border-radius: 0;
+  background: var(--card-bg);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.3);
+  /* Dark-scheme native bits (caret, autofill) to match the light-on-dark fields. */
+  color-scheme: dark;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Small spaced capitals (the web font has no true small caps, so these are capitals
+   set small). The inline-start padding matches the tracking left after the last
+   letter, so the line stays optically centred.
+   The cqw sizes here and below are of the card's content width: they hold at their
+   minimums on the usual 300px card and only grow on the largest cards (up to 480px). */
+.signup__label {
+  display: block;
+  margin-bottom: clamp(12px, 4.4cqw, 18px);
+  padding-inline-start: 0.22em;
+  font-size: clamp(0.75rem, 3.4cqw, 0.9375rem);
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  text-align: center;
+}
+
+.signup__row {
+  display: flex;
+  gap: 8px;
+}
+
+.signup__input,
+.signup__button {
+  height: clamp(44px, 12cqw, 48px);
+  border-radius: 0;
+  font: inherit;
+  font-size: clamp(1.0625rem, 4.5cqw, 1.1875rem);
+}
+
+/* A hairline-framed field on the glass; 17px text at least, so iOS does not zoom in on focus. */
+.signup__input {
+  flex: 1;
+  min-width: 0;
+  padding: 0 14px;
+  border: 1px solid var(--input-border);
+  background: var(--input-bg);
+  color: var(--input-text);
+  caret-color: var(--text);
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.signup__input::placeholder {
+  color: var(--placeholder);
+  /* Firefox dims placeholders further by default. */
+  opacity: 1;
+}
+
+.signup__input:hover {
+  border-color: var(--text-muted);
+}
+
+.signup__input:focus {
+  border-color: var(--text);
+  background: var(--input-bg-focus);
+}
+
+.signup__input:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* The one solid shape on the card: light fill, dark ink, the same spaced capitals as
+   the label. The start padding is wider by the trailing tracking, to keep it centred. */
+.signup__button {
+  flex: none;
+  padding: 0 20px 0 calc(20px + 0.2em);
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: var(--accent-text);
+  font-size: clamp(0.8125rem, 3.4cqw, 0.9375rem);
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.signup__button:hover {
+  border-color: var(--accent-hover);
+  background: var(--accent-hover);
+}
+
+.signup__button:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.signup__message {
+  min-height: 1.25em;
+  margin: 8px 0 0;
+  font-size: 0.9375rem;
+  font-style: italic;
+  line-height: 1.25;
+  text-align: center;
+  text-wrap: balance;
+  color: var(--text-muted);
+}
+
+.signup__message:empty {
+  display: none;
+}
+
+.signup__message[data-state="error"] {
+  color: var(--error);
+}
+
+@container (width < 280px) {
+  .signup__row {
+    flex-direction: column;
+  }
+
+  .signup__input {
+    flex: none;
+  }
+
+  /* Slightly shorter when stacked, so the label, both fields and a message still
+     fit inside the golden rectangle at its smallest (288px wide on a 320px screen). */
+  .signup__input,
+  .signup__button {
+    height: 40px;
+  }
+}

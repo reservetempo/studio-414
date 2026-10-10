@@ -1,0 +1,295 @@
+/* Comment section below the hero, on the page's dark background.
+   It inherits the body font and uses the colour tokens from styles.css (:root), in the
+   sign-up card's manner: square corners, hairlines, spaced small capitals for labels. */
+
+.comments {
+  padding: clamp(64px, 10vw, 112px) 16px clamp(72px, 12vw, 136px);
+  /* Carries on the hero's darkening (it ends at 35% black, see .hero::before) and
+     eases it out, so the hero's bottom edge doesn't show as a hard line. */
+  background-image: linear-gradient(
+    rgba(0, 0, 0, 0.35),
+    rgba(0, 0, 0, 0.336) 12.5%, rgba(0, 0, 0, 0.294) 25%, rgba(0, 0, 0, 0.238) 37.5%,
+    rgba(0, 0, 0, 0.175) 50%,
+    rgba(0, 0, 0, 0.112) 62.5%, rgba(0, 0, 0, 0.056) 75%, rgba(0, 0, 0, 0.014) 87.5%,
+    transparent
+  );
+  background-size: 100% clamp(96px, 14vw, 180px);
+  background-repeat: no-repeat;
+  color: var(--text);
+  color-scheme: dark;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.comments [hidden] {
+  display: none !important;
+}
+
+.comments__inner {
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+/* The same spaced capitals as the sign-up label, over a hairline. */
+.comments__title,
+.comments__label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+.comments__title {
+  margin: 0;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--card-border);
+  font-size: 0.8125rem;
+}
+
+.comments__note {
+  margin: 16px 0 0;
+  font-size: 0.9375rem;
+  font-style: italic;
+  color: var(--text-muted);
+}
+
+/* ---------- The list ---------- */
+
+.comments__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.comment {
+  padding: 22px 0 24px;
+  border-bottom: 1px solid var(--card-border);
+}
+
+.comment__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 14px;
+  margin: 0 0 6px;
+}
+
+.comment__name {
+  font-size: 1.0625rem;
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+
+.comment__time {
+  font-size: 0.9375rem;
+  font-style: italic;
+  color: var(--text-muted);
+}
+
+.comment__body {
+  margin: 0;
+  font-size: 1.125rem;
+  line-height: 1.55;
+  /* Keeps the line breaks people type, and wraps long words and links. */
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+/* Loading, empty and error states of the list ("Try again" follows the text). */
+.comments__state {
+  font-size: 1.0625rem;
+  font-style: italic;
+  line-height: 1.4;
+  color: var(--text-muted);
+}
+
+.comments__state.is-active {
+  padding: 22px 0;
+}
+
+.comments__status {
+  display: inline;
+  margin: 0;
+}
+
+.comments__state .comments__link {
+  margin-left: 0.3em;
+}
+
+/* ---------- The form ---------- */
+
+.comments__form {
+  margin-top: 40px;
+}
+
+.comments__field {
+  margin: 0 0 20px;
+}
+
+.comments__label {
+  display: block;
+  margin-bottom: 10px;
+}
+
+.comments__identity {
+  margin: 0 0 20px;
+  font-size: 1.0625rem;
+  font-style: italic;
+  color: var(--text-muted);
+  overflow-wrap: anywhere;
+}
+
+.comments__identity-name {
+  font-style: normal;
+  font-weight: 500;
+  color: var(--text);
+}
+
+/* Hairline-framed fields, as on the card; 17px text, so iOS does not zoom in on focus. */
+.comments__input,
+.comments__textarea {
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 10px 14px;
+  border: 1px solid var(--input-border);
+  border-radius: 0;
+  background: var(--input-bg);
+  color: var(--input-text);
+  caret-color: var(--text);
+  font: inherit;
+  font-size: max(16px, 1.0625rem);
+  line-height: 1.5;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.comments__input {
+  height: 44px;
+  padding-block: 0;
+}
+
+.comments__textarea {
+  min-height: calc(5 * 1.5em + 22px);
+  resize: vertical;
+}
+
+.comments__input::placeholder,
+.comments__textarea::placeholder {
+  color: var(--placeholder);
+  opacity: 1;
+}
+
+.comments__input:hover,
+.comments__textarea:hover {
+  border-color: var(--text-muted);
+}
+
+.comments__input:focus,
+.comments__textarea:focus {
+  border-color: var(--text);
+  background: var(--input-bg-focus);
+}
+
+.comments__input[aria-invalid="true"],
+.comments__textarea[aria-invalid="true"] {
+  border-color: var(--error);
+}
+
+.comments__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 20px;
+}
+
+/* The card's button: light fill, dark ink, spaced capitals. The start padding is
+   wider by the trailing tracking, to keep the label centred. */
+.comments__submit {
+  flex: none;
+  height: 44px;
+  margin: 0;
+  padding: 0 24px 0 calc(24px + 0.2em);
+  border: 1px solid var(--accent);
+  border-radius: 0;
+  background: var(--accent);
+  color: var(--accent-text);
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease, opacity 0.15s ease;
+}
+
+.comments__submit:hover:not(:disabled) {
+  border-color: var(--accent-hover);
+  background: var(--accent-hover);
+}
+
+.comments__submit:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+.comments__message {
+  flex: 1 1 14em;
+  margin: 0;
+  font-size: 0.9375rem;
+  font-style: italic;
+  line-height: 1.3;
+  color: var(--text-muted);
+}
+
+.comments__message[data-state="error"] {
+  color: var(--error);
+}
+
+/* Text buttons: "change" (the name) and "Try again" (loading). */
+.comments__link {
+  margin: 0;
+  padding: 2px 1px;
+  border: 0;
+  background: none;
+  color: var(--text);
+  font: inherit;
+  font-style: normal;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+  cursor: pointer;
+}
+
+.comments__link:hover {
+  text-decoration-color: var(--text-muted);
+}
+
+.comments__input:focus-visible,
+.comments__textarea:focus-visible,
+.comments__submit:focus-visible,
+.comments__link:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* On larger screens the sign-up card sets its labels, fields and button a step
+   larger; follow it. */
+@media (min-width: 720px) {
+  .comments__title {
+    font-size: 0.875rem;
+  }
+
+  .comments__label {
+    font-size: 0.8125rem;
+  }
+
+  .comments__input,
+  .comments__submit {
+    height: 48px;
+  }
+
+  .comments__submit {
+    font-size: 0.875rem;
+  }
+}

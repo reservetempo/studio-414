@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Studio 414</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="comments.css">
+</head>
+<body>
+  <main class="hero">
+    <form class="signup" id="signup" novalidate>
+      <label class="signup__label" for="email">Join the mailing list</label>
+      <div class="signup__row">
+        <input class="signup__input" id="email" name="email" type="email"
+               placeholder="you@example.com" autocomplete="email" required>
+        <button class="signup__button" type="submit">Sign up</button>
+      </div>
+      <p class="signup__message" id="signup-message" role="status" aria-live="polite"></p>
+    </form>
+  </main>
+
+  <section class="comments" id="comments" aria-labelledby="comments-title">
+    <div class="comments__inner">
+      <h2 class="comments__title" id="comments-title">Comments</h2>
+      <p class="comments__note" id="comments-note" hidden></p>
+
+      <ol class="comments__list" id="comments-list" hidden></ol>
+      <div class="comments__state">
+        <p class="comments__status" id="comments-status" role="status" aria-live="polite"></p>
+        <button class="comments__link" id="comments-retry" type="button" hidden>Try again</button>
+      </div>
+
+      <form class="comments__form" id="comments-form" novalidate>
+        <div class="comments__field" id="comments-name-field">
+          <label class="comments__label" for="comments-name">Your name</label>
+          <input class="comments__input" id="comments-name" name="name" type="text"
+                 maxlength="40" autocomplete="nickname" autocapitalize="words" spellcheck="false" required>
+        </div>
+        <p class="comments__identity" id="comments-identity" hidden>
+          Commenting as <span class="comments__identity-name" id="comments-identity-name"></span>
+          <button class="comments__link" id="comments-change" type="button" aria-label="Change your name">change</button>
+        </p>
+        <div class="comments__field">
+          <label class="comments__label" for="comments-body">Comment</label>
+          <textarea class="comments__textarea" id="comments-body" name="body" rows="5" required></textarea>
+        </div>
+        <div class="comments__actions">
+          <button class="comments__submit" id="comments-submit" type="submit">Post comment</button>
+          <p class="comments__message" id="comments-message" role="status" aria-live="polite"></p>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <script defer src="comments-config.js"></script>
+  <script defer src="comments.js"></script>
+
+  <script>
+    // Placeholder handler until the mailing list service is connected.
+    const form = document.getElementById('signup');
+    const input = document.getElementById('email');
+    const message = document.getElementById('signup-message');
+
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+
+      if (!input.checkValidity()) {
+        message.textContent = 'Please enter a valid email address.';
+        message.dataset.state = 'error';
+        input.focus();
+        return;
+      }
+
+      message.textContent = "Thanks! You're on the list.";
+      message.dataset.state = 'success';
+      form.reset();
+    });
+  </script>
+</body>
+</html>
