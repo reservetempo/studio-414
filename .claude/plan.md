@@ -4,21 +4,12 @@ Managed by the main session (see CLAUDE.md). `/z <items>` adds tasks; `/z` works
 
 ## Next
 
-### 3. Back end: several workshops, a spot count per order, and names (supports steps 2 and 4)
-- Goal: the Supabase/Stripe back end handles more than one workshop, buying several spots in one order, the buyer's name and an optional friend's name.
-- Files: `supabase/workshop.sql`, `supabase/functions/workshop-checkout/index.ts`, `supabase/functions/stripe-webhook/index.ts` (if needed), `README.md` (setup steps and "Still to do"). Don't change `workshop.js`: tasks 4 and 6 adapt the front end.
-- Workshops (ids are up to you; keep them short): "Paint a piece", Saturday 7 November 2026, and "Hand building", Saturday 5 December 2026. Each has 10 spots at $59.99 (CAD, as now).
-- GET returns every upcoming workshop with its id, name, date, price, capacity, taken and remaining. Taken counts spots, not orders.
-- POST takes the workshop id, email, name, quantity (1 to the spots remaining) and an optional friend's name, and sends Stripe Checkout the quantity. Reject past workshops, bad input and full workshops with clear error codes. Keep the existing one-order-per-email-per-workshop rule.
-- Nothing is deployed yet, so the SQL can change freely, but it must still run cleanly in the Supabase SQL editor.
-- Document the API in the header comment of `workshop-checkout/index.ts` so the front-end tasks can follow it.
-- Done when: the functions type-check (`deno check` if Deno is installed; otherwise review carefully) and the README matches.
-
 ### 4. Workshops list window (user's step 2)
 - Goal: the Workshops button (top right, `#workshop-button`) opens a "Workshops" window listing the upcoming workshops (name, date, spots left). Clicking one opens the sign-up window for that workshop.
 - Files: `workshop.js`, `workshop.css`, `index.html` (button label, if needed).
 - Use the API documented at the top of `supabase/functions/workshop-checkout/index.ts` (task 3): POST sends the workshop id.
 - The functions aren't deployed yet, so names and dates must show even when the API can't be reached: keep the list in `workshop.js`, with ids matching the server's, and a comment in each place pointing to the other. Spots left come from the API when it answers.
+- The back end returns `{ workshops: [...] }`; ids are `paint-a-piece` (2026-11-07) and `hand-building` (2026-12-05), price in cents. Until task 6 adds the name field, POST will still be rejected (name is required): that's expected; leave the README's "Still to do" note for task 6 to remove.
 - Workshops whose date has passed drop off the list. The button hides when none are left.
 - Same 90s window style, dragging, keyboard and screen-reader behaviour as the existing sign-up window. Update the header comment of `workshop.js`.
 - Done when: previewed: the list shows both workshops, and each one opens its own sign-up.
@@ -37,6 +28,7 @@ Managed by the main session (see CLAUDE.md). `/z <items>` adds tasks; `/z` works
   - "× 1" beside the price, with buttons to go up and down (1 to the spots left), so several spots can be bought in one order. Make it clear what the total will be.
 - Files: `workshop.js`, `workshop.css`.
 - POST sends name, quantity and friend's name as documented at the top of `supabase/functions/workshop-checkout/index.ts`.
+- Show `409 not_enough_spots` (it includes `remaining`) helpfully. Once sign-ups work end to end, remove the README "Still to do" note saying the front end isn't wired to the new API yet.
 - Done when: previewed: the fields show, hide and validate as described, and the count steps within its limits.
 
 ### 7. Flashing "Opening soon" sign with butterflies (user's step 5)
@@ -59,3 +51,4 @@ Managed by the main session (see CLAUDE.md). `/z <items>` adds tasks; `/z` works
 
 - 1. Add 10 Velvetyne fonts to the font switcher: `34558eb`. Fonts 11-20: Anthony, Victorianna (Thin), Gulax, BackOut, Bluu Next (Bold), Daubenton, Grotesk, Kaeru Kaeru, Format 1452, Flor de Ruina. The font range is now 0-20; colours still 0-10.
 - 2. Add 10 color options to the color switcher: `f7ffc9b`. Colours 11-20: Oxblood, Tangerine, Umber, Olive, Turquoise, Teal, Ultraviolet, Hot Pink, Porcelain, Raku. Colour range is now 0-20.
+- 3. Back end for several workshops, spot counts and names: `c2e148f`. GET `{ workshops: [...] }`; POST `{ workshop, email, name, quantity, friendName? }`; API documented at the top of `workshop-checkout/index.ts`. Assumes Eastern time (`America/Toronto`). Not type-checked with Deno (not installed); SQL not run.
