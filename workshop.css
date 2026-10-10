@@ -1,0 +1,580 @@
+/* Workshop sign-up (workshop.js): a small, flashy button fixed at the top right of the
+   screen, as 90s home pages had them (a rainbow frame that runs round, blinking stars
+   and a "NEW!" starburst), and the window it opens, "Workshop sign-up": a 90s dialog
+   like the boxes. boxes.css gives the window its frame, title bar and drag handle, and
+   the colours and fonts are the tokens in styles.css, so both follow the style
+   switcher like everything else. With reduced motion nothing moves or blinks.
+
+   Where the button sits: the top-right corner, 16px in (8px on phones), over the
+   ceiling or the band of page colour above the photo, clear of the big 414. Where the
+   top right is taken (short screens, where the Display window starts at the top, see
+   switcher.css; roughly square ones, where the 414 reaches into the corner) it moves
+   to the bottom-right corner, beside or below the card. Where the comments box floats
+   on the wall right of the window (comments.css), the box starts lower to leave the
+   corner to the button. */
+
+/* ---------- The button ---------- */
+
+.workshop-button {
+  position: fixed;
+  top: max(16px, env(safe-area-inset-top));
+  right: max(16px, env(safe-area-inset-right));
+  /* Over the boxes (boxes.js stacks them from z-index 1 up). */
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  margin: 0;
+  padding: 0 9px;
+  /* The rainbow frame: a strip of rainbow, repeated, under the face and showing only
+     in the 3px border; it runs round by moving along. A black line outside it, and
+     the raised bevel inside, as on the other buttons. */
+  border: 3px solid transparent;
+  border-radius: 0;
+  background:
+    linear-gradient(var(--face), var(--face)) padding-box,
+    linear-gradient(90deg, #ff0000, #ff8a00, #ffe600, #00d600, #00c8ff, #3b3bff, #d400ff, #ff0000)
+      0 0 / 160px 100% repeat-x border-box;
+  color: var(--face-text);
+  box-shadow: 0 0 0 1px var(--dk-shadow), var(--bevel-raised);
+  font-family: var(--display-font);
+  font-size: calc(0.8125rem * var(--display-size));
+  font-weight: var(--display-weight);
+  line-height: 1;
+  letter-spacing: calc(0.2em * var(--display-tracking));
+  text-transform: uppercase;
+  white-space: nowrap;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  animation: workshop-rainbow 2.4s linear infinite;
+}
+
+.workshop-button[hidden] {
+  display: none;
+}
+
+/* Pressed, the bevel flips and the contents move 1px across and down. */
+.workshop-button:active {
+  padding: 2px 8px 0 10px;
+  box-shadow: 0 0 0 1px var(--dk-shadow), var(--bevel-pressed);
+}
+
+/* The dotted focus rectangle inside the button, and a ring outside it, as it sits
+   straight on the page or the photo. */
+.workshop-button:focus-visible {
+  outline: 1px dotted var(--focus);
+  outline-offset: -6px;
+}
+
+.workshop-button:focus-visible::after {
+  content: "";
+  position: absolute;
+  inset: -6px;
+  border: 2px solid var(--page-text);
+  pointer-events: none;
+}
+
+/* Less the trailing tracking, so the word sits centred between the stars. */
+.workshop-button__label {
+  margin-right: calc(-0.2em * var(--display-tracking));
+}
+
+/* Two small pixel stars round the word, blinking in turn (once a second: far below
+   the three flashes a second that can be harmful). */
+.workshop-button__star {
+  flex: none;
+  width: 9px;
+  height: 9px;
+  color: #c40000;
+  animation: workshop-blink 1s step-end infinite;
+}
+
+.workshop-button__star:last-child {
+  animation-delay: -0.5s;
+}
+
+/* "NEW!" on a yellow starburst, stuck over the left end of the button, pulsing. The
+   filter draws a black edge round the star the clip-path cuts out. */
+.workshop-button__burst {
+  position: absolute;
+  top: 50%;
+  left: -38px;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  margin-top: -22px;
+  color: #c40000;
+  font-size: 10px;
+  letter-spacing: 0.02em;
+  filter: drop-shadow(1px 0 0 #000) drop-shadow(-1px 0 0 #000)
+    drop-shadow(0 1px 0 #000) drop-shadow(0 -1px 0 #000);
+  transform: rotate(-14deg);
+  animation: workshop-pulse 0.8s ease-in-out infinite alternate;
+}
+
+.workshop-button__burst::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: #ffe600;
+  clip-path: polygon(50% 0%, 59.3% 15.2%, 75% 6.7%, 75.5% 24.5%, 93.3% 25%, 84.8% 40.7%,
+    100% 50%, 84.8% 59.3%, 93.3% 75%, 75.5% 75.5%, 75% 93.3%, 59.3% 84.8%, 50% 100%,
+    40.7% 84.8%, 25% 93.3%, 24.5% 75.5%, 6.7% 75%, 15.2% 59.3%, 0% 50%, 15.2% 40.7%,
+    6.7% 25%, 24.5% 24.5%, 25% 6.7%, 40.7% 15.2%);
+}
+
+/* Sold out: no more fanfare, just a plain grey frame and the words. */
+.workshop-button[data-state="soldout"] {
+  background:
+    linear-gradient(var(--face), var(--face)) padding-box,
+    linear-gradient(var(--shadow), var(--shadow)) border-box;
+  animation: none;
+}
+
+.workshop-button[data-state="soldout"] .workshop-button__burst,
+.workshop-button[data-state="soldout"] .workshop-button__star {
+  display: none;
+}
+
+@keyframes workshop-rainbow {
+  to {
+    background-position: 0 0, 160px 0;
+  }
+}
+
+@keyframes workshop-blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+@keyframes workshop-pulse {
+  from {
+    transform: rotate(-16deg) scale(0.92);
+  }
+
+  to {
+    transform: rotate(-8deg) scale(1.08);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .workshop-button,
+  .workshop-button__star,
+  .workshop-button__burst {
+    animation: none;
+  }
+}
+
+/* Phones: the same 8px gutter as the Display window at the side, and room above for
+   the starburst. */
+@media (max-width: 480px) {
+  .workshop-button {
+    top: max(12px, env(safe-area-inset-top));
+    right: max(8px, env(safe-area-inset-right));
+  }
+}
+
+/* Where Display starts at the top (switcher.css) and the 414 moves out of its way into
+   the top-right corner (styles.css), the button goes to the bottom-right corner, beside
+   the card; without the starburst, which would reach over the card's corner on phones
+   turned sideways. */
+@media (max-height: 620px) and (min-width: 481px) and (max-width: 1067px) {
+  .workshop-button {
+    top: auto;
+    bottom: max(16px, env(safe-area-inset-bottom));
+  }
+}
+
+@media (max-height: 560px) and (max-width: 480px) {
+  .workshop-button {
+    top: auto;
+    bottom: max(8px, env(safe-area-inset-bottom));
+  }
+}
+
+@media (max-height: 620px) and (min-width: 481px) and (max-width: 1067px),
+  (max-height: 560px) and (max-width: 480px) {
+  .workshop-button__burst {
+    display: none;
+  }
+}
+
+/* On roughly square screens under 1100px wide the 414 is as wide as it gets (80% of
+   the photo) and reaches the top of the page, right into the corner: there the button
+   goes to the bottom-right corner too, clear of the card above it and Display on the
+   left. */
+@media (min-width: 481px) and (max-width: 1099px) and (min-height: 621px) and (min-aspect-ratio: 8/9) and (max-aspect-ratio: 13/10) {
+  .workshop-button {
+    top: auto;
+    bottom: max(16px, env(safe-area-inset-bottom));
+  }
+}
+
+/* The wider faces (fonts.css) draw a wider 414, which reaches the corner on screens up
+   to half as wide again as they are tall. */
+@media (min-width: 481px) and (max-width: 1099px) and (min-height: 621px) and (min-aspect-ratio: 8/9) and (max-aspect-ratio: 3/2) {
+  html[data-font="1"] .workshop-button,
+  html[data-font="2"] .workshop-button,
+  html[data-font="5"] .workshop-button,
+  html[data-font="6"] .workshop-button,
+  html[data-font="8"] .workshop-button,
+  html[data-font="10"] .workshop-button {
+    top: auto;
+    bottom: max(16px, env(safe-area-inset-bottom));
+  }
+}
+
+/* Phones turned sideways: the phones' 8px gutter, to stay clear of the card. */
+@media (max-height: 620px) and (min-width: 481px) and (max-width: 699px) {
+  .workshop-button {
+    right: max(8px, env(safe-area-inset-right));
+  }
+}
+
+/* Where the comments box floats on the wall right of the window (comments.css), it is
+   centred in the hero 16px from the top at the least, which on screens under about
+   800px tall brings it up under the button. There it starts 64px down instead (clear
+   of the button and its starburst) and keeps 16px at the bottom. Once moved or
+   resized (boxes.js) it keeps its own place and size. */
+@media (min-width: 1100px) and (min-height: 640px) {
+  .comments__inner {
+    --h: min(100% - 80px, 680px);
+    top: max(64px, (100% - var(--h)) / 2);
+  }
+}
+
+/* ---------- The window ---------- */
+
+/* A modal <dialog> in the top layer, centred until it is dragged by its title bar
+   (workshop.js). On screens too short for it, it scrolls inside its frame. */
+.workshop {
+  width: min(420px, 100vw - 32px);
+  max-width: none;
+  /* boxes.css keeps boxes as tall as their content; this one may scroll instead. */
+  min-height: 0;
+  max-height: calc(100vh - 32px);
+  max-height: calc(100dvh - 32px);
+  overflow: auto;
+  font-size: 1rem;
+  line-height: 1.3;
+}
+
+.workshop:not([open]) {
+  display: none;
+}
+
+/* Dragged: left and top (set by workshop.js) are in screen px. */
+.workshop.is-moved {
+  margin: 0;
+  right: auto;
+  bottom: auto;
+}
+
+/* The page behind it, dimmed by a fine dither, as 90s screens were behind a system
+   dialog. */
+.workshop::backdrop {
+  background: repeating-conic-gradient(rgba(0, 0, 0, 0.45) 0% 25%, transparent 0% 50%) 0 0 / 2px 2px;
+}
+
+.workshop [hidden] {
+  display: none !important;
+}
+
+/* The close button, the "x" at the right of the title bar, over the drag handle. */
+.workshop__close {
+  position: relative;
+  z-index: 1;
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 20px;
+  margin: 0 -3px 0 auto;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: var(--face);
+  color: var(--face-text);
+  box-shadow: var(--bevel-raised);
+  cursor: pointer;
+}
+
+.workshop__close svg {
+  display: block;
+  width: 8px;
+  height: 7px;
+}
+
+.workshop__close:active {
+  padding: 2px 0 0 2px;
+  box-shadow: var(--bevel-pressed);
+}
+
+.workshop__close:focus-visible {
+  outline: 1px dotted var(--focus);
+  outline-offset: -4px;
+}
+
+@media (pointer: coarse) {
+  .workshop__close {
+    width: 30px;
+    height: 28px;
+  }
+}
+
+.workshop__body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px 16px 16px;
+}
+
+/* "You're in!" or "Payment cancelled", as a 90s message box: an icon and the text. */
+.workshop__result {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.workshop__result-icon {
+  flex: none;
+  width: 32px;
+  height: 32px;
+  color: var(--accent-ink);
+}
+
+.workshop__result-title {
+  margin: 0 0 2px;
+  font-family: var(--display-font);
+  font-size: calc(1.25rem * var(--display-name-size));
+  font-weight: var(--display-weight);
+  line-height: 1.2;
+}
+
+.workshop__result-text {
+  margin: 0;
+  color: var(--face-muted);
+}
+
+.workshop__name {
+  margin: 0;
+  color: var(--accent-ink);
+  font-family: var(--display-font);
+  font-size: calc(2.25rem * var(--display-name-size));
+  font-weight: var(--display-weight);
+  line-height: 1;
+}
+
+.workshop__facts {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  align-items: baseline;
+  gap: 4px 14px;
+  margin: 0;
+}
+
+/* Small spaced capitals, as the labels on the card and in the comments. */
+.workshop__facts dt,
+.workshop__label {
+  font-family: var(--display-font);
+  font-size: calc(0.75rem * var(--display-size));
+  font-weight: var(--display-weight);
+  line-height: 1.2;
+  letter-spacing: calc(0.22em * var(--display-tracking));
+  text-transform: uppercase;
+}
+
+.workshop__facts dt {
+  color: var(--face-muted);
+}
+
+.workshop__facts dd {
+  margin: 0;
+  font-size: 1.0625rem;
+}
+
+/* How many spots are left, in a sunken white panel with a small status light: green
+   while there are spots, red once sold out, amber while checking, grey before
+   sign-ups open. */
+.workshop__spots {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin: 0;
+  padding: 7px 10px;
+  border: 1px solid;
+  border-color: var(--sunken-border);
+  background: var(--field);
+  color: var(--field-text);
+  box-shadow: var(--sunken-edge);
+  font-size: 1.0625rem;
+  font-variant-numeric: lining-nums tabular-nums;
+  line-height: 1.25;
+}
+
+.workshop__spots::before {
+  content: "";
+  flex: none;
+  width: 10px;
+  height: 10px;
+  border: 1px solid #000;
+  background: #19c219;
+  box-shadow: inset 1px 1px rgba(255, 255, 255, 0.6), inset -1px -1px rgba(0, 0, 0, 0.3);
+}
+
+.workshop__spots[data-state="loading"],
+.workshop__spots[data-state="unavailable"] {
+  font-style: italic;
+  color: var(--face-muted);
+}
+
+.workshop__spots[data-state="loading"]::before {
+  background: #ffb000;
+}
+
+.workshop__spots[data-state="unavailable"]::before {
+  background: #8a8a8a;
+}
+
+.workshop__spots[data-state="soldout"] {
+  color: var(--error);
+}
+
+.workshop__spots[data-state="soldout"]::before {
+  background: #e00000;
+}
+
+.workshop__form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+}
+
+.workshop__label {
+  display: block;
+  margin-bottom: -4px;
+}
+
+/* A sunken white field, as on the card; 17px text, so iOS does not zoom in on focus. */
+.workshop__input {
+  display: block;
+  width: 100%;
+  height: 36px;
+  margin: 0;
+  padding: 0 8px;
+  border: 1px solid;
+  border-color: var(--sunken-border);
+  border-radius: 0;
+  background: var(--field);
+  color: var(--field-text);
+  box-shadow: var(--sunken-edge);
+  font: inherit;
+  font-size: max(16px, 1.0625rem);
+}
+
+.workshop__input::placeholder {
+  color: var(--placeholder);
+  opacity: 1;
+}
+
+.workshop__input:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 1px;
+}
+
+.workshop__input[aria-invalid="true"] {
+  box-shadow: var(--sunken-edge), inset 0 0 0 2px var(--error);
+}
+
+.workshop__input:disabled {
+  background: var(--face);
+  color: var(--face-muted);
+}
+
+/* The default button, as on the card: raised, framed in black, spaced capitals. The
+   start padding is wider by the trailing tracking, to keep the label centred. */
+.workshop__pay {
+  --pad: 16px;
+  align-self: stretch;
+  min-width: 96px;
+  min-height: 40px;
+  margin: 2px 0 0;
+  padding: 4px var(--pad) 4px calc(var(--pad) + 0.2em * var(--display-tracking));
+  border: 1px solid var(--dk-shadow);
+  border-radius: 0;
+  background: var(--button);
+  color: var(--button-text);
+  box-shadow: var(--bevel-raised);
+  font: inherit;
+  font-family: var(--display-font);
+  font-size: calc(0.8125rem * var(--display-size));
+  font-weight: var(--display-weight);
+  line-height: 1.2;
+  letter-spacing: calc(0.2em * var(--display-tracking));
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.workshop__pay:active:not(:disabled) {
+  padding: 6px calc(var(--pad) - 1px) 2px calc(var(--pad) + 1px + 0.2em * var(--display-tracking));
+  box-shadow: var(--bevel-pressed);
+}
+
+.workshop__pay:focus-visible {
+  outline: 1px dotted var(--focus);
+  outline-offset: -5px;
+}
+
+/* Greyed and embossed, as disabled controls were. */
+.workshop__pay:disabled {
+  color: var(--shadow);
+  text-shadow: 1px 1px 0 var(--hilight);
+  cursor: not-allowed;
+}
+
+.workshop__pay[aria-busy="true"] {
+  cursor: progress;
+}
+
+/* "OK" under the thank-you: a shorter button on the right, as a message box has. */
+.workshop__ok {
+  align-self: flex-end;
+}
+
+.workshop__message,
+.workshop__note {
+  margin: 0;
+  font-size: 0.9375rem;
+  font-style: italic;
+  line-height: 1.3;
+  color: var(--face-muted);
+}
+
+.workshop__message:empty {
+  display: none;
+}
+
+.workshop__message[data-state="error"] {
+  color: var(--error);
+}
+
+/* High-contrast modes drop the backgrounds: keep the button's frame, and the star's
+   word on its own. */
+@media (forced-colors: active) {
+  .workshop-button {
+    border-color: ButtonText;
+  }
+
+  .workshop-button__burst::before {
+    display: none;
+  }
+
+  .workshop__spots::before {
+    forced-color-adjust: none;
+  }
+}

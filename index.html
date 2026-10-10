@@ -42,6 +42,7 @@
   <link rel="stylesheet" href="comments.css">
   <link rel="stylesheet" href="fonts.css">
   <link rel="stylesheet" href="switcher.css">
+  <link rel="stylesheet" href="workshop.css">
 </head>
 <body>
   <main class="hero">
@@ -110,10 +111,67 @@
     </div>
   </section>
 
+  <!-- Workshop sign-up (workshop.js, workshop.css): the flashy button fixed at the top
+       right opens the sign-up window, a modal 90s dialog like the boxes. The button
+       stays hidden until workshop.js runs, as it does nothing without it. -->
+  <button class="workshop-button" id="workshop-button" type="button"
+          aria-label="Workshop sign-up" aria-haspopup="dialog" aria-controls="workshop" hidden>
+    <span class="workshop-button__burst" aria-hidden="true">New!</span>
+    <svg class="workshop-button__star" viewBox="0 0 9 9" aria-hidden="true" focusable="false" shape-rendering="crispEdges"><path fill="currentColor" d="M4 0h1v2H4zM3 2h3v1H3zM0 3h9v1H0zM1 4h7v1H1zM2 5h5v1H2zM2 6h2v1H2zM5 6h2v1H5zM1 7h2v1H1zM6 7h2v1H6zM1 8h1v1H1zM7 8h1v1H7z"/></svg>
+    <span class="workshop-button__label" id="workshop-button-label">Workshop</span>
+    <svg class="workshop-button__star" viewBox="0 0 9 9" aria-hidden="true" focusable="false" shape-rendering="crispEdges"><path fill="currentColor" d="M4 0h1v2H4zM3 2h3v1H3zM0 3h9v1H0zM1 4h7v1H1zM2 5h5v1H2zM2 6h2v1H2zM5 6h2v1H5zM1 7h2v1H1zM6 7h2v1H6zM1 8h1v1H1zM7 8h1v1H7z"/></svg>
+  </button>
+
+  <dialog class="workshop box" id="workshop" aria-labelledby="workshop-title">
+    <div class="box__titlebar">
+      <svg class="box__icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false" shape-rendering="crispEdges"><path fill="currentColor" d="M13 1h2v1h-2zM12 2h2v1h-2zM11 3h2v1h-2zM10 4h2v1h-2zM9 5h2v1H9zM7 6h4v1H7zM6 7h4v1H6zM4 9h4v1H4zM3 10h4v1H3zM2 11h4v1H2zM1 12h4v1H1zM1 13h3v1H1zM1 14h2v1H1zM10 13h5v2h-5z"/></svg>
+      <h2 class="box__title" id="workshop-title">Workshop sign-up</h2>
+      <button class="workshop__close" id="workshop-close" type="button" aria-label="Close">
+        <svg viewBox="0 0 8 7" aria-hidden="true" focusable="false" shape-rendering="crispEdges"><path fill="currentColor" d="M0 0h2v1H0zM6 0h2v1H6zM1 1h2v1H1zM5 1h2v1H5zM2 2h4v1H2zM3 3h2v1H3zM2 4h4v1H2zM1 5h2v1H1zM5 5h2v1H5zM0 6h2v1H0zM6 6h2v1H6z"/></svg>
+      </button>
+    </div>
+    <div class="workshop__body">
+      <!-- After Stripe: "You're in!" or "Payment cancelled" (workshop.js). -->
+      <div class="workshop__result" id="workshop-result" hidden>
+        <svg class="workshop__result-icon" id="workshop-result-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false" shape-rendering="crispEdges"></svg>
+        <div>
+          <p class="workshop__result-title" id="workshop-result-title"></p>
+          <p class="workshop__result-text" id="workshop-result-text"></p>
+        </div>
+      </div>
+
+      <p class="workshop__name">Paint a piece</p>
+      <dl class="workshop__facts">
+        <dt>Date</dt>
+        <dd><time datetime="2026-11-07">Saturday 7 November 2026</time></dd>
+        <dt>Price</dt>
+        <dd>$59.99 CAD</dd>
+        <dt>Group</dt>
+        <dd>10 people at most</dd>
+      </dl>
+
+      <p class="workshop__spots" id="workshop-spots" role="status" aria-live="polite" data-state="loading">Checking spots…</p>
+
+      <form class="workshop__form" id="workshop-form" novalidate>
+        <label class="workshop__label" for="workshop-email">Your email</label>
+        <input class="workshop__input" id="workshop-email" name="email" type="email"
+               placeholder="you@example.com" autocomplete="email" maxlength="254"
+               spellcheck="false" autocapitalize="off" required>
+        <button class="workshop__pay" id="workshop-pay" type="submit" disabled>Pay $59.99 CAD with Stripe</button>
+        <p class="workshop__message" id="workshop-message" role="status" aria-live="polite"></p>
+      </form>
+
+      <p class="workshop__note" id="workshop-note">You pay on Stripe’s secure checkout page, and Stripe emails you a receipt.</p>
+
+      <button class="workshop__pay workshop__ok" id="workshop-ok" type="button" hidden>OK</button>
+    </div>
+  </dialog>
+
   <script defer src="comments-config.js"></script>
   <script defer src="comments.js"></script>
   <script defer src="switcher.js"></script>
   <script defer src="boxes.js"></script>
+  <script defer src="workshop.js"></script>
 
   <script>
     // Placeholder handler until the mailing list service is connected.
