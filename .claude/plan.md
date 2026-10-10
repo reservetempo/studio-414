@@ -4,6 +4,8 @@ Managed by the main session (see CLAUDE.md). `/z <items>` adds tasks; `/z` works
 
 ## Next
 
+- 14. Make the top-right "Workshops" link a button like "Sign up". Today `.workshop-button` (`workshop.css`, "The button" section; markup in `index.html` around line 121, `#workshop-button` / `.workshop-button__label`) is plain underlined text with a page-colour halo, fixed top right. Turn it into the same raised grey 90s button as the mailing list's `.signup__button` (`styles.css` ~line 503): `--button`/`--button-text` fill, 1px `--dk-shadow` frame, `--bevel-raised` (flips to `--bevel-pressed` with the 1px shift on `:active`), dotted inner focus rectangle. Label in spaced capitals in the display font like "SIGN UP" (uppercase, `0.2em * --display-tracking` letter-spacing, start padding widened by the trailing tracking so the word stays centred). Drop the underline and text-shadow halo. Keep it fixed top right with its current gutters, `hidden` handling, and a finger-sized target. It sits on the photo/page, so make sure it reads there (a ring outside it on focus is fine). Re-size the corner the 414 keeps clear (`--workshop-reach`, `--workshop-drop` at the top of `workshop.css`; the "Opening soon!" counterpart comment in `index.html` ~line 41) to fit the bigger button, including the widest font. Leave "Opening soon!" as plain text. Update the comments in `workshop.css` and `index.html` that call it plain text.
+
 
 ## Done
 
