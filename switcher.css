@@ -153,10 +153,10 @@ html[data-color="10"] {
    It starts closed (hidden); the paint roller button in the bottom-left corner
    (.switcher-toggle, below) opens it, and the "x" in its title bar (.box__close in
    boxes.css) closes it.
-   Where it opens: bottom-left, over its paint roller; top-left on short screens where
-   the card comes down to the bottom; on phones a compact window along the bottom, low
-   enough to clear the card, or along the top on the shortest ones. Once moved, where
-   it was left. */
+   Where it opens: bottom-left, over its paint roller; top-left on short screens, out of
+   the way of the card at the bottom of the hero (see below); on phones a compact
+   window along the bottom, or along the top on the shortest ones. Once moved, where it
+   was left. */
 
 .switcher {
   position: fixed;
@@ -292,8 +292,11 @@ html[data-color="10"] {
 }
 
 /* Phones: the full width less 8px gutters, and compact: a slimmer title bar (as a 90s
-   tool palette has) and 28px rows, so on load it sits below the card even on a
-   320 x 568 screen. It keeps its width once moved (a set width, not left and right). */
+   tool palette has) and 28px rows, so it covers as little of the page as it can.
+   Along the bottom it clears the card on tall phones (390 x 844, say), where the card
+   sits across the photo's bottom edge well above it; on shorter ones (375 x 667 and
+   down) the card comes down to its gutter (styles.css) and the window opens over the
+   bottom of it. It keeps its width once moved (a set width, not left and right). */
 @media (max-width: 480px) {
   .switcher {
     left: 8px;
@@ -366,9 +369,14 @@ html[data-color="10"] {
   }
 }
 
-/* On short screens (phones turned sideways, small windows) the card comes down to the
-   bottom of the hero, and below about 1068px wide it reaches under the window's corner,
-   so the window starts in the top-left corner instead, over the ceiling. */
+/* Below about 1068px wide the card (300px, centred, at or near the bottom of the hero:
+   styles.css) reaches in under the right end of the window where it opens at the
+   bottom left. On short screens there (phones turned sideways, small windows) the
+   window opens in the top-left corner instead, over the ceiling; on taller ones
+   (768 x 1024, 1000 x 800) it stays at the bottom, over the card's bottom-left corner.
+   Up there it covers the left side of the big 414, which stands centred at the top of
+   these screens and does not make way for it. The shortest phones get the same along
+   the top: clear of the card, but over the top of the 414 or all of it. */
 @media (max-height: 620px) and (min-width: 481px) and (max-width: 1067px) {
   .switcher {
     top: 16px;
