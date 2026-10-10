@@ -46,8 +46,9 @@
     padding: 0;
   }
 
-  /* .comments > raises this above the older override in workshop.css, which is no
-     longer needed: the box is short enough to stay clear of the Workshop button. */
+  /* This selector (.comments > .comments__inner) and the 64px top clearance below
+     keep the box under the Workshop button fixed at the top right. Nothing in
+     workshop.css overrides it any more. */
   .comments > .comments__inner {
     /* The free width right of the window, then a box centred in it: two thirds of
        that width less margins (never under the box's min-width, so it stays
