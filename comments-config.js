@@ -17,6 +17,6 @@
   only in this browser's localStorage, and the section says it isn't connected yet.
 */
 window.COMMENTS_CONFIG = {
-  supabaseUrl: "",
-  supabaseAnonKey: ""
+  supabaseUrl: "https://cgbqzdhjhquprjgtcmwh.supabase.co",
+  supabaseAnonKey: "sb_publishable_c0kzOVyXDYoHlrnQ_43sEw_rNx5opO7"
 };
