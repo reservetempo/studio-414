@@ -1,7 +1,7 @@
 /*
   Style switcher for Studio 414.
 
-  Lets friends try ten display faces (fonts.css) and ten colours (switcher.css)
+  Lets friends try twenty display faces (fonts.css) and ten colours (switcher.css)
   independently, and say which they like in a comment by number ("colour 1 and
   font 6").
   Option 0 of each is the default design (Terminal Grotesque, the Classic grey and
@@ -29,7 +29,8 @@
   index.html's <head> sets those before first paint, from the URL (?font=6&color=1,
   which wins) or else from localStorage; this file builds the panel and keeps the
   attributes, localStorage and the URL in step as the choice changes. Values that are
-  not a whole number from 0 to 10 count as 0.
+  not a whole number from 0 to the last option (20 for the font, 10 for the colour)
+  count as 0.
 
   To remove the switcher: delete switcher.js, switcher.css, fonts.css and fonts/,
   their <link> / <script> tags and the inline script in <head>. The tokens in
@@ -39,7 +40,6 @@
 (function () {
   'use strict';
 
-  var MAX = 10;
   var KEY_PREFIX = 'studio414.style.';
   var OPEN_KEY = 'studio414.display';
   var root = document.documentElement;
@@ -58,7 +58,17 @@
         'Façade',
         'Karrik',
         'Trickster',
-        'Compagnon'
+        'Compagnon',
+        'Anthony',
+        'Victorianna',
+        'Gulax',
+        'BackOut',
+        'Bluu Next',
+        'Daubenton',
+        'Grotesk',
+        'Kaeru Kaeru',
+        'Format 1452',
+        'Flor de Ruina'
       ]
     },
     color: {
@@ -86,9 +96,14 @@
 
   /* ---------- Values, storage and the URL ---------- */
 
-  function parse(value) {
+  // The number of the last option of a kind: 20 for the font, 10 for the colour.
+  function last(kind) {
+    return OPTIONS[kind].names.length - 1;
+  }
+
+  function parse(value, kind) {
     var text = String(value == null ? '' : value).trim();
-    return /^(10|[0-9])$/.test(text) ? Number(text) : 0;
+    return /^(0|[1-9][0-9]?)$/.test(text) && Number(text) <= last(kind) ? Number(text) : 0;
   }
 
   function readStorage(key) {
@@ -111,10 +126,10 @@
   // again the same way if that script is missing.
   function initialValue(kind) {
     var attr = root.getAttribute('data-' + kind);
-    if (attr != null) return parse(attr);
+    if (attr != null) return parse(attr, kind);
     var params = new URLSearchParams(window.location.search);
-    if (params.has(kind)) return parse(params.get(kind));
-    return parse(readStorage(KEY_PREFIX + kind));
+    if (params.has(kind)) return parse(params.get(kind), kind);
+    return parse(readStorage(KEY_PREFIX + kind), kind);
   }
 
   var state = {
@@ -208,7 +223,8 @@
     prev.setAttribute('aria-label', 'Previous ' + option.label.toLowerCase());
 
     var select = element('select', 'switcher__select switcher__select--' + kind);
-    select.setAttribute('aria-label', option.label + ' (0 to ' + MAX + ')');
+    var max = last(kind);
+    select.setAttribute('aria-label', option.label + ' (0 to ' + max + ')');
     option.names.forEach(function (name, index) {
       var item = element('option', null, index + ' — ' + name);
       item.value = String(index);
@@ -220,13 +236,13 @@
     next.setAttribute('aria-label', 'Next ' + option.label.toLowerCase());
 
     prev.addEventListener('click', function () {
-      set(kind, (state[kind] + MAX) % (MAX + 1));
+      set(kind, (state[kind] + max) % (max + 1));
     });
     next.addEventListener('click', function () {
-      set(kind, (state[kind] + 1) % (MAX + 1));
+      set(kind, (state[kind] + 1) % (max + 1));
     });
     select.addEventListener('change', function () {
-      set(kind, parse(select.value));
+      set(kind, parse(select.value, kind));
     });
 
     row.appendChild(label);

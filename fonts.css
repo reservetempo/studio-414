@@ -4,7 +4,7 @@
 
    <html data-font="0"> (or no attribute) is Terminal Grotesque, the default;
    data-font="1" is EB Garamond, the original face, whose tokens are the ones in
-   styles.css; data-font="2" to data-font="10" pick the others. Each option only sets
+   styles.css; data-font="2" to data-font="20" pick the others. Each option only sets
    the display tokens from styles.css:
      --display-font      the family, with fallbacks
      --display-weight    the weight of the one face loaded
@@ -99,6 +99,86 @@
   font-display: swap;
 }
 
+@font-face {
+  font-family: "Anthony";
+  src: url("fonts/anthony/Anthony.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Victorianna";
+  src: url("fonts/victorianna/vtf_victorianna_thin-webfont.woff") format("woff");
+  font-weight: 200;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Gulax";
+  src: url("fonts/gulax/Gulax-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "BackOut";
+  src: url("fonts/backout/BackOut.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Bluu Next";
+  src: url("fonts/bluu-next/bluunext-bold-webfont.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Daubenton";
+  src: url("fonts/daubenton/daubentonwebfont.woff") format("woff");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Grotesk";
+  src: url("fonts/grotesk/Grotesk-03Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Kaeru Kaeru";
+  src: url("fonts/kaerukaeru/kaerukaeru-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Format 1452";
+  src: url("fonts/format-1452/Format_1452.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Flor de Ruina";
+  src: url("fonts/flor-de-ruina/FlorDeRuina-Flor.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* Every face but EB Garamond (1). */
 html:not([data-font]),
 html[data-font="0"],
@@ -110,7 +190,17 @@ html[data-font="6"],
 html[data-font="7"],
 html[data-font="8"],
 html[data-font="9"],
-html[data-font="10"] {
+html[data-font="10"],
+html[data-font="11"],
+html[data-font="12"],
+html[data-font="13"],
+html[data-font="14"],
+html[data-font="15"],
+html[data-font="16"],
+html[data-font="17"],
+html[data-font="18"],
+html[data-font="19"],
+html[data-font="20"] {
   --display-italic: normal;
   --big-weight: var(--display-weight);
 }
@@ -236,4 +326,124 @@ html[data-font="10"] {
   --big-w: 1.8;
   --big-h: 0.594;
   --big-base: 0.94;
+}
+
+/* 11. Anthony, Sun Young Oh */
+html[data-font="11"] {
+  --display-font: "Anthony", "Futura", "Century Gothic", sans-serif;
+  --display-weight: 400;
+  --display-size: 1;
+  --display-tracking: 1;
+  --display-name-size: 1;
+  --big-w: 1.42;
+  --big-h: 0.719;
+  --big-base: 0.97;
+}
+
+/* 12. Victorianna (Thin), Sébastien Hayez, Jérémy Landes */
+html[data-font="12"] {
+  --display-font: "Victorianna", "EB Garamond", Georgia, serif;
+  --display-weight: 200;
+  --display-size: 0.9;
+  --display-tracking: 1;
+  --display-name-size: 0.95;
+  --big-w: 1.549;
+  --big-h: 0.938;
+  --big-base: 0.806;
+}
+
+/* 13. Gulax, Morgan Gilbert */
+html[data-font="13"] {
+  --display-font: "Gulax", "Helvetica Neue", Arial, sans-serif;
+  --display-weight: 400;
+  --display-size: 1.1;
+  --display-tracking: 1;
+  --display-name-size: 1;
+  --big-w: 1.435;
+  --big-h: 0.641;
+  --big-base: 0.95;
+}
+
+/* 14. BackOut (Medium), Frank Adebiaye, Ariel Martín Pérez */
+html[data-font="14"] {
+  --display-font: "BackOut", "Arial Narrow", sans-serif;
+  --display-weight: 500;
+  --display-size: 0.85;
+  --display-tracking: 1;
+  --display-name-size: 0.82;
+  --big-w: 1.332;
+  --big-h: 0.875;
+  --big-base: 0.8;
+}
+
+/* 15. Bluu Next (Bold), Jean-Baptiste Morizot */
+html[data-font="15"] {
+  --display-font: "Bluu Next", "EB Garamond", Georgia, serif;
+  --display-weight: 700;
+  --display-size: 1;
+  --display-tracking: 0.9;
+  --display-name-size: 0.92;
+  --big-w: 1.518;
+  --big-h: 0.609;
+  --big-base: 0.84;
+}
+
+/* 16. Daubenton, Olivier Dolbeau (capitals only) */
+html[data-font="16"] {
+  --display-font: "Daubenton", "EB Garamond", Georgia, serif;
+  --display-weight: 400;
+  --display-size: 0.96;
+  --display-tracking: 0.8;
+  --display-name-size: 0.8;
+  --big-w: 1.565;
+  --big-h: 0.719;
+  --big-base: 0.843;
+}
+
+/* 17. Grotesk (Regular), Frank Adebiaye, Jérémy Landes, Ariel Martín Pérez */
+html[data-font="17"] {
+  --display-font: "Grotesk", "Futura", "Century Gothic", sans-serif;
+  --display-weight: 400;
+  --display-size: 1.04;
+  --display-tracking: 0.7;
+  --display-name-size: 0.88;
+  --big-w: 1.663;
+  --big-h: 0.656;
+  --big-base: 0.8;
+}
+
+/* 18. Kaeru Kaeru, Isabel Motz */
+html[data-font="18"] {
+  --display-font: "Kaeru Kaeru", "Helvetica Neue", Arial, sans-serif;
+  --display-weight: 400;
+  --display-size: 0.92;
+  --display-tracking: 1;
+  --display-name-size: 0.9;
+  --big-w: 1.581;
+  --big-h: 0.766;
+  --big-base: 0.9;
+}
+
+/* 19. Format 1452 (Medium), Frank Adebiaye */
+html[data-font="19"] {
+  --display-font: "Format 1452", "DIN Alternate", "Arial Narrow", sans-serif;
+  --display-weight: 500;
+  --display-size: 1;
+  --display-tracking: 1;
+  --display-name-size: 0.95;
+  --big-w: 1.35;
+  --big-h: 0.734;
+  --big-base: 0.724;
+}
+
+/* 20. Flor de Ruina (Flor), Felipe Sanzana */
+html[data-font="20"] {
+  --display-font: "Flor de Ruina", "EB Garamond", Georgia, serif;
+  --display-weight: 500;
+  --display-size: 0.85;
+  --display-tracking: 0.9;
+  --display-name-size: 0.82;
+  --big-w: 1.677;
+  --big-h: 0.828;
+  --big-base: 0.77;
 }
