@@ -1,9 +1,10 @@
 /* Workshops (workshop.js): "Workshops" in plain underlined text fixed at the top right
    of the screen, a button that opens the windows, 90s dialogs like the boxes: the
-   "Workshops" list (.workshop--list), and a workshop's sign-up window. boxes.css gives
-   the windows their frame, title bar and drag handle, and the colours and fonts are
-   the tokens in styles.css, so all of it follows the style switcher like everything
-   else. With reduced motion nothing moves.
+   Workshops window (.workshop--list), the month calendar (calendar.css) over a list of
+   links, and a workshop's sign-up window. boxes.css gives the windows their frame,
+   title bar and drag handle, and the colours and fonts are the tokens in styles.css,
+   so all of it follows the style switcher like everything else, but for the links,
+   which keep the early web's blue and purple. With reduced motion nothing moves.
 
    Where the button sits: the top-right corner, 16px in (8px on phones), over the
    ceiling or the band of page colour above the photo, on every screen. The corner is
@@ -182,109 +183,58 @@
   width: min(380px, 100vw - 32px);
 }
 
-.workshop__intro {
-  margin: 0;
-}
-
-/* The workshops, as a 90s list box: a sunken white panel of rows, each a button that
-   lights up in the title-bar colour under the pointer or the keyboard focus. */
+/* The workshops under the calendar, as a plain bulleted list of the early web. */
 .workshop__list {
   margin: 0;
-  padding: 2px;
-  border: 1px solid;
-  border-color: var(--sunken-border);
-  background: var(--field);
-  color: var(--field-text);
-  box-shadow: var(--sunken-edge);
-  list-style: none;
+  padding: 0 0 0 1.25em;
 }
 
 .workshop__list li + li {
-  border-top: 1px dotted var(--shadow);
+  margin-top: 6px;
 }
 
-.workshop__pick {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: baseline;
-  gap: 2px 12px;
-  width: 100%;
+/* Each workshop's link: a button (it opens a window) dressed as a link of the time,
+   underlined and blue, purple once its sign-up window has opened (data-visited,
+   workshop.js), red while pressed, whatever the switcher's colours. The spots left
+   follow it in the window's own text. */
+.workshop__link {
+  display: inline;
   margin: 0;
-  padding: 8px 10px 9px;
+  padding: 0;
   border: 0;
   border-radius: 0;
   background: none;
-  color: inherit;
+  color: #0000ee;
   font: inherit;
   text-align: left;
+  text-decoration: underline;
   cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
 }
 
-.workshop__pick:hover,
-.workshop__pick:focus-visible {
-  background: var(--title);
-  color: var(--title-text);
+.workshop__link[data-visited] {
+  color: #551a8b;
 }
 
-/* The dotted focus rectangle, inside the lit row. */
-.workshop__pick:focus-visible {
-  outline: 1px dotted var(--title-text);
-  outline-offset: -3px;
+.workshop__link:active {
+  color: #ee0000;
 }
 
-/* The name, with the spots left at the right of it, and the date under both. */
-.workshop__pick-name {
-  color: var(--accent-ink);
-  font-family: var(--display-font);
-  font-size: calc(1.5rem * var(--display-name-size));
-  font-weight: var(--display-weight);
-  line-height: 1.1;
-}
-
-.workshop__pick-date {
-  grid-column: 1 / -1;
-  font-size: 1.0625rem;
-}
-
-/* Spots left, once they are in (small spaced capitals, as the labels); "Sold out" in
-   the error colour. */
-.workshop__pick-spots {
-  grid-row: 1;
-  grid-column: 2;
-  font-family: var(--display-font);
-  font-size: calc(0.75rem * var(--display-size));
-  font-weight: var(--display-weight);
-  line-height: 1.2;
-  letter-spacing: calc(0.22em * var(--display-tracking));
-  text-transform: uppercase;
-  white-space: nowrap;
-}
-
-.workshop__pick-spots:empty {
-  display: none;
-}
-
-.workshop__pick[data-state="soldout"] .workshop__pick-spots {
-  color: var(--error);
-}
-
-.workshop__pick:hover .workshop__pick-name,
-.workshop__pick:focus-visible .workshop__pick-name,
-.workshop__pick:hover .workshop__pick-spots,
-.workshop__pick:focus-visible .workshop__pick-spots {
-  color: inherit;
+.workshop__link:focus-visible {
+  outline: 1px dotted currentColor;
+  outline-offset: 1px;
 }
 
 .workshop__none {
-  padding: 8px 10px;
+  margin-left: -1.25em;
   color: var(--face-muted);
   font-style: italic;
+  list-style: none;
 }
 
 /* ---------- The sign-up window ---------- */
 
-/* "All workshops", back to the list: a small raised button with a pixel arrow. */
+/* "All workshops", back to the Workshops window: a small raised button with a pixel
+   arrow. */
 .workshop__back {
   display: inline-flex;
   align-items: center;
@@ -668,11 +618,17 @@
 
 /* High-contrast modes drop the backgrounds. */
 @media (forced-colors: active) {
-  .workshop__pick:hover,
-  .workshop__pick:focus-visible {
+  .workshop__link {
     forced-color-adjust: none;
-    background: Highlight;
-    color: HighlightText;
+    color: LinkText;
+  }
+
+  .workshop__link[data-visited] {
+    color: VisitedText;
+  }
+
+  .workshop__link:active {
+    color: ActiveText;
   }
 
   .workshop__spots::before {

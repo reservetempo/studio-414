@@ -1,11 +1,13 @@
 /*
-  The workshop calendar at Studio 414: the workshops (workshop.js) on a month grid, in
-  a 90s window like the Workshops window and the sign-up window.
+  The workshop calendar at Studio 414: the workshops (workshop.js) on a month grid, at
+  the top of the Workshops window, over the list of links to them.
 
-  - "See in calendar", under the list in the Workshops window (#workshops-calendar),
-    closes that window and opens this one (#calendar). It starts on the month of the
-    next workshop (this month, once none are left), and its arrow buttons step a month
-    back or on, from this month to the month of the last workshop.
+  - Each time the Workshops window opens, workshop.js runs draw (below, handed over
+    through window.studioWorkshops.setCalendar). It starts on the month of the next
+    workshop (this month, once none are left), and its arrow buttons step a month back
+    or on, from this month to the month of the last workshop. The focus goes to the
+    next workshop's day, unless the window opens onto a workshop's link (back from its
+    sign-up window).
   - The month is a table, Sunday first, always six weeks tall so the window keeps its
     size from month to month. Each workshop's day is marked: a raised button that opens
     its sign-up window, with the workshop's name in a tooltip under the pointer or the
@@ -14,33 +16,26 @@
     would only show in the list. Days gone by (in the studio's time zone, as
     workshop.js counts them) and workshops that are over are greyed out, and today is
     outlined.
-  - "All workshops" goes back to the list. The window closes, drags and moves as the
-    others do (workshop.js's makeWindow), opens fresh each time, and only one of the
-    three is open at a time.
   - It needs workshop.js, which hands it what it uses as window.studioWorkshops. Without
-    that, "See in calendar" stays hidden and nothing here runs.
+    that, the calendar (#workshops-calendar) stays hidden and nothing here runs; the
+    list still works.
 */
 (function () {
   'use strict';
 
   var api = window.studioWorkshops;
-  var opener = document.getElementById('workshops-calendar');
-  var win = document.getElementById('calendar');
-  if (!api || !opener || !win || typeof win.showModal !== 'function') return;
+  var calendar = document.getElementById('workshops-calendar');
+  if (!api || !calendar) return;
 
   var DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
   var MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July',
     'August', 'September', 'October', 'November', 'December'];
 
-  var closeButton = document.getElementById('calendar-close');
-  var backButton = document.getElementById('calendar-back');
   var prevButton = document.getElementById('calendar-prev');
   var nextButton = document.getElementById('calendar-next');
   var monthEl = document.getElementById('calendar-month');
   var weekdaysEl = document.getElementById('calendar-weekdays');
   var daysEl = document.getElementById('calendar-days');
-
-  var calendarWindow = api.makeWindow(win, closeButton, 'Move the workshop calendar');
 
   // Months are counted from year 0 (year * 12 + month, January being 0), so stepping
   // one is adding one.
@@ -156,7 +151,9 @@
     if (focused && focused.disabled) (focused === prevButton ? nextButton : prevButton).focus();
   }
 
-  function open() {
+  // Draws the month of the next workshop, as the Workshops window opens, and returns
+  // that workshop's day (for workshop.js to focus), or null.
+  function draw() {
     today = api.today();
     var next = api.upcoming()[0] || null;
     first = monthOf(today);
@@ -165,35 +162,25 @@
       return Math.max(latest, monthOf(w.date));
     }, shown);
     render();
-    api.closeList();
-    calendarWindow.open();
-    // The focus on the next workshop's day, or else on the way back.
     var mark = null;
     if (next) {
       daysEl.querySelectorAll('button').forEach(function (button) {
         if (button.dataset.id === next.id) mark = button;
       });
     }
-    (mark || backButton).focus();
+    return mark;
   }
 
   prevButton.addEventListener('click', function () { step(-1); });
   nextButton.addEventListener('click', function () { step(1); });
 
+  // A workshop's day: its sign-up window (which closes the Workshops window).
   daysEl.addEventListener('click', function (event) {
     var button = event.target.closest ? event.target.closest('button.calendar__day') : null;
     var w = button ? api.find(button.dataset.id, api.upcoming()) : null;
-    if (!w) return;
-    calendarWindow.close();
-    api.openSignup(w, '');
+    if (w) api.openSignup(w, '');
   });
 
-  backButton.addEventListener('click', function () {
-    calendarWindow.close();
-    api.openList(null, '');
-    opener.focus();
-  });
-
-  opener.addEventListener('click', open);
-  opener.hidden = false;
+  calendar.hidden = false;
+  api.setCalendar(draw);
 })();

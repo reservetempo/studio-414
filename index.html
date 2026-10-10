@@ -113,18 +113,22 @@
   </section>
 
   <!-- Workshops (workshop.js, workshop.css): "Workshops" in plain underlined text, fixed
-       at the top right, is a button that opens the Workshops window, which lists the
-       workshops coming up; each one opens its own sign-up window. Both are modal 90s
-       dialogs like the boxes. The button stays hidden until workshop.js runs, as it does
-       nothing without it, and again once no workshops are left. -->
+       at the top right, is a button that opens the Workshops window, a month calendar of
+       the workshops coming up with a link to each under it; each one opens its own
+       sign-up window. Both are modal 90s dialogs like the boxes. The button stays hidden
+       until workshop.js runs, as it does nothing without it, and again once no workshops
+       are left. -->
   <button class="workshop-button" id="workshop-button" type="button"
           aria-label="Workshops" aria-haspopup="dialog" aria-controls="workshops" hidden>
     <span class="workshop-button__label" id="workshop-button-label">Workshops</span>
   </button>
 
-  <!-- The Workshops window: workshop.js fills the list (#workshops-list), one button
-       per workshop coming up, with its name, date and, once they are in, its spots
-       left. -->
+  <!-- The Workshops window: the month calendar (calendar.js, calendar.css), starting on
+       the month of the next workshop, with each workshop's day marked; a marked day
+       opens its sign-up window. calendar.js shows it and draws the month
+       (#calendar-days) each time the window opens. Under it, workshop.js fills the list
+       (#workshops-list): one plain blue link per workshop coming up, its name and date
+       ("Paint a piece, Sat 7 Nov"), then, once they are in, its spots left. -->
   <dialog class="workshop workshop--list box" id="workshops" aria-labelledby="workshops-title">
     <div class="box__titlebar">
       <svg class="box__icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false" shape-rendering="crispEdges"><path fill="currentColor" d="M13 1h2v1h-2zM12 2h2v1h-2zM11 3h2v1h-2zM10 4h2v1h-2zM9 5h2v1H9zM7 6h4v1H7zM6 7h4v1H6zM4 9h4v1H4zM3 10h4v1H3zM2 11h4v1H2zM1 12h4v1H1zM1 13h3v1H1zM1 14h2v1H1zM10 13h5v2h-5z"/></svg>
@@ -134,14 +138,24 @@
       </button>
     </div>
     <div class="workshop__body" id="workshops-body">
-      <p class="workshop__intro" id="workshops-intro">Pick a workshop to sign up.</p>
+      <div class="calendar" id="workshops-calendar" hidden>
+        <div class="calendar__head">
+          <button class="calendar__step" id="calendar-prev" type="button" aria-label="Previous month">
+            <svg viewBox="0 0 4 7" aria-hidden="true" focusable="false" shape-rendering="crispEdges"><path fill="currentColor" d="M3 0h1v1H3zM2 1h1v1H2zM1 2h1v1H1zM0 3h1v1H0zM1 4h1v1H1zM2 5h1v1H2zM3 6h1v1H3z"/></svg>
+          </button>
+          <h3 class="calendar__month" id="calendar-month" aria-live="polite"></h3>
+          <button class="calendar__step" id="calendar-next" type="button" aria-label="Next month">
+            <svg viewBox="0 0 4 7" aria-hidden="true" focusable="false" shape-rendering="crispEdges"><path fill="currentColor" d="M0 0h1v1H0zM1 1h1v1H1zM2 2h1v1H2zM3 3h1v1H3zM2 4h1v1H2zM1 5h1v1H1zM0 6h1v1H0z"/></svg>
+          </button>
+        </div>
+
+        <table class="calendar__grid" aria-labelledby="calendar-month">
+          <thead><tr id="calendar-weekdays"></tr></thead>
+          <tbody id="calendar-days"></tbody>
+        </table>
+      </div>
+
       <ul class="workshop__list" id="workshops-list"></ul>
-      <!-- To the workshop calendar (calendar.js), which shows this button. -->
-      <button class="workshop__back calendar__open" id="workshops-calendar" type="button"
-              aria-haspopup="dialog" aria-controls="calendar" hidden>
-        <svg viewBox="0 0 9 9" aria-hidden="true" focusable="false" shape-rendering="crispEdges"><path fill="currentColor" d="M2 0h1v1H2zM6 0h1v1H6zM0 1h9v2H0zM0 3h1v6H0zM8 3h1v6H8zM1 8h7v1H1zM2 4h1v1H2zM4 4h1v1H4zM6 4h1v1H6zM2 6h1v1H2zM4 6h1v1H4z"/></svg>
-        See in calendar
-      </button>
     </div>
   </dialog>
 
@@ -226,44 +240,6 @@
       <p class="workshop__note" id="workshop-note">You pay on Stripe’s secure checkout page, and Stripe emails you a receipt.</p>
 
       <button class="workshop__pay workshop__ok" id="workshop-ok" type="button" hidden>OK</button>
-    </div>
-  </dialog>
-
-  <!-- The workshop calendar (calendar.js, calendar.css): "See in calendar" in the
-       Workshops window opens it. calendar.js draws the month (#calendar-days), starting
-       on the month of the next workshop, with each workshop's day marked; a marked day
-       opens its sign-up window, and "All workshops" goes back to the list. -->
-  <dialog class="workshop calendar box" id="calendar" aria-labelledby="calendar-title">
-    <div class="box__titlebar">
-      <svg class="box__icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false" shape-rendering="crispEdges"><path fill="currentColor" d="M4 0h2v2H4zM10 0h2v2h-2zM1 2h14v3H1zM1 5h1v10H1zM14 5h1v10h-1zM2 14h12v1H2zM4 7h2v2H4zM7 7h2v2H7zM10 7h2v2h-2zM4 10h2v2H4zM7 10h2v2H7zM10 10h2v2h-2z"/></svg>
-      <h2 class="box__title" id="calendar-title">Workshop calendar</h2>
-      <button class="workshop__close" id="calendar-close" type="button" aria-label="Close">
-        <svg viewBox="0 0 8 7" aria-hidden="true" focusable="false" shape-rendering="crispEdges"><path fill="currentColor" d="M0 0h2v1H0zM6 0h2v1H6zM1 1h2v1H1zM5 1h2v1H5zM2 2h4v1H2zM3 3h2v1H3zM2 4h4v1H2zM1 5h2v1H1zM5 5h2v1H5zM0 6h2v1H0zM6 6h2v1H6z"/></svg>
-      </button>
-    </div>
-    <div class="workshop__body">
-      <!-- Back to the Workshops window. -->
-      <button class="workshop__back" id="calendar-back" type="button">
-        <svg viewBox="0 0 4 7" aria-hidden="true" focusable="false" shape-rendering="crispEdges"><path fill="currentColor" d="M3 0h1v1H3zM2 1h1v1H2zM1 2h1v1H1zM0 3h1v1H0zM1 4h1v1H1zM2 5h1v1H2zM3 6h1v1H3z"/></svg>
-        All workshops
-      </button>
-
-      <p class="workshop__intro">Pick a marked day to sign up.</p>
-
-      <div class="calendar__head">
-        <button class="calendar__step" id="calendar-prev" type="button" aria-label="Previous month">
-          <svg viewBox="0 0 4 7" aria-hidden="true" focusable="false" shape-rendering="crispEdges"><path fill="currentColor" d="M3 0h1v1H3zM2 1h1v1H2zM1 2h1v1H1zM0 3h1v1H0zM1 4h1v1H1zM2 5h1v1H2zM3 6h1v1H3z"/></svg>
-        </button>
-        <h3 class="calendar__month" id="calendar-month" aria-live="polite"></h3>
-        <button class="calendar__step" id="calendar-next" type="button" aria-label="Next month">
-          <svg viewBox="0 0 4 7" aria-hidden="true" focusable="false" shape-rendering="crispEdges"><path fill="currentColor" d="M0 0h1v1H0zM1 1h1v1H1zM2 2h1v1H2zM3 3h1v1H3zM2 4h1v1H2zM1 5h1v1H1zM0 6h1v1H0z"/></svg>
-        </button>
-      </div>
-
-      <table class="calendar__grid" aria-labelledby="calendar-month">
-        <thead><tr id="calendar-weekdays"></tr></thead>
-        <tbody id="calendar-days"></tbody>
-      </table>
     </div>
   </dialog>
 

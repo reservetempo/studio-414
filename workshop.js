@@ -1,22 +1,25 @@
 /*
-  Workshops at Studio 414: a list of the workshops coming up, and a sign-up window for
-  each, paid with Stripe Checkout (Stripe charges it in CAD, which the windows leave
-  unsaid).
+  Workshops at Studio 414: a calendar and a list of the workshops coming up, and a
+  sign-up window for each, paid with Stripe Checkout (Stripe charges it in CAD, which
+  the windows leave unsaid).
 
   - The workshops (ids, names, dates and prices) are in WORKSHOPS below, so their names
     and dates show even when the sign-up server can't be reached. A workshop drops off
     once its day has ended in the studio's time zone (STUDIO_TIME_ZONE), as on the
     server. Once none are left, the button at the top right hides.
   - The plain underlined "Workshops" fixed at the top right of the screen (a button,
-    #workshop-button) opens the Workshops window (#workshops): one button per
-    workshop, soonest first, with its name, date and, once they are in, its spots
-    left ("7 spots left", "Sold out"). A sold-out workshop stays in the list, marked
-    so. Its "See in calendar" button opens the workshop calendar, a month grid of them
-    (calendar.js, which this file hands what it needs as window.studioWorkshops, at
-    the end).
-  - Clicking a workshop closes that window and opens its sign-up window (#workshop):
-    its name, date and price, a form, and an "All workshops" button back to the list.
-    The dialog is named after the workshop ("Paint a piece sign-up").
+    #workshop-button) opens the Workshops window (#workshops): the month calendar
+    (calendar.js, drawn each time the window opens, through the function it hands
+    setCalendar in window.studioWorkshops, at the end), and under it the list, one
+    link per workshop, soonest first: its name and date ("Paint a piece, Sat 7 Nov")
+    in the classic web's underlined blue, purple once opened, whatever the switcher's
+    colours, then in plain text, once they are in, its spots left ("7 spots left",
+    "Sold out"). A sold-out workshop stays in the list. The links are buttons dressed
+    as links, as they open a window rather than a page.
+  - A workshop's link, or its day on the calendar, closes that window and opens its
+    sign-up window (#workshop): its name, date and price, a form, and an "All
+    workshops" button back to the Workshops window, onto that workshop's link. The
+    dialog is named after the workshop ("Paint a piece sign-up").
   - Both windows are modal <dialog>s drawn as 90s windows like the boxes (boxes.css,
     workshop.css), one open at a time. Each closes with its close button, Escape or a
     click outside it. Its title bar drags it, and on the title bar the arrow keys move
@@ -102,7 +105,7 @@
   };
 
   // The message after Stripe, for a workshop, or for none when it isn't known which
-  // (then it shows over the list).
+  // (then it shows at the top of the Workshops window).
   var MESSAGES = {
     success: function (w) {
       return w ? {
@@ -131,7 +134,6 @@
 
   var launcherLabel = document.getElementById('workshop-button-label');
   var listBody = document.getElementById('workshops-body');
-  var listIntro = document.getElementById('workshops-intro');
   var listEl = document.getElementById('workshops-list');
   var listClose = document.getElementById('workshops-close');
   var titleEl = document.getElementById('workshop-title');
@@ -213,6 +215,12 @@
   function longDate(w) {
     var d = day(w);
     return DAYS[d.getUTCDay()] + ' ' + d.getUTCDate() + ' ' + MONTHS[d.getUTCMonth()] + ' ' + d.getUTCFullYear();
+  }
+
+  // "Sat 7 Nov"
+  function shortDate(w) {
+    var d = day(w);
+    return DAYS[d.getUTCDay()].slice(0, 3) + ' ' + d.getUTCDate() + ' ' + MONTHS[d.getUTCMonth()].slice(0, 3);
   }
 
   // "7 November"
@@ -538,7 +546,7 @@
     resultEl.hidden = !message;
     if (!message) return;
     if (win === dialog) nameEl.parentNode.insertBefore(resultEl, nameEl);
-    else listBody.insertBefore(resultEl, listIntro);
+    else listBody.insertBefore(resultEl, listBody.firstChild);
     resultIcon.innerHTML = '<path fill="currentColor" fill-rule="evenodd" d="' + ICONS[kind] + '"/>';
     resultTitle.textContent = message.title;
     resultText.textContent = message.text;
@@ -550,35 +558,33 @@
   // The list's rows, as built when the window last opened: { w, button, spots }. More
   // rows or options go in buildList and renderList.
   var rows = [];
+  // The workshops whose sign-up window has opened since the page loaded, by id: their
+  // links are "visited" (purple).
+  var visited = {};
+  // The calendar's drawing (calendar.js hands it over through setCalendar): it draws
+  // the month and returns the next workshop's day, for the focus, or null.
+  var drawCalendar = null;
 
-  function addText(parent, className, text) {
-    var span = document.createElement('span');
-    span.className = className;
-    if (text) span.textContent = text;
-    parent.appendChild(span);
-    // A space between the parts, so screen readers don't run them together.
-    parent.appendChild(document.createTextNode(' '));
-    return span;
-  }
-
-  // One button per workshop coming up: its name, date and spots left (once in).
+  // One link per workshop coming up, "Paint a piece, Sat 7 Nov" (a button, as it opens
+  // a window), then its spots left in plain text (once in).
   function buildList() {
     listEl.textContent = '';
     rows = upcoming().map(function (w) {
       var item = document.createElement('li');
       var button = document.createElement('button');
       button.type = 'button';
-      button.className = 'workshop__pick';
+      button.className = 'workshop__link';
       button.dataset.id = w.id;
+      if (visited[w.id]) button.dataset.visited = '';
       button.setAttribute('aria-haspopup', 'dialog');
-      addText(button, 'workshop__pick-name', w.name);
-      var when = addText(button, 'workshop__pick-date', '');
+      button.appendChild(document.createTextNode(w.name + ', '));
       var time = document.createElement('time');
       time.dateTime = w.date;
-      time.textContent = longDate(w);
-      when.appendChild(time);
-      var spots = addText(button, 'workshop__pick-spots', '');
+      time.textContent = shortDate(w);
+      button.appendChild(time);
+      var spots = document.createElement('span');
       item.appendChild(button);
+      item.appendChild(spots);
       listEl.appendChild(item);
       return { w: w, button: button, spots: spots };
     });
@@ -588,36 +594,37 @@
       none.textContent = 'No workshops coming up. Check back soon.';
       listEl.appendChild(none);
     }
-    listIntro.hidden = !rows.length;
     renderList();
   }
 
-  // The counts, once they are in.
+  // The counts, once they are in: " – 7 spots left".
   function renderList() {
     rows.forEach(function (row) {
       var spots = spotsById[row.w.id];
-      var text = spots ? countText(spots.remaining) : '';
+      var text = spots ? ' – ' + countText(spots.remaining) : '';
       if (row.spots.textContent !== text) row.spots.textContent = text;
-      if (availabilityOf(row.w) === 'soldout') row.button.dataset.state = 'soldout';
-      else delete row.button.dataset.state;
     });
   }
 
   // Opens the Workshops window, with the focus on the workshop given (coming back from
-  // its sign-up window), or on the first; kind is a message after Stripe, or ''.
+  // its sign-up window), or else on the next workshop's day, or the first link; kind is
+  // a message after Stripe, or ''.
   function openList(focusId, kind) {
     if (listDialog.open) return;
     signupWindow.close();
     buildList();
+    var mark = drawCalendar ? drawCalendar() : null;
     showResult(kind || '', listDialog, null);
     listWindow.open();
     loadSpots();
-    var row = rows.filter(function (r) { return r.w.id === focusId; })[0] || rows[0];
-    (row ? row.button : listClose).focus();
+    var row = rows.filter(function (r) { return r.w.id === focusId; })[0];
+    if (row) row.button.focus();
+    else if (mark) mark.focus();
+    else (rows[0] ? rows[0].button : listClose).focus();
   }
 
   listEl.addEventListener('click', function (event) {
-    var button = event.target.closest ? event.target.closest('.workshop__pick') : null;
+    var button = event.target.closest ? event.target.closest('.workshop__link') : null;
     var w = button ? find(button.dataset.id, upcoming()) : null;
     if (w) openSignup(w, '');
   });
@@ -814,6 +821,7 @@
   // message after Stripe, or ''.
   function openSignup(w, next) {
     listWindow.close();
+    visited[w.id] = true;
     if (current !== w) {
       setMessage('');
       clearInvalid();
@@ -860,7 +868,7 @@
     try {
       window.sessionStorage.setItem(RETURN_KEY, id);
     } catch (error) {
-      // Without storage, the message on the way back shows over the list.
+      // Without storage, the message on the way back shows in the Workshops window.
     }
   }
 
@@ -1051,16 +1059,19 @@
     else openList(null, returned);
   }
 
-  // For the workshop calendar (calendar.js): the workshops, past ones too, and the
-  // windows. It closes its own window, and the list's, before opening another.
+  // For the workshop calendar (calendar.js): the workshops, past ones too, the sign-up
+  // window (which closes the Workshops window), and setCalendar, which takes its
+  // drawing, run each time the Workshops window opens. If the window is open already
+  // (back from Stripe, before calendar.js ran), the month is drawn into it at once.
   window.studioWorkshops = {
     all: function () { return WORKSHOPS.slice(); },
     today: studioToday,
     upcoming: upcoming,
     find: find,
-    openList: openList,
-    closeList: listWindow.close,
     openSignup: openSignup,
-    makeWindow: makeWindow
+    setCalendar: function (draw) {
+      drawCalendar = draw;
+      if (listDialog.open) draw();
+    }
   };
 })();
