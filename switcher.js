@@ -2,7 +2,8 @@
   Style switcher for Studio 414.
 
   Lets friends try ten display faces (fonts.css) and ten colours (switcher.css)
-  independently, and quote what they like in a comment ("colour 1 and font 6").
+  independently, and say which they like in a comment by number ("colour 1 and
+  font 6").
   Option 0 of each is the default design (Terminal Grotesque, the Classic grey and
   navy); font 1 is EB Garamond, the original face.
 
@@ -160,11 +161,6 @@
     return OPTIONS[kind].label + ' ' + value + ', ' + OPTIONS[kind].names[value];
   }
 
-  // "Colour 1, font 6", the order people are likely to quote it in.
-  function combo() {
-    return 'Colour ' + state.color + ', font ' + state.font;
-  }
-
   // A window like the boxes: a title bar with a pixel icon (a display showing three
   // swatches and a line of text), then the rows. box--fixed tells boxes.js and
   // boxes.css that it is fixed to the screen rather than placed in the page.
@@ -275,29 +271,6 @@
   body.appendChild(layoutRow);
   body.appendChild(live);
 
-  /* ---------- "Insert the combination" in the comment box ---------- */
-
-  var bodyInput = document.getElementById('comments-body');
-  var insertButton = null;
-
-  if (bodyInput && bodyInput.parentNode) {
-    insertButton = element('button', 'switcher-insert');
-    insertButton.type = 'button';
-    insertButton.addEventListener('click', function () {
-      var text = combo() + ': ';
-      // Where the caret was last (the start of an untouched box), spaced from any
-      // word just before it.
-      var start = bodyInput.selectionStart || 0;
-      var end = bodyInput.selectionEnd || start;
-      if (start > 0 && /\S/.test(bodyInput.value.charAt(start - 1))) text = ' ' + text;
-      bodyInput.focus();
-      bodyInput.setRangeText(text, start, end, 'end');
-      // Lets comments.js clear any earlier error, as if typed.
-      bodyInput.dispatchEvent(new Event('input', { bubbles: true }));
-    });
-    bodyInput.parentNode.insertBefore(insertButton, bodyInput);
-  }
-
   /* ---------- Credit ---------- */
 
   var credit = element('footer', 'switcher-credit');
@@ -372,10 +345,6 @@
     controls.color.select.style.setProperty('--swatch', OPTIONS.color.swatches[state.color]);
     controls.font.select.title = describe('font', state.font);
     controls.color.select.title = describe('color', state.color);
-    if (insertButton) {
-      insertButton.textContent = 'Insert “' + combo() + '”';
-      insertButton.setAttribute('aria-label', 'Insert “' + combo() + '” into your comment');
-    }
   }
 
   function set(kind, value) {

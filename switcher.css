@@ -481,46 +481,6 @@ html[data-color="10"] {
   }
 }
 
-/* ---------- "Insert the combination" above the comment box ---------- */
-
-/* The label and the link share a line while they fit; then the link wraps under the
-   label, still on the right. */
-.comments__field:has(.switcher-insert) {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  column-gap: 12px;
-}
-
-.comments__field:has(.switcher-insert) > .comments__textarea {
-  flex-basis: 100%;
-}
-
-.switcher-insert {
-  margin: 0 0 4px auto;
-  padding: 2px 1px;
-  border: 0;
-  background: none;
-  color: var(--face-muted);
-  font: inherit;
-  font-size: 0.9375rem;
-  font-style: italic;
-  text-align: right;
-  text-decoration: underline;
-  text-decoration-thickness: 1px;
-  text-underline-offset: 0.2em;
-  cursor: pointer;
-}
-
-.switcher-insert:hover {
-  color: var(--face-text);
-}
-
-.switcher-insert:focus-visible {
-  outline: 2px solid var(--focus);
-  outline-offset: 1px;
-}
-
 /* ---------- Credit ---------- */
 
 /* Quiet, at the very end of the page (straight on the page colour, outside the
