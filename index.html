@@ -33,9 +33,21 @@
   <link rel="stylesheet" href="switcher.css">
   <link rel="stylesheet" href="workshop.css">
   <link rel="stylesheet" href="calendar.css">
+  <link rel="stylesheet" href="opening-soon.css">
 </head>
 <body>
   <main class="hero">
+    <!-- "Opening soon": a flashing 90s marquee sign in the top-left corner, the
+         counterpart of the Workshops button, with three pixel butterflies round it
+         (opening-soon.css). Screen readers hear the words once; the butterflies are
+         decoration. It lies under the 414 and the windows, so it never covers them. -->
+    <p class="opening-soon">
+      <span class="opening-soon__board"><span class="opening-soon__text">Opening soon</span></span>
+      <span class="opening-soon__fly opening-soon__fly--perched" aria-hidden="true"><svg viewBox="0 0 11 8" focusable="false" shape-rendering="crispEdges"><path class="opening-soon__wing" d="M2 2h1v1H2zM8 2h1v1H8zM1 3h3v1H1zM7 3h3v1H7zM2 4h3v2H2zM6 4h3v2H6zM3 6h1v1H3zM7 6h1v1H7z"/><path class="opening-soon__spot" d="M1 2h1v1H1zM9 2h1v1H9zM2 6h1v1H2zM8 6h1v1H8z"/><path class="opening-soon__line" d="M4 0h1v1H4zM6 0h1v1H6zM0 1h3v1H0zM8 1h3v1H8zM5 1h1v7H5zM0 2h1v2H0zM10 2h1v2h-1zM3 2h1v1H3zM7 2h1v1H7zM4 3h1v1H4zM6 3h1v1H6zM1 4h1v3H1zM9 4h1v3H9zM4 6h1v1H4zM6 6h1v1H6zM2 7h2v1H2zM7 7h2v1H7z"/></svg></span>
+      <span class="opening-soon__fly opening-soon__fly--left" aria-hidden="true"><svg viewBox="0 0 11 8" focusable="false" shape-rendering="crispEdges"><path class="opening-soon__wing" d="M2 2h1v1H2zM8 2h1v1H8zM1 3h3v1H1zM7 3h3v1H7zM2 4h3v2H2zM6 4h3v2H6zM3 6h1v1H3zM7 6h1v1H7z"/><path class="opening-soon__spot" d="M1 2h1v1H1zM9 2h1v1H9zM2 6h1v1H2zM8 6h1v1H8z"/><path class="opening-soon__line" d="M4 0h1v1H4zM6 0h1v1H6zM0 1h3v1H0zM8 1h3v1H8zM5 1h1v7H5zM0 2h1v2H0zM10 2h1v2h-1zM3 2h1v1H3zM7 2h1v1H7zM4 3h1v1H4zM6 3h1v1H6zM1 4h1v3H1zM9 4h1v3H9zM4 6h1v1H4zM6 6h1v1H6zM2 7h2v1H2zM7 7h2v1H7z"/></svg></span>
+      <span class="opening-soon__fly opening-soon__fly--right" aria-hidden="true"><svg viewBox="0 0 11 8" focusable="false" shape-rendering="crispEdges"><path class="opening-soon__wing" d="M2 2h1v1H2zM8 2h1v1H8zM1 3h3v1H1zM7 3h3v1H7zM2 4h3v2H2zM6 4h3v2H6zM3 6h1v1H3zM7 6h1v1H7z"/><path class="opening-soon__spot" d="M1 2h1v1H1zM9 2h1v1H9zM2 6h1v1H2zM8 6h1v1H8z"/><path class="opening-soon__line" d="M4 0h1v1H4zM6 0h1v1H6zM0 1h3v1H0zM8 1h3v1H8zM5 1h1v7H5zM0 2h1v2H0zM10 2h1v2h-1zM3 2h1v1H3zM7 2h1v1H7zM4 3h1v1H4zM6 3h1v1H6zM1 4h1v3H1zM9 4h1v3H9zM4 6h1v1H4zM6 6h1v1H6zM2 7h2v1H2zM7 7h2v1H7z"/></svg></span>
+    </p>
+
     <!-- The studio's name: a giant 414 above the photo, in the page colour (styles.css).
          The heading reads "Studio 414" to screen readers. The box round it is what
          moves: boxes.js lets visitors drag it, and adds a "Move 414" button for the

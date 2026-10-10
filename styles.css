@@ -231,10 +231,11 @@ body {
   --band: max(0px, var(--photo-y));
   --room-w: min(100cqw - 32px, var(--photo-w) * 0.8);
   --room-top: 16px;
-  /* The workshop button's corner: how far in from the right edge and down from the
-     top it reaches, with room to spare (workshop.css). Without it, no corner. */
-  --corner-w: var(--workshop-reach, 0px);
-  --corner-h: var(--workshop-drop, var(--room-top));
+  /* The corners of the workshop button (top right, workshop.css) and the "Opening
+     soon" sign (top left, opening-soon.css): how far in from the side and down from
+     the top the larger of them reaches, with room to spare. Without them, no corner. */
+  --corner-w: max(var(--workshop-reach, 0px), var(--opening-reach, 0px));
+  --corner-h: max(var(--workshop-drop, var(--room-top)), var(--opening-drop, var(--room-top)));
   /* The two ways to fit, as font sizes. High: from 16px down, between the corner and
      the same width on the left (but never under a quarter of the room, so it can't
      vanish in the smallest windows). Low: below the button, the full room wide,

@@ -1,0 +1,323 @@
+/* "Opening soon": a 90s marquee sign in the top-left corner, the counterpart of the
+   Workshops button at the top right (workshop.css). A raised frame in the face colour
+   round a black band of bulbs that chase round it, and the words on a panel in the
+   colour's title-bar colour that flashes to the reverse (title text and title bar
+   swapped, so the words keep the same contrast); three pixel butterflies flutter round
+   it, in the face and title-bar colours with black edges, so it all follows the style
+   switcher like everything else. With reduced motion nothing moves or flashes.
+
+   It stands in the hero (index.html), under the big 414 and the windows (it comes
+   before the 414 in the page, on the same layer, and the boxes are above that layer),
+   so it never covers them, wherever they are dragged; it scrolls away with the photo
+   rather than staying over the page. The 414 keeps out of its corner (styles.css), as
+   it does the workshop button's.
+
+   Nothing flashes more than once a second (the panel about once every 1.2s, each bulb
+   once a second): far below the three flashes a second that can be harmful, and the
+   whole sign is a small part of the screen. */
+
+/* The corner the sign takes, with room to spare: its gutter, the sign (166px at most,
+   in the widest face, with its black edge) and the butterfly off its right end (25px
+   more, as it bobs), and down to the foot of the sign (40px); the big 414 keeps 8px
+   clear of that. On phones the words go on two lines and it takes less. Both stay
+   inside the workshop button's corner (workshop.css), so the 414 is no smaller. */
+:root {
+  --opening-reach: calc(max(16px, env(safe-area-inset-left)) + 200px);
+  --opening-drop: calc(max(16px, env(safe-area-inset-top)) + 48px);
+}
+
+@media (max-width: 480px) {
+  :root {
+    --opening-reach: calc(max(8px, env(safe-area-inset-left)) + 136px);
+    --opening-drop: calc(max(12px, env(safe-area-inset-top)) + 52px);
+  }
+}
+
+/* ---------- The sign ---------- */
+
+.opening-soon {
+  position: absolute;
+  top: max(16px, env(safe-area-inset-top));
+  left: max(16px, env(safe-area-inset-left));
+  /* The 414's layer, before it in the page: over the photo's shading, under the 414
+     and the boxes (1 and up). */
+  z-index: 0;
+  margin: 0;
+  /* Only something to look at: clicks and drags go to whatever is under it. */
+  pointer-events: none;
+}
+
+/* The frame: a raised 90s bevel in the face colour with a black line outside it, as
+   on the buttons, round a black band (inside the 3px frame) for the bulbs. */
+.opening-soon__board {
+  position: relative;
+  display: block;
+  padding: 9px;
+  background:
+    linear-gradient(var(--dk-shadow), var(--dk-shadow)) 3px 3px / calc(100% - 6px) calc(100% - 6px) no-repeat,
+    var(--face);
+  box-shadow: 0 0 0 1px var(--dk-shadow), var(--bevel-raised);
+}
+
+/* The bulbs: a row of 3px pixel bulbs along the top of the band and another along the
+   bottom, every 6px, as wide as fits a whole number of them. One in three is lit,
+   and the lit ones step along (the top row to the right, the bottom row back to the
+   left), so the lights run round the sign. */
+.opening-soon__board::before,
+.opening-soon__board::after {
+  content: "";
+  position: absolute;
+  top: 4px;
+  left: 6px;
+  right: 6px;
+  width: calc(round(down, 100% - 9px, 6px) - 3px);
+  height: 3px;
+  margin-inline: auto;
+  background:
+    linear-gradient(90deg, #ffe600 3px, transparent 3px) 0 0 / 18px 3px repeat-x,
+    linear-gradient(90deg, #5e5500 3px, transparent 3px) 0 0 / 6px 3px repeat-x;
+  animation: opening-soon-chase 1s steps(3) infinite;
+}
+
+.opening-soon__board::after {
+  top: auto;
+  bottom: 4px;
+  animation-direction: reverse;
+}
+
+/* The words, in the display face like the workshop button, on the title-bar colour;
+   the padding on the right is less the trailing tracking, so they sit centred. */
+.opening-soon__text {
+  display: block;
+  padding: 3px calc(7px - 0.16em * var(--display-tracking)) 2px 7px;
+  background: var(--title);
+  color: var(--title-text);
+  font-family: var(--display-font);
+  font-size: calc(0.8125rem * var(--display-size));
+  font-weight: var(--display-weight);
+  line-height: 1;
+  letter-spacing: calc(0.16em * var(--display-tracking));
+  text-align: center;
+  text-transform: uppercase;
+  white-space: nowrap;
+  animation: opening-soon-flash 1.2s step-end infinite;
+}
+
+/* ---------- The butterflies ----------
+   11 x 8 pixel drawings at exactly twice their size, so every pixel stays crisp:
+   wings in the face colour with spots in the title-bar colour (the one on the sign the
+   other way round), and a black edge, body and feelers, which keep them clear of the
+   page, the photo and the sign alike. Each span carries one round its flight path;
+   the drawing inside beats its wings. */
+.opening-soon__fly {
+  --wing: var(--face);
+  --spot: var(--title);
+
+  position: absolute;
+  width: 22px;
+  height: 16px;
+}
+
+.opening-soon__fly svg {
+  display: block;
+  width: 22px;
+  height: 16px;
+  animation: opening-soon-flap 0.3s ease-in-out infinite alternate;
+}
+
+.opening-soon__wing {
+  fill: var(--wing);
+}
+
+.opening-soon__spot {
+  fill: var(--spot);
+}
+
+.opening-soon__line {
+  fill: var(--dk-shadow);
+}
+
+/* Resting on the top edge of the sign, near its right end, opening and closing its
+   wings now and then. */
+.opening-soon__fly--perched {
+  --wing: var(--title);
+  --spot: var(--face);
+
+  top: -13px;
+  right: 22px;
+  transform: rotate(8deg);
+}
+
+.opening-soon__fly--perched svg {
+  animation: opening-soon-rest 3.6s ease-in-out infinite;
+}
+
+/* Round the left end of the sign, up over it and back. */
+.opening-soon__fly--left {
+  top: 21px;
+  left: -8px;
+  animation: opening-soon-flit-left 7s ease-in-out infinite;
+}
+
+/* Off the right end, bobbing in a small figure of eight. */
+.opening-soon__fly--right {
+  top: 9px;
+  right: -21px;
+  animation: opening-soon-flit-right 4.6s ease-in-out infinite;
+}
+
+.opening-soon__fly--right svg {
+  animation-duration: 0.26s;
+}
+
+@keyframes opening-soon-chase {
+  to {
+    background-position: 18px 0, 0 0;
+  }
+}
+
+@keyframes opening-soon-flash {
+  60% {
+    background-color: var(--title-text);
+    color: var(--title);
+  }
+}
+
+@keyframes opening-soon-flap {
+  to {
+    transform: scaleX(0.3);
+  }
+}
+
+@keyframes opening-soon-rest {
+  0%,
+  55%,
+  75%,
+  100% {
+    transform: scaleX(1);
+  }
+
+  62%,
+  68%,
+  82% {
+    transform: scaleX(0.25);
+  }
+}
+
+@keyframes opening-soon-flit-left {
+  0%,
+  100% {
+    transform: translate(0, 0) rotate(-12deg);
+  }
+
+  20% {
+    transform: translate(-4px, -14px) rotate(-4deg);
+  }
+
+  40% {
+    transform: translate(12px, -30px) rotate(10deg);
+  }
+
+  60% {
+    transform: translate(34px, -27px) rotate(18deg);
+  }
+
+  80% {
+    transform: translate(18px, -6px) rotate(4deg);
+  }
+}
+
+@keyframes opening-soon-flit-right {
+  0%,
+  100% {
+    transform: translate(0, 0) rotate(10deg);
+  }
+
+  25% {
+    transform: translate(-3px, -8px) rotate(-6deg);
+  }
+
+  50% {
+    transform: translate(1px, -14px) rotate(4deg);
+  }
+
+  75% {
+    transform: translate(3px, -6px) rotate(16deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .opening-soon__board::before,
+  .opening-soon__board::after,
+  .opening-soon__text,
+  .opening-soon__fly,
+  .opening-soon__fly svg {
+    animation: none;
+  }
+}
+
+/* Phones: the same gutters as the workshop button, and the words on two lines, so the
+   sign stays well clear of the button across the top. */
+@media (max-width: 480px) {
+  .opening-soon {
+    top: max(12px, env(safe-area-inset-top));
+    left: max(8px, env(safe-area-inset-left));
+  }
+
+  /* The butterflies a little further in, so they keep on the screen in the smaller
+     gutters. */
+  .opening-soon__fly--perched {
+    top: -10px;
+  }
+
+  .opening-soon__fly--left {
+    left: -2px;
+  }
+
+  .opening-soon__board {
+    padding: 8px;
+  }
+
+  .opening-soon__board::before {
+    top: 3px;
+  }
+
+  .opening-soon__board::after {
+    bottom: 3px;
+  }
+
+  /* Lines a set 12px apart, so the sign is the same height in every face (the
+     capitals, scaled alike by --display-size, fit in them). */
+  .opening-soon__text {
+    width: min-content;
+    padding: 1px calc(6px - 0.16em * var(--display-tracking)) 1px 6px;
+    font-size: calc(0.75rem * var(--display-size));
+    line-height: 0.75rem;
+    white-space: normal;
+  }
+}
+
+/* The narrowest phones: no butterfly off the right end, and the words a little
+   tighter, so the sign keeps clear of the workshop button's starburst. */
+@media (max-width: 359px) {
+  .opening-soon__fly--right {
+    display: none;
+  }
+
+  .opening-soon__text {
+    padding-right: calc(6px - 0.08em * var(--display-tracking));
+    letter-spacing: calc(0.08em * var(--display-tracking));
+  }
+}
+
+/* Windows high contrast: the system colours, a plain frame, no bulbs. */
+@media (forced-colors: active) {
+  .opening-soon__board {
+    border: 1px solid CanvasText;
+  }
+
+  .opening-soon__board::before,
+  .opening-soon__board::after {
+    display: none;
+  }
+}
