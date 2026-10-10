@@ -517,3 +517,28 @@ html.is-moving-414 * {
 .signup__message[data-state="error"] {
   color: var(--error);
 }
+
+/* A small "Email us" link in the bottom-left corner, level with the resize grip on the
+   right. Taken out of the flow so it never moves the centred field and button: it sits
+   in the body's bottom padding, and its left edge (left: auto, its static position) is
+   the body's content edge, under the label. */
+.signup__email {
+  position: absolute;
+  bottom: 3px;
+  font-size: 0.75rem;
+  line-height: 1.2;
+  color: var(--face-muted);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.15em;
+}
+
+.signup__email:hover {
+  color: var(--accent-ink);
+}
+
+/* The dotted focus rectangle, as on the button. */
+.signup__email:focus-visible {
+  outline: 1px dotted var(--focus);
+  outline-offset: 1px;
+}
