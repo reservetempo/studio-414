@@ -14,12 +14,17 @@
   /* How much of the big 414 and of the card lies over the photo, at its top and
      bottom edge: 1/phi^3 of their height, about a quarter. */
   --dip: 0.236;
+}
 
-  /* The boxes (the mailing-list card and the comments box) are 90s dialog windows:
-     solid fills, a title bar and 2px bevels. These are colour 0, "Classic": a warm
-     Windows-grey face and a navy title bar. switcher.css swaps them per colour.
-     Contrast: text 4.5:1 or more on the face and on the white fields, and --shadow
-     3:1 or more against the face, so every bevelled edge reads as a border. */
+/* The boxes (the mailing-list card and the comments box) are 90s dialog windows:
+   solid fills, a title bar and 2px bevels. These are colour 0, "Classic": a warm
+   Windows-grey face and a navy title bar. switcher.css swaps them per colour.
+   Contrast: text 4.5:1 or more on the face and on the white fields, and --shadow
+   3:1 or more against the face, so every bevelled edge reads as a border.
+   They are declared for [data-color="0"] as well as :root, so a window carrying
+   data-color="0" is Classic even when <html> has another colour (switcher.css). */
+:root,
+[data-color="0"] {
   --face: #d4d0c8;          /* window fill, and the buttons on it */
   --face-text: #000000;
   --face-muted: #4a4742;    /* times, notes and messages */
@@ -35,42 +40,64 @@
   --accent-ink: #0a246a;    /* comment names and links */
   --error: #9c0000;
   --focus: #000000;
-  --button: var(--face);
-  --button-text: var(--face-text);
+}
 
+:root {
   /* The page itself is the colour's main colour, the one on its title bars and its
      swatch (navy for Classic): the page background, the bands above and below the
      photo and the fades into them, and the big 414. It follows --title, which
      switcher.css sets per colour, so nothing else needs changing per colour.
      Text straight on the page (the credit line) uses the title-bar text colour, which
      every colour keeps at 4.5:1 or more on --title; the muted version (85% of it) is
-     4.8:1 or more on all of them. */
+     4.8:1 or more on all of them.
+     These are worked out on :root alone, so they follow <html data-color> and
+     nothing else: a window's own colour leaves the page, the big 414 and the text
+     straight on the page as they are. */
   --page-bg: var(--title);
   --page-text: var(--title-text);
   --page-text-muted: color-mix(in srgb, var(--page-text) 85%, var(--page-bg));
+}
 
-  /* The bevels. Raised and pressed (buttons) are stacks of inset 1px lines, outer
-     pair first. Sunken (fields, the comment list) is a 1px border for the inner pair
-     and a 1px outside shadow for the outer one, so scrolled text never runs over it. */
+/* The button fill and the bevels. Raised and pressed (buttons) are stacks of inset
+   1px lines, outer pair first. Sunken (fields, the comment list) is a 1px border for
+   the inner pair and a 1px outside shadow for the outer one, so scrolled text never
+   runs over it.
+   They are built from the palette, and a custom property built from others is worked
+   out where it is declared and inherited as the finished value. So they are declared
+   again on every element carrying data-color (a window with its own colour): declared
+   on :root alone, a window's own --face, --hilight or --shadow would never reach its
+   buttons, fields and bevels. */
+:root,
+[data-color] {
+  --button: var(--face);
+  --button-text: var(--face-text);
   --bevel-raised: inset -1px -1px var(--dk-shadow), inset 1px 1px var(--hilight),
     inset -2px -2px var(--shadow), inset 2px 2px var(--light);
   --bevel-pressed: inset -1px -1px var(--hilight), inset 1px 1px var(--dk-shadow),
     inset -2px -2px var(--light), inset 2px 2px var(--shadow);
   --sunken-border: var(--dk-shadow) var(--light) var(--light) var(--dk-shadow);
   --sunken-edge: -1px -1px var(--shadow), 1px 1px var(--hilight);
+}
 
+:root,
+[data-font="1"] {
   /* The body face sets running text and the fields; the display face sets the spaced
      capitals (labels, buttons), the title bars and names. --display-size and
      --display-tracking scale the capitals, and --display-name-size the upper- and
      lower-case display text (title bars, names), for faces drawn larger, smaller,
      wider or narrower than EB Garamond.
-     The style switcher (fonts.css, switcher.css) only changes these tokens. */
+     The style switcher (fonts.css, switcher.css) only changes these tokens.
+     These are font 1, EB Garamond, so they are declared for [data-font="1"] as well
+     as :root: a window carrying data-font="1" is set in it even when <html> has
+     another face (fonts.css). --display-italic is the "Commenting as" line; the
+     other faces have no italic and set it to normal. */
   --body-font: "EB Garamond", Garamond, "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
   --display-font: var(--body-font);
   --display-weight: 500;
   --display-size: 1;
   --display-tracking: 1;
   --display-name-size: 1;
+  --display-italic: italic;
 
   /* The big 414 (below), measured per face so it can be fitted to the room it has:
      --big-weight  the weight it is set in (EB Garamond has an 800; the display faces

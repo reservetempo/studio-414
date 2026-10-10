@@ -2,10 +2,22 @@
    (https://velvetyne.fr) under the SIL Open Font License 1.1; each folder in fonts/
    holds the face and its licence. The numbered rules below give the list and credits.
 
-   <html data-font="0"> (or no attribute) is Terminal Grotesque, the default;
+   data-font="0" (or no attribute) is Terminal Grotesque, the default;
    data-font="1" is EB Garamond, the original face, whose tokens are the ones in
-   styles.css; data-font="2" to data-font="20" pick the others. Each option only sets
-   the display tokens from styles.css:
+   styles.css (declared there for :root and [data-font="1"]); data-font="2" to
+   data-font="20" pick the others. On <html> it sets the page and every window. On a
+   window (#signup, #comments-box, the Workshops dialogs #workshops and #workshop,
+   #switcher and .switcher-toggle) it sets that window alone, over the page's face: a
+   window inherits these tokens from <html> unless it carries its own data-font. The
+   big 414, "Opening soon!" and the Workshops link sit on the page, so they follow
+   <html> alone.
+   Unlike the bevels (see switcher.css), nothing here needs declaring again on a
+   window: the tokens the windows use are plain values, and the one built from
+   another, --big-weight, is worked out on the element carrying data-font anyway and
+   is only used by the 414.
+   These rules have the same specificity as styles.css's :root and win by coming
+   after it (fonts.css loads later); html:not([data-font]) is the default.
+   Each option only sets the display tokens from styles.css:
      --display-font      the family, with fallbacks
      --display-weight    the weight of the one face loaded
      --display-size      scales the spaced capitals (labels, buttons), so they
@@ -181,33 +193,33 @@
 
 /* Every face but EB Garamond (1). */
 html:not([data-font]),
-html[data-font="0"],
-html[data-font="2"],
-html[data-font="3"],
-html[data-font="4"],
-html[data-font="5"],
-html[data-font="6"],
-html[data-font="7"],
-html[data-font="8"],
-html[data-font="9"],
-html[data-font="10"],
-html[data-font="11"],
-html[data-font="12"],
-html[data-font="13"],
-html[data-font="14"],
-html[data-font="15"],
-html[data-font="16"],
-html[data-font="17"],
-html[data-font="18"],
-html[data-font="19"],
-html[data-font="20"] {
+[data-font="0"],
+[data-font="2"],
+[data-font="3"],
+[data-font="4"],
+[data-font="5"],
+[data-font="6"],
+[data-font="7"],
+[data-font="8"],
+[data-font="9"],
+[data-font="10"],
+[data-font="11"],
+[data-font="12"],
+[data-font="13"],
+[data-font="14"],
+[data-font="15"],
+[data-font="16"],
+[data-font="17"],
+[data-font="18"],
+[data-font="19"],
+[data-font="20"] {
   --display-italic: normal;
   --big-weight: var(--display-weight);
 }
 
 /* 0. Terminal Grotesque, Raphaël Bastide, Jérémy Landes (the default) */
 html:not([data-font]),
-html[data-font="0"] {
+[data-font="0"] {
   --display-font: "Terminal Grotesque", "Helvetica Neue", Arial, sans-serif;
   --display-weight: 400;
   --display-size: 1.08;
@@ -218,10 +230,11 @@ html[data-font="0"] {
   --big-base: 0.803;
 }
 
-/* 1. EB Garamond (the original face): the tokens in styles.css, so no rule here. */
+/* 1. EB Garamond (the original face): the tokens in styles.css, declared there for
+   :root and [data-font="1"], so no rule here. */
 
 /* 2. Basteleur (Moonlight), Keussel */
-html[data-font="2"] {
+[data-font="2"] {
   --display-font: "Basteleur", "EB Garamond", Georgia, serif;
   --display-weight: 400;
   --display-size: 0.92;
@@ -233,7 +246,7 @@ html[data-font="2"] {
 }
 
 /* 3. Lineal (Medium), Frank Adebiaye, Anton Moglia, Ariel Martín Pérez */
-html[data-font="3"] {
+[data-font="3"] {
   --display-font: "Lineal", "Futura", "Century Gothic", sans-serif;
   --display-weight: 500;
   --display-size: 0.96;
@@ -245,7 +258,7 @@ html[data-font="3"] {
 }
 
 /* 4. Le Murmure, Jérémy Landes */
-html[data-font="4"] {
+[data-font="4"] {
   --display-font: "Le Murmure", "Arial Narrow", sans-serif;
   --display-weight: 400;
   --display-size: 1.24;
@@ -257,7 +270,7 @@ html[data-font="4"] {
 }
 
 /* 5. Sligoil (Micro Medium), Ariel Martín Pérez, Đông Trúc Nguyễn */
-html[data-font="5"] {
+[data-font="5"] {
   --display-font: "Sligoil", ui-monospace, "Cascadia Mono", Consolas, monospace;
   --display-weight: 500;
   --display-size: 0.94;
@@ -269,7 +282,7 @@ html[data-font="5"] {
 }
 
 /* 6. Ouroboros, Ariel Martín Pérez, H·Alix Sanyas */
-html[data-font="6"] {
+[data-font="6"] {
   --display-font: "Ouroboros", "EB Garamond", Georgia, serif;
   --display-weight: 400;
   --display-size: 0.94;
@@ -281,7 +294,7 @@ html[data-font="6"] {
 }
 
 /* 7. Façade (Ouest), Éléonore Fines */
-html[data-font="7"] {
+[data-font="7"] {
   --display-font: "Facade", "Arial Narrow", sans-serif;
   --display-weight: 400;
   --display-size: 0.98;
@@ -293,7 +306,7 @@ html[data-font="7"] {
 }
 
 /* 8. Karrik, Jean-Baptiste Morizot, Lucas Le Bihan */
-html[data-font="8"] {
+[data-font="8"] {
   --display-font: "Karrik", "Helvetica Neue", Arial, sans-serif;
   --display-weight: 400;
   --display-size: 1;
@@ -305,7 +318,7 @@ html[data-font="8"] {
 }
 
 /* 9. Trickster, Jean-Baptiste Morizot */
-html[data-font="9"] {
+[data-font="9"] {
   --display-font: "Trickster", "EB Garamond", Georgia, serif;
   --display-weight: 400;
   --display-size: 0.92;
@@ -317,7 +330,7 @@ html[data-font="9"] {
 }
 
 /* 10. Compagnon (Medium), Juliette Duhé, Léa Pradine, Valentin Papon, Chloé Lozano, Sébastien Riollier */
-html[data-font="10"] {
+[data-font="10"] {
   --display-font: "Compagnon", "Courier New", monospace;
   --display-weight: 500;
   --display-size: 1.1;
@@ -329,7 +342,7 @@ html[data-font="10"] {
 }
 
 /* 11. Anthony, Sun Young Oh */
-html[data-font="11"] {
+[data-font="11"] {
   --display-font: "Anthony", "Futura", "Century Gothic", sans-serif;
   --display-weight: 400;
   --display-size: 1;
@@ -341,7 +354,7 @@ html[data-font="11"] {
 }
 
 /* 12. Victorianna (Thin), Sébastien Hayez, Jérémy Landes */
-html[data-font="12"] {
+[data-font="12"] {
   --display-font: "Victorianna", "EB Garamond", Georgia, serif;
   --display-weight: 200;
   --display-size: 0.9;
@@ -353,7 +366,7 @@ html[data-font="12"] {
 }
 
 /* 13. Gulax, Morgan Gilbert */
-html[data-font="13"] {
+[data-font="13"] {
   --display-font: "Gulax", "Helvetica Neue", Arial, sans-serif;
   --display-weight: 400;
   --display-size: 1.1;
@@ -365,7 +378,7 @@ html[data-font="13"] {
 }
 
 /* 14. BackOut (Medium), Frank Adebiaye, Ariel Martín Pérez */
-html[data-font="14"] {
+[data-font="14"] {
   --display-font: "BackOut", "Arial Narrow", sans-serif;
   --display-weight: 500;
   --display-size: 0.85;
@@ -377,7 +390,7 @@ html[data-font="14"] {
 }
 
 /* 15. Bluu Next (Bold), Jean-Baptiste Morizot */
-html[data-font="15"] {
+[data-font="15"] {
   --display-font: "Bluu Next", "EB Garamond", Georgia, serif;
   --display-weight: 700;
   --display-size: 1;
@@ -389,7 +402,7 @@ html[data-font="15"] {
 }
 
 /* 16. Daubenton, Olivier Dolbeau (capitals only) */
-html[data-font="16"] {
+[data-font="16"] {
   --display-font: "Daubenton", "EB Garamond", Georgia, serif;
   --display-weight: 400;
   --display-size: 0.96;
@@ -401,7 +414,7 @@ html[data-font="16"] {
 }
 
 /* 17. Grotesk (Regular), Frank Adebiaye, Jérémy Landes, Ariel Martín Pérez */
-html[data-font="17"] {
+[data-font="17"] {
   --display-font: "Grotesk", "Futura", "Century Gothic", sans-serif;
   --display-weight: 400;
   --display-size: 1.04;
@@ -413,7 +426,7 @@ html[data-font="17"] {
 }
 
 /* 18. Kaeru Kaeru, Isabel Motz */
-html[data-font="18"] {
+[data-font="18"] {
   --display-font: "Kaeru Kaeru", "Helvetica Neue", Arial, sans-serif;
   --display-weight: 400;
   --display-size: 0.92;
@@ -425,7 +438,7 @@ html[data-font="18"] {
 }
 
 /* 19. Format 1452 (Medium), Frank Adebiaye */
-html[data-font="19"] {
+[data-font="19"] {
   --display-font: "Format 1452", "DIN Alternate", "Arial Narrow", sans-serif;
   --display-weight: 500;
   --display-size: 1;
@@ -437,7 +450,7 @@ html[data-font="19"] {
 }
 
 /* 20. Flor de Ruina (Flor), Felipe Sanzana */
-html[data-font="20"] {
+[data-font="20"] {
   --display-font: "Flor de Ruina", "EB Garamond", Georgia, serif;
   --display-weight: 500;
   --display-size: 0.85;

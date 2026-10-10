@@ -1,10 +1,24 @@
 /* Style switcher: the twenty colours, and the window that picks them and the fonts
    (switcher.js; the fonts are in fonts.css).
 
-   <html data-color="1"> to data-color="20" picks a colour; 0 (or no attribute) keeps
-   "Classic", the palette in styles.css. Each colour is a 90s window scheme for the
-   three windows: a tinted face (with its own bevel highlight, light and shadow), a
-   title bar and its text, and an ink for comment names and links. The title-bar colour
+   data-color="1" to data-color="20" picks a colour; 0 (or no attribute) keeps
+   "Classic", the palette in styles.css. On <html> it colours the page and every
+   window. On a window (the mailing list #signup, the comments #comments-box, the
+   Workshops dialogs #workshops and #workshop, Display #switcher and its paint roller
+   .switcher-toggle) it colours that window alone, over the page's colour: a window
+   inherits the colour tokens from <html> unless it carries its own data-color.
+   That is why styles.css declares Classic for [data-color="0"] too (a window can be
+   set back to it), and declares the button fill and the bevels again on every
+   element carrying data-color: they are built from these colours, and a custom
+   property built from others is worked out where it is declared, so on :root alone
+   they would keep the page's colour inside a window. The page itself (--page-bg,
+   --page-text: the background, the big 414 and the text on the page) is worked out
+   on :root only, so it follows <html> alone.
+   These rules have the same specificity as styles.css's :root and win by coming
+   after it (switcher.css loads later).
+   Each colour is a 90s window scheme for the windows: a tinted face (with its own
+   bevel highlight, light and shadow), a title bar and its text, and an ink for
+   comment names and links. On <html>, the title-bar colour
    is also the colour of the page itself and of the big 414 (--page-bg in styles.css),
    and the title text is the text on the page and the edge of the 414 (--page-text).
    Black text and frames, white fields, the error red and the focus rings stay the same
@@ -24,7 +38,7 @@
 /* ---------- The twenty colours ---------- */
 
 /* 1. Vermilion */
-html[data-color="1"] {
+[data-color="1"] {
   --face: #ecd3c8;
   --face-muted: #783a2e;
   --hilight: #faf4f1;
@@ -36,7 +50,7 @@ html[data-color="1"] {
 }
 
 /* 2. Saffron */
-html[data-color="2"] {
+[data-color="2"] {
   --face: #efe1c0;
   --face-muted: #674e1e;
   --hilight: #fbf8ef;
@@ -48,7 +62,7 @@ html[data-color="2"] {
 }
 
 /* 3. Chartreuse */
-html[data-color="3"] {
+[data-color="3"] {
   --face: #e2e8c4;
   --face-muted: #4e5822;
   --hilight: #f8f9f0;
@@ -60,7 +74,7 @@ html[data-color="3"] {
 }
 
 /* 4. Malachite */
-html[data-color="4"] {
+[data-color="4"] {
   --face: #cfe6d6;
   --face-muted: #295a41;
   --hilight: #f3f9f5;
@@ -72,7 +86,7 @@ html[data-color="4"] {
 }
 
 /* 5. Verdigris */
-html[data-color="5"] {
+[data-color="5"] {
   --face: #cde3de;
   --face-muted: #305750;
   --hilight: #f2f8f7;
@@ -84,7 +98,7 @@ html[data-color="5"] {
 }
 
 /* 6. Cerulean */
-html[data-color="6"] {
+[data-color="6"] {
   --face: #d1e3f0;
   --face-muted: #31556e;
   --hilight: #f4f8fb;
@@ -96,7 +110,7 @@ html[data-color="6"] {
 }
 
 /* 7. Klein Blue */
-html[data-color="7"] {
+[data-color="7"] {
   --face: #d5d9ef;
   --face-muted: #404886;
   --hilight: #f4f6fb;
@@ -108,7 +122,7 @@ html[data-color="7"] {
 }
 
 /* 8. Wisteria */
-html[data-color="8"] {
+[data-color="8"] {
   --face: #e0d9f3;
   --face-muted: #544486;
   --hilight: #f7f6fc;
@@ -120,7 +134,7 @@ html[data-color="8"] {
 }
 
 /* 9. Fuchsia */
-html[data-color="9"] {
+[data-color="9"] {
   --face: #ecd4e6;
   --face-muted: #713a67;
   --hilight: #faf4f9;
@@ -132,7 +146,7 @@ html[data-color="9"] {
 }
 
 /* 10. Flamingo */
-html[data-color="10"] {
+[data-color="10"] {
   --face: #f3d8e1;
   --face-muted: #7c3b54;
   --hilight: #fcf5f8;
@@ -144,7 +158,7 @@ html[data-color="10"] {
 }
 
 /* 11. Oxblood */
-html[data-color="11"] {
+[data-color="11"] {
   --face: #f4d5dc;
   --face-muted: #773c4d;
   --hilight: #fcf5f6;
@@ -156,7 +170,7 @@ html[data-color="11"] {
 }
 
 /* 12. Tangerine */
-html[data-color="12"] {
+[data-color="12"] {
   --face: #f3d8ca;
   --face-muted: #764123;
   --hilight: #fcf5f2;
@@ -168,7 +182,7 @@ html[data-color="12"] {
 }
 
 /* 13. Umber */
-html[data-color="13"] {
+[data-color="13"] {
   --face: #efdac5;
   --face-muted: #704714;
   --hilight: #fbf6f1;
@@ -180,7 +194,7 @@ html[data-color="13"] {
 }
 
 /* 14. Olive */
-html[data-color="14"] {
+[data-color="14"] {
   --face: #dbe2c7;
   --face-muted: #4d571a;
   --hilight: #f6f8f2;
@@ -192,7 +206,7 @@ html[data-color="14"] {
 }
 
 /* 15. Turquoise */
-html[data-color="15"] {
+[data-color="15"] {
   --face: #c5e6e1;
   --face-muted: #055e57;
   --hilight: #f1f9f7;
@@ -204,7 +218,7 @@ html[data-color="15"] {
 }
 
 /* 16. Teal */
-html[data-color="16"] {
+[data-color="16"] {
   --face: #c4e6e5;
   --face-muted: #045d5d;
   --hilight: #f1f9f8;
@@ -216,7 +230,7 @@ html[data-color="16"] {
 }
 
 /* 17. Ultraviolet */
-html[data-color="17"] {
+[data-color="17"] {
   --face: #dfdaf4;
   --face-muted: #55477b;
   --hilight: #f7f6fc;
@@ -228,7 +242,7 @@ html[data-color="17"] {
 }
 
 /* 18. Hot Pink */
-html[data-color="18"] {
+[data-color="18"] {
   --face: #efd5e6;
   --face-muted: #6f3d60;
   --hilight: #fbf5f8;
@@ -240,7 +254,7 @@ html[data-color="18"] {
 }
 
 /* 19. Porcelain */
-html[data-color="19"] {
+[data-color="19"] {
   --face: #e2ded4;
   --face-muted: #59503c;
   --hilight: #f8f7f4;
@@ -252,7 +266,7 @@ html[data-color="19"] {
 }
 
 /* 20. Raku */
-html[data-color="20"] {
+[data-color="20"] {
   --face: #e4dcda;
   --face-muted: #5c4d49;
   --hilight: #f8f6f6;
