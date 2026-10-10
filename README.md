@@ -70,14 +70,14 @@ Free Supabase projects are paused after a week or so without activity; if commen
 
 ## Font and colour switcher
 
-A small window titled **Display** lets visitors try 10 display fonts and 10 colours independently, so friends can browse combinations and say which they like in a comment ("colour 1 and font 6"). Option 0 of each is the default design (EB Garamond, the Classic grey and navy), so nothing changes for anyone who never touches it. The window follows the selected colour like the others, and its title bar the selected font; its rows stay in EB Garamond so the controls keep their shape while you browse. See [The boxes](#the-boxes) for where it sits and how it moves.
+A small window titled **Display** lets visitors try 10 display fonts and 10 colours independently, so friends can browse combinations and say which they like in a comment ("colour 1 and font 6"). Option 0 of each is the default design (Terminal Grotesque, the Classic grey and navy), so nothing changes for anyone who never touches it; font 1 is EB Garamond, the original face. The window follows the selected colour like the others, and its title bar the selected font; its rows stay in EB Garamond so the controls keep their shape while you browse. See [The boxes](#the-boxes) for where it sits and how it moves.
 
 - **Font** changes the display typography: the big 414, the title bars, the card label, the sign-up button, the field labels, the Post comment button, comment author names and the "Commenting as" line. The fields and the comment text stay in EB Garamond.
 - **Colour** is a 90s window scheme for the three windows: the title bar, a tinted face with its own bevel shades, and the ink for author names and links. The title-bar colour is also the page background and the big 414. Text stays black on the face, the fields stay white, and every colour keeps text at 4.5:1 contrast or more and the bevel edges at 3:1 or more.
-- A combination can be shared as a link: `?font=6&color=1` (numbers 0 to 10; anything else counts as 0). The link wins over the browser's saved choice, which is kept in `localStorage` under `studio414.style.font` and `studio414.style.color`.
+- A combination can be shared as a link: `?font=6&color=1` (numbers 0 to 10; anything else counts as 0). The link wins over the browser's saved choice, which is kept in `localStorage` under `studio414.style.font` and `studio414.style.color`. (The fonts were renumbered when Terminal Grotesque, once 10, became 0 and the others moved up one; a font saved before that is converted once, marked by `studio414.style.fontorder`. Older links and comments use the old numbers.)
 - A small "Insert “Colour 1, font 6”" link above the comment box types the current combination into the comment.
 
-It lives in [`switcher.js`](switcher.js), [`switcher.css`](switcher.css) (the colours and the window), [`fonts.css`](fonts.css) (the fonts) and [`fonts/`](fonts). To remove it, delete those, their `<link>` / `<script>` tags and the small inline script at the top of `index.html`'s `<head>`; the tokens it sets in `styles.css` (`--display-*`, `--big-*`, `--face`, `--title` and the rest) fall back to the default look. (Without the window there is no Reset button for the layout; visitors can still clear it with their browser's site data.)
+It lives in [`switcher.js`](switcher.js), [`switcher.css`](switcher.css) (the colours and the window), [`fonts.css`](fonts.css) (the fonts) and [`fonts/`](fonts). To remove it, delete those, their `<link>` / `<script>` tags and the small inline script at the top of `index.html`'s `<head>`; the tokens it sets in `styles.css` (`--display-*`, `--big-*`, `--face`, `--title` and the rest) fall back to the default colours, with EB Garamond as the display face. (Without the window there is no Reset button for the layout; visitors can still clear it with their browser's site data.)
 
 ## Fonts
 
@@ -85,17 +85,17 @@ The 10 display fonts are from [Velvetyne](https://velvetyne.fr), a French libre 
 
 | # | Font | Designers | Weight used |
 |---|------|-----------|-------------|
-| 0 | EB Garamond (original) | Georg Duffner, Octavio Pardo (via Google Fonts) | Medium; ExtraBold for the 414 |
-| 1 | [Basteleur](https://velvetyne.fr/fonts/basteleur/) | Keussel | Moonlight |
-| 2 | [Lineal](https://velvetyne.fr/fonts/lineal/) | Frank Adebiaye, Anton Moglia, Ariel Martín Pérez | Medium |
-| 3 | [Le Murmure](https://velvetyne.fr/fonts/le-murmure/) | Jérémy Landes | Regular |
-| 4 | [Sligoil](https://velvetyne.fr/fonts/sligoil/) | Ariel Martín Pérez, Đông Trúc Nguyễn | Micro Medium |
-| 5 | [Ouroboros](https://velvetyne.fr/fonts/ouroboros/) | Ariel Martín Pérez, H·Alix Sanyas | Regular |
-| 6 | [Façade](https://velvetyne.fr/fonts/facade/) | Éléonore Fines | Ouest |
-| 7 | [Karrik](https://velvetyne.fr/fonts/karrik/) | Jean-Baptiste Morizot, Lucas Le Bihan | Regular |
-| 8 | [Trickster](https://velvetyne.fr/fonts/trickster/) | Jean-Baptiste Morizot | Regular |
-| 9 | [Compagnon](https://velvetyne.fr/fonts/compagnon/) | Juliette Duhé, Léa Pradine, Valentin Papon, Chloé Lozano, Sébastien Riollier | Medium |
-| 10 | [Terminal Grotesque](https://velvetyne.fr/fonts/terminal-grotesque/) | Raphaël Bastide, Jérémy Landes | Regular |
+| 0 | [Terminal Grotesque](https://velvetyne.fr/fonts/terminal-grotesque/) (default) | Raphaël Bastide, Jérémy Landes | Regular |
+| 1 | EB Garamond (original) | Georg Duffner, Octavio Pardo (via Google Fonts) | Medium; ExtraBold for the 414 |
+| 2 | [Basteleur](https://velvetyne.fr/fonts/basteleur/) | Keussel | Moonlight |
+| 3 | [Lineal](https://velvetyne.fr/fonts/lineal/) | Frank Adebiaye, Anton Moglia, Ariel Martín Pérez | Medium |
+| 4 | [Le Murmure](https://velvetyne.fr/fonts/le-murmure/) | Jérémy Landes | Regular |
+| 5 | [Sligoil](https://velvetyne.fr/fonts/sligoil/) | Ariel Martín Pérez, Đông Trúc Nguyễn | Micro Medium |
+| 6 | [Ouroboros](https://velvetyne.fr/fonts/ouroboros/) | Ariel Martín Pérez, H·Alix Sanyas | Regular |
+| 7 | [Façade](https://velvetyne.fr/fonts/facade/) | Éléonore Fines | Ouest |
+| 8 | [Karrik](https://velvetyne.fr/fonts/karrik/) | Jean-Baptiste Morizot, Lucas Le Bihan | Regular |
+| 9 | [Trickster](https://velvetyne.fr/fonts/trickster/) | Jean-Baptiste Morizot | Regular |
+| 10 | [Compagnon](https://velvetyne.fr/fonts/compagnon/) | Juliette Duhé, Léa Pradine, Valentin Papon, Chloé Lozano, Sébastien Riollier | Medium |
 
 ## Colours
 

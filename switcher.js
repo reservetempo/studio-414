@@ -3,7 +3,8 @@
 
   Lets friends try ten display faces (fonts.css) and ten colours (switcher.css)
   independently, and quote what they like in a comment ("colour 1 and font 6").
-  Option 0 of each is the default design (EB Garamond, the Classic grey and navy).
+  Option 0 of each is the default design (Terminal Grotesque, the Classic grey and
+  navy); font 1 is EB Garamond, the original face.
 
   The panel is a third 90s window, "Display" (#switcher, styled by boxes.css and
   switcher.css), fixed to the screen. boxes.js lets it be dragged by its title bar
@@ -22,8 +23,8 @@
 
   To remove the switcher: delete switcher.js, switcher.css, fonts.css and fonts/,
   their <link> / <script> tags and the inline script in <head>. The tokens in
-  styles.css (--display-*, --face, --title and the rest) keep the default look on
-  their own.
+  styles.css (--display-*, --face, --title and the rest) keep the default colours on
+  their own, with EB Garamond (font 1) as the display face.
 */
 (function () {
   'use strict';
@@ -36,6 +37,7 @@
     font: {
       label: 'Font',
       names: [
+        'Terminal Grotesque',
         'EB Garamond',
         'Basteleur',
         'Lineal',
@@ -45,8 +47,7 @@
         'Façade',
         'Karrik',
         'Trickster',
-        'Compagnon',
-        'Terminal Grotesque'
+        'Compagnon'
       ]
     },
     color: {
