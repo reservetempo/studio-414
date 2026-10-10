@@ -30,6 +30,20 @@
   --accent-hover: #d6d2c9;
   --focus: var(--text);
   --error: #f4bfb1;
+  /* Accent for text: the card and section labels, comment names and links. */
+  --accent-ink: var(--text);
+
+  /* The body face sets running text and the fields; the display face sets the spaced
+     capitals (labels, buttons) and names. --display-size and --display-tracking scale
+     the capitals, and --display-name-size the names, for faces drawn larger, smaller,
+     wider or narrower than EB Garamond.
+     The style switcher (fonts.css, switcher.css) only changes these tokens. */
+  --body-font: "EB Garamond", Garamond, "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  --display-font: var(--body-font);
+  --display-weight: 500;
+  --display-size: 1;
+  --display-tracking: 1;
+  --display-name-size: 1;
 }
 
 *,
@@ -45,7 +59,7 @@ body {
 }
 
 body {
-  font-family: "EB Garamond", Garamond, "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  font-family: var(--body-font);
   color: var(--text);
   background-color: #2b2b2b;
 }
@@ -126,6 +140,8 @@ body {
   border: 1px solid var(--card-border);
   border-radius: 0;
   background: var(--card-bg);
+  /* Set here as well as on body, so a tinted card can bring its own text colour. */
+  color: var(--text);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   box-shadow: 0 24px 60px rgba(0, 0, 0, 0.3);
@@ -143,11 +159,13 @@ body {
 .signup__label {
   display: block;
   margin-bottom: clamp(12px, 4.4cqw, 18px);
-  padding-inline-start: 0.22em;
-  font-size: clamp(0.75rem, 3.4cqw, 0.9375rem);
-  font-weight: 500;
+  padding-inline-start: calc(0.22em * var(--display-tracking));
+  color: var(--accent-ink);
+  font-family: var(--display-font);
+  font-size: calc(clamp(0.75rem, 3.4cqw, 0.9375rem) * var(--display-size));
+  font-weight: var(--display-weight);
   line-height: 1.2;
-  letter-spacing: 0.22em;
+  letter-spacing: calc(0.22em * var(--display-tracking));
   text-transform: uppercase;
   text-align: center;
 }
@@ -201,13 +219,14 @@ body {
    the label. The start padding is wider by the trailing tracking, to keep it centred. */
 .signup__button {
   flex: none;
-  padding: 0 20px 0 calc(20px + 0.2em);
+  padding: 0 20px 0 calc(20px + 0.2em * var(--display-tracking));
   border: 1px solid var(--accent);
   background: var(--accent);
   color: var(--accent-text);
-  font-size: clamp(0.8125rem, 3.4cqw, 0.9375rem);
-  font-weight: 500;
-  letter-spacing: 0.2em;
+  font-family: var(--display-font);
+  font-size: calc(clamp(0.8125rem, 3.4cqw, 0.9375rem) * var(--display-size));
+  font-weight: var(--display-weight);
+  letter-spacing: calc(0.2em * var(--display-tracking));
   text-transform: uppercase;
   cursor: pointer;
   transition: background-color 0.15s ease, border-color 0.15s ease;

@@ -1,0 +1,198 @@
+/* Display faces for the style switcher (switcher.js), all from Velvetyne
+   (https://velvetyne.fr) under the SIL Open Font License 1.1; each folder in fonts/
+   holds the face and its licence. See README.md for the list and credits.
+
+   <html data-font="1"> to data-font="10" picks one of them; 0 (or no attribute) keeps
+   EB Garamond. Each option only sets the display tokens from styles.css:
+     --display-font      the family, with fallbacks
+     --display-weight    the weight of the one face loaded
+     --display-size      scales the spaced capitals (labels, titles, buttons), so they
+                         come out about as tall as EB Garamond's, or a little taller
+     --display-tracking  scales their letter-spacing (wide faces need less)
+     --display-name-size scales the names (comment authors, "Commenting as"), which are
+                         in upper and lower case, so they follow the x-height instead
+     --display-italic    the "Commenting as" line; none of these faces has an italic
+   Browsers only download a face once something on the page uses it. */
+
+@font-face {
+  font-family: "Basteleur";
+  src: url("fonts/basteleur/Basteleur-Moonlight.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Lineal";
+  src: url("fonts/lineal/Lineal-Medium.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Le Murmure";
+  src: url("fonts/le-murmure/LeMurmure-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Sligoil";
+  src: url("fonts/sligoil/Sligoil-MicroMedium.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Ouroboros";
+  src: url("fonts/ouroboros/Ouroboros-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Facade";
+  src: url("fonts/facade/Facade-Ouest.woff") format("woff");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Karrik";
+  src: url("fonts/karrik/Karrik-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Trickster";
+  src: url("fonts/trickster/Trickster-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Compagnon";
+  src: url("fonts/compagnon/Compagnon-Medium.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Terminal Grotesque";
+  src: url("fonts/terminal-grotesque/terminal-grotesque-webfont.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+html[data-font="1"],
+html[data-font="2"],
+html[data-font="3"],
+html[data-font="4"],
+html[data-font="5"],
+html[data-font="6"],
+html[data-font="7"],
+html[data-font="8"],
+html[data-font="9"],
+html[data-font="10"] {
+  --display-italic: normal;
+}
+
+/* 1. Basteleur (Moonlight), Keussel */
+html[data-font="1"] {
+  --display-font: "Basteleur", "EB Garamond", Georgia, serif;
+  --display-weight: 400;
+  --display-size: 0.92;
+  --display-tracking: 0.9;
+  --display-name-size: 0.85;
+}
+
+/* 2. Lineal (Medium), Frank Adebiaye, Anton Moglia, Ariel Martín Pérez */
+html[data-font="2"] {
+  --display-font: "Lineal", "Futura", "Century Gothic", sans-serif;
+  --display-weight: 500;
+  --display-size: 0.96;
+  --display-tracking: 1;
+  --display-name-size: 0.85;
+}
+
+/* 3. Le Murmure, Jérémy Landes */
+html[data-font="3"] {
+  --display-font: "Le Murmure", "Arial Narrow", sans-serif;
+  --display-weight: 400;
+  --display-size: 1.24;
+  --display-tracking: 1.1;
+  --display-name-size: 0.9;
+}
+
+/* 4. Sligoil (Micro Medium), Ariel Martín Pérez, Đông Trúc Nguyễn */
+html[data-font="4"] {
+  --display-font: "Sligoil", ui-monospace, "Cascadia Mono", Consolas, monospace;
+  --display-weight: 500;
+  --display-size: 0.94;
+  --display-tracking: 0.6;
+  --display-name-size: 0.85;
+}
+
+/* 5. Ouroboros, Ariel Martín Pérez, H·Alix Sanyas */
+html[data-font="5"] {
+  --display-font: "Ouroboros", "EB Garamond", Georgia, serif;
+  --display-weight: 400;
+  --display-size: 0.94;
+  --display-tracking: 0.8;
+  --display-name-size: 0.9;
+}
+
+/* 6. Façade (Ouest), Éléonore Fines */
+html[data-font="6"] {
+  --display-font: "Facade", "Arial Narrow", sans-serif;
+  --display-weight: 400;
+  --display-size: 0.98;
+  --display-tracking: 1;
+  --display-name-size: 0.9;
+}
+
+/* 7. Karrik, Jean-Baptiste Morizot, Lucas Le Bihan */
+html[data-font="7"] {
+  --display-font: "Karrik", "Helvetica Neue", Arial, sans-serif;
+  --display-weight: 400;
+  --display-size: 1;
+  --display-tracking: 1;
+  --display-name-size: 0.92;
+}
+
+/* 8. Trickster, Jean-Baptiste Morizot */
+html[data-font="8"] {
+  --display-font: "Trickster", "EB Garamond", Georgia, serif;
+  --display-weight: 400;
+  --display-size: 0.92;
+  --display-tracking: 0.9;
+  --display-name-size: 0.82;
+}
+
+/* 9. Compagnon (Medium), Juliette Duhé, Léa Pradine, Valentin Papon, Chloé Lozano, Sébastien Riollier */
+html[data-font="9"] {
+  --display-font: "Compagnon", "Courier New", monospace;
+  --display-weight: 500;
+  --display-size: 1.1;
+  --display-tracking: 0.6;
+  --display-name-size: 0.95;
+}
+
+/* 10. Terminal Grotesque, Raphaël Bastide, Jérémy Landes */
+html[data-font="10"] {
+  --display-font: "Terminal Grotesque", "Helvetica Neue", Arial, sans-serif;
+  --display-weight: 400;
+  --display-size: 1.08;
+  --display-tracking: 1;
+  --display-name-size: 1;
+}

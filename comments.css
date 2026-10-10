@@ -33,10 +33,11 @@
 /* The same spaced capitals as the sign-up label, over a hairline. */
 .comments__title,
 .comments__label {
-  font-size: 0.75rem;
-  font-weight: 500;
+  font-family: var(--display-font);
+  font-size: calc(0.75rem * var(--display-size));
+  font-weight: var(--display-weight);
   line-height: 1.2;
-  letter-spacing: 0.22em;
+  letter-spacing: calc(0.22em * var(--display-tracking));
   text-transform: uppercase;
 }
 
@@ -44,7 +45,8 @@
   margin: 0;
   padding-bottom: 16px;
   border-bottom: 1px solid var(--card-border);
-  font-size: 0.8125rem;
+  color: var(--accent-ink);
+  font-size: calc(0.8125rem * var(--display-size));
 }
 
 .comments__note {
@@ -76,8 +78,10 @@
 }
 
 .comment__name {
-  font-size: 1.0625rem;
-  font-weight: 500;
+  color: var(--accent-ink);
+  font-family: var(--display-font);
+  font-size: calc(1.0625rem * var(--display-name-size));
+  font-weight: var(--display-weight);
   overflow-wrap: anywhere;
 }
 
@@ -134,16 +138,18 @@
 
 .comments__identity {
   margin: 0 0 20px;
-  font-size: 1.0625rem;
-  font-style: italic;
+  font-family: var(--display-font);
+  font-size: calc(1.0625rem * var(--display-name-size));
+  /* Italic in EB Garamond; the switcher's display faces have no italic, so they set it upright. */
+  font-style: var(--display-italic, italic);
   color: var(--text-muted);
   overflow-wrap: anywhere;
 }
 
 .comments__identity-name {
   font-style: normal;
-  font-weight: 500;
-  color: var(--text);
+  font-weight: var(--display-weight);
+  color: var(--accent-ink);
 }
 
 /* Hairline-framed fields, as on the card; 17px text, so iOS does not zoom in on focus. */
@@ -209,15 +215,16 @@
   flex: none;
   height: 44px;
   margin: 0;
-  padding: 0 24px 0 calc(24px + 0.2em);
+  padding: 0 24px 0 calc(24px + 0.2em * var(--display-tracking));
   border: 1px solid var(--accent);
   border-radius: 0;
   background: var(--accent);
   color: var(--accent-text);
   font: inherit;
-  font-size: 0.8125rem;
-  font-weight: 500;
-  letter-spacing: 0.2em;
+  font-family: var(--display-font);
+  font-size: calc(0.8125rem * var(--display-size));
+  font-weight: var(--display-weight);
+  letter-spacing: calc(0.2em * var(--display-tracking));
   text-transform: uppercase;
   cursor: pointer;
   transition: background-color 0.15s ease, border-color 0.15s ease, opacity 0.15s ease;
@@ -252,7 +259,7 @@
   padding: 2px 1px;
   border: 0;
   background: none;
-  color: var(--text);
+  color: var(--accent-ink);
   font: inherit;
   font-style: normal;
   text-decoration: underline;
@@ -277,11 +284,11 @@
    larger; follow it. */
 @media (min-width: 720px) {
   .comments__title {
-    font-size: 0.875rem;
+    font-size: calc(0.875rem * var(--display-size));
   }
 
   .comments__label {
-    font-size: 0.8125rem;
+    font-size: calc(0.8125rem * var(--display-size));
   }
 
   .comments__input,
@@ -290,6 +297,6 @@
   }
 
   .comments__submit {
-    font-size: 0.875rem;
+    font-size: calc(0.875rem * var(--display-size));
   }
 }
