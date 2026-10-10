@@ -10,7 +10,9 @@
   - The flashy button fixed at the top right of the screen (#workshop-button,
     "Workshops") opens the Workshops window (#workshops): one button per workshop,
     soonest first, with its name, date and, once they are in, its spots left ("7 spots
-    left", "Sold out"). A sold-out workshop stays in the list, marked so.
+    left", "Sold out"). A sold-out workshop stays in the list, marked so. Its "See in
+    calendar" button opens the workshop calendar, a month grid of them (calendar.js,
+    which this file hands what it needs as window.studioWorkshops, at the end).
   - Clicking a workshop closes that window and opens its sign-up window (#workshop):
     its name, date and price, a form, and an "All workshops" button back to the list.
     The dialog is named after the workshop ("Paint a piece sign-up").
@@ -898,4 +900,17 @@
     if (paidFor) openSignup(paidFor, returned);
     else openList(null, returned);
   }
+
+  // For the workshop calendar (calendar.js): the workshops, past ones too, and the
+  // windows. It closes its own window, and the list's, before opening another.
+  window.studioWorkshops = {
+    all: function () { return WORKSHOPS.slice(); },
+    today: studioToday,
+    upcoming: upcoming,
+    find: find,
+    openList: openList,
+    closeList: listWindow.close,
+    openSignup: openSignup,
+    makeWindow: makeWindow
+  };
 })();
