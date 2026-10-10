@@ -6,12 +6,12 @@
    - on wide, tall enough screens it floats over the hero, centred on the white wall
      to the right of the photo's window, clear of the window and the sign-up card;
    - otherwise it sits in the page under the hero, full width less 16px gutters (at
-     most 640px).
+     most 432px).
    boxes.js lets visitors move and resize it; it then keeps their position. */
 
 .comments {
   /* The box's height when it sits in the page. */
-  --comments-h: min(720px, 100svh - 32px);
+  --comments-h: min(480px, 100svh - 32px);
 
   /* The section keeps the box's place in the page even after the box has been
      dragged out of it, so the page never shifts under the visitor's finger. */
@@ -29,7 +29,7 @@
 .comments__inner {
   position: relative;
   width: 100%;
-  max-width: 640px;
+  max-width: 432px;
   /* The narrowest it can be resized to (boxes.js reads this). */
   min-width: min(280px, 100vw - 16px);
   height: var(--comments-h);
@@ -46,15 +46,21 @@
     padding: 0;
   }
 
-  .comments__inner {
-    /* The free width right of the window, then a box centred in it. */
+  /* .comments > raises this above the older override in workshop.css, which is no
+     longer needed: the box is short enough to stay clear of the Workshop button. */
+  .comments > .comments__inner {
+    /* The free width right of the window, then a box centred in it: two thirds of
+       that width less margins (never under the box's min-width, so it stays
+       centred), and at most 456px tall. */
     --free: 100% * (1 - var(--window-cx) - var(--window-w) / 2);
-    --w: clamp(320px, var(--free) - 48px, 460px);
-    --h: min(100% - 32px, 680px);
+    --w: clamp(280px, (var(--free) - 48px) * 2 / 3, 308px);
+    --h: min(100% - 80px, 456px);
 
     position: absolute;
     left: calc(100% - var(--free) + (var(--free) - var(--w)) / 2);
-    top: calc((100% - var(--h)) / 2);
+    /* Centred down the hero, and never within 64px of the top, so it stays clear of
+       the Workshop button in the top-right corner (workshop.css). */
+    top: max(64px, (100% - var(--h)) / 2);
     width: var(--w);
     max-width: none;
     height: var(--h);
@@ -87,7 +93,7 @@
    to its min-height (room for a couple of comments), never less. */
 .comments__pane {
   flex: 1 1 0;
-  min-height: 14rem;
+  min-height: 9rem;
   contain: size;
   overflow-y: auto;
   padding: 0 12px;
