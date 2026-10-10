@@ -344,9 +344,14 @@
   font-size: 1.0625rem;
 }
 
-/* How many spots are left, in a sunken white panel with a small status light: green
-   while there are spots, red once sold out, amber while checking, grey before
-   sign-ups open. */
+/* How many spots are left, in the title bar once they are in (workshop.js), with
+   lining figures so the count ticking down there sits level with the words. */
+.workshop .box__title {
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+/* Until then, a line in a sunken white panel with a small status light: amber while
+   checking the spots, grey before sign-ups open. It is hidden once the spots are in. */
 .workshop__spots {
   display: flex;
   align-items: center;
@@ -356,10 +361,10 @@
   border: 1px solid;
   border-color: var(--sunken-border);
   background: var(--field);
-  color: var(--field-text);
+  color: var(--face-muted);
   box-shadow: var(--sunken-edge);
   font-size: 1.0625rem;
-  font-variant-numeric: lining-nums tabular-nums;
+  font-style: italic;
   line-height: 1.25;
 }
 
@@ -369,30 +374,12 @@
   width: 10px;
   height: 10px;
   border: 1px solid #000;
-  background: #19c219;
-  box-shadow: inset 1px 1px rgba(255, 255, 255, 0.6), inset -1px -1px rgba(0, 0, 0, 0.3);
-}
-
-.workshop__spots[data-state="loading"],
-.workshop__spots[data-state="unavailable"] {
-  font-style: italic;
-  color: var(--face-muted);
-}
-
-.workshop__spots[data-state="loading"]::before {
   background: #ffb000;
+  box-shadow: inset 1px 1px rgba(255, 255, 255, 0.6), inset -1px -1px rgba(0, 0, 0, 0.3);
 }
 
 .workshop__spots[data-state="unavailable"]::before {
   background: #8a8a8a;
-}
-
-.workshop__spots[data-state="soldout"] {
-  color: var(--error);
-}
-
-.workshop__spots[data-state="soldout"]::before {
-  background: #e00000;
 }
 
 .workshop__form {

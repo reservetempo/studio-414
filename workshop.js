@@ -1,6 +1,7 @@
 /*
-  Workshop sign-up for Studio 414: "Paint a piece", Saturday 7 November 2026, for 10
-  people at most, $59.99 CAD, paid with Stripe Checkout.
+  Workshop sign-up for Studio 414: "Paint a piece", Saturday 7 November 2026, 10 spots
+  at $59.99, paid with Stripe Checkout (Stripe charges it in CAD, which the window
+  leaves unsaid).
 
   - The flashy button fixed at the top right of the screen (#workshop-button) opens the
     sign-up window (#workshop): a modal <dialog> drawn as a 90s window like the boxes
@@ -17,10 +18,14 @@
               400 { error: "invalid_email" }
               409 { error: "already_signed_up" } or { error: "full" }
               500 { error: "server_error" }
-    They are fetched each time the window opens. Until they can be (the function isn't
-    deployed yet, or the network is down) the window says sign-ups aren't open yet and
-    the pay button stays off. Once sold out, the form is off and the button at the top
-    right says so too.
+    They are fetched each time the window opens. Once they are in, the window's title
+    bar says how many are left ("7 spots left", "1 spot left" or "Sold out"), ticking
+    down quickly from the capacity to that number; until then it says "Workshop
+    sign-up". Screen readers keep that as the window's name (aria-label) and hear the
+    count once, from a live region of its own. Until the spots can be fetched (the
+    function isn't deployed yet, or the network is down) the window says sign-ups
+    aren't open yet and the pay button stays off. Once sold out, the form is off and
+    the button at the top right says so too.
   - Stripe sends the visitor back to /?workshop=success, or to /?workshop=cancelled if
     they leave the checkout. Either one opens the window on load, with a thank-you or a
     "nothing was charged" message, and the parameter is taken out of the address (any
@@ -32,6 +37,9 @@
   var REQUEST_TIMEOUT_MS = 15000;
   var EMAIL_MAX = 254;
   var STEP = 10;
+  // The count in the title ticks down a step every TICK_MS, and takes TICK_MAX_MS at most.
+  var TICK_MS = 80;
+  var TICK_MAX_MS = 900;
   var KEYS = {
     ArrowLeft: [-1, 0],
     ArrowRight: [1, 0],
@@ -67,6 +75,8 @@
 
   var launcherLabel = document.getElementById('workshop-button-label');
   var titlebar = dialog.querySelector('.box__titlebar');
+  var titleEl = document.getElementById('workshop-title');
+  var countEl = document.getElementById('workshop-count');
   var closeButton = document.getElementById('workshop-close');
   var resultEl = document.getElementById('workshop-result');
   var resultIcon = document.getElementById('workshop-result-icon');
@@ -80,6 +90,7 @@
   var noteEl = document.getElementById('workshop-note');
   var okButton = document.getElementById('workshop-ok');
   var PAY_TEXT = payButton.textContent;
+  var TITLE = titleEl.textContent;
 
   var config = window.COMMENTS_CONFIG || {};
   var supabaseUrl = String(config.supabaseUrl || '').trim().replace(/\/+$/, '');
@@ -151,14 +162,24 @@
   var paying = false;
   var mode = '';                  // '', or 'success' / 'cancelled' after Stripe
   var loadId = 0;
+  var counting = 0;               // the animation frame of the count in the title, or 0
 
+  // The title bar once the spots are in.
+  function countText(remaining) {
+    if (remaining <= 0) return 'Sold out';
+    return remaining === 1 ? '1 spot left' : remaining + ' spots left';
+  }
+
+  // The line under the facts, only while the spots aren't in: once they are, the title
+  // bar says how many are left and the line is hidden.
   function spotsText() {
     if (availability === 'loading') return 'Checking spots…';
     if (availability === 'unavailable') return 'Sign-ups aren’t open yet, check back soon.';
-    if (availability === 'soldout') {
-      return spots ? 'Sold out: all ' + spots.capacity + ' spots are taken.' : 'Sold out.';
-    }
-    return spots.remaining + ' of ' + spots.capacity + ' spots left';
+    return '';
+  }
+
+  function setTitle(text) {
+    if (titleEl.textContent !== text) titleEl.textContent = text;
   }
 
   function render() {
@@ -166,8 +187,14 @@
     // Only when it changes, so screen readers hear it once.
     if (spotsEl.textContent !== text) spotsEl.textContent = text;
     spotsEl.dataset.state = availability;
+    spotsEl.hidden = !text || mode === 'success';
 
     var soldOut = availability === 'soldout';
+    // While the count ticks down (countDown), it sets the title itself.
+    if (!counting) {
+      setTitle(spots && (soldOut || availability === 'open') ? countText(spots.remaining) : TITLE);
+    }
+
     emailInput.disabled = soldOut;
     payButton.disabled = paying || availability !== 'open';
     payButton.textContent = paying ? 'Opening Stripe…' : PAY_TEXT;
@@ -182,8 +209,41 @@
   }
 
   function setAvailability(next) {
+    stopCount();
     availability = next;
     render();
+  }
+
+  function stopCount() {
+    if (counting) cancelAnimationFrame(counting);
+    counting = 0;
+  }
+
+  // As the spots come in, the number in the title ticks down from the capacity to the
+  // spots left, a step every TICK_MS (TICK_MAX_MS at most in all), and stops on it.
+  // With reduced motion, or all the spots left, render has already put it there.
+  function countDown() {
+    stopCount();
+    var from = spots.capacity;
+    var steps = from - spots.remaining;
+    var still = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (steps <= 0 || still) return;
+    var duration = Math.min(steps * TICK_MS, TICK_MAX_MS);
+    var start = null;
+    setTitle(countText(from));
+    counting = requestAnimationFrame(function frame(now) {
+      if (start === null) start = now;
+      var done = Math.min(steps, Math.floor(steps * (now - start) / duration));
+      setTitle(countText(from - done));
+      counting = done < steps ? requestAnimationFrame(frame) : 0;
+    });
+  }
+
+  // The count for screen readers, once, from a polite live region of its own (the
+  // title's numbers going by aren't read out, and the dialog's name stays put). Emptied
+  // as the window closes, so the same count is heard again next time.
+  function announce(text) {
+    countEl.textContent = text;
   }
 
   // Disabling the focused control (the field once sold out, the pay button while
@@ -201,12 +261,17 @@
       setAvailability('unavailable');
       return;
     }
+    announce('');
     setAvailability('loading');
     request('GET').then(function (result) {
       if (id !== loadId) return;
       var next = result.ok ? readSpots(result.data) : null;
       if (next) spots = next;
       setAvailability(next ? (next.remaining > 0 ? 'open' : 'soldout') : 'unavailable');
+      if (next) {
+        countDown();
+        announce(countText(next.remaining));
+      }
       keepFocus();
     }, function () {
       // Not open yet, or offline: the window says so. The failed request itself is
@@ -251,10 +316,11 @@
       dialog.removeAttribute('aria-describedby');
     }
     var done = mode === 'success';
-    spotsEl.hidden = done;
     form.hidden = done;
     noteEl.hidden = done;
     okButton.hidden = !done;
+    // The spots line too.
+    render();
   }
 
   /* ---------- Opening and closing ---------- */
@@ -296,9 +362,14 @@
 
   dialog.addEventListener('close', function () {
     if (drag) endDrag(true);
-    loadId++;
     if (!paying) setMessage('');
     clearInvalid();
+    // The event comes a moment after the window closes. If it has been opened again by
+    // then, leave that opening's spots, count and announcement be.
+    if (dialog.open) return;
+    loadId++;
+    stopCount();
+    announce('');
     setMode('');
   });
 
