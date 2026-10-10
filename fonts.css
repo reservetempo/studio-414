@@ -6,12 +6,15 @@
    EB Garamond. Each option only sets the display tokens from styles.css:
      --display-font      the family, with fallbacks
      --display-weight    the weight of the one face loaded
-     --display-size      scales the spaced capitals (labels, titles, buttons), so they
+     --display-size      scales the spaced capitals (labels, buttons), so they
                          come out about as tall as EB Garamond's, or a little taller
      --display-tracking  scales their letter-spacing (wide faces need less)
-     --display-name-size scales the names (comment authors, "Commenting as"), which are
-                         in upper and lower case, so they follow the x-height instead
+     --display-name-size scales the names (comment authors, "Commenting as") and the
+                         title bars, which are in upper and lower case, so they follow
+                         the x-height instead
      --display-italic    the "Commenting as" line; none of these faces has an italic
+     --big-*             the big 414 (styles.css): its weight, and the face's "414"
+                         measured, so it is fitted to the same room in every face
    Browsers only download a face once something on the page uses it. */
 
 @font-face {
@@ -105,6 +108,7 @@ html[data-font="8"],
 html[data-font="9"],
 html[data-font="10"] {
   --display-italic: normal;
+  --big-weight: var(--display-weight);
 }
 
 /* 1. Basteleur (Moonlight), Keussel */
@@ -114,6 +118,9 @@ html[data-font="1"] {
   --display-size: 0.92;
   --display-tracking: 0.9;
   --display-name-size: 0.85;
+  --big-w: 1.966;
+  --big-h: 0.766;
+  --big-base: 0.775;
 }
 
 /* 2. Lineal (Medium), Frank Adebiaye, Anton Moglia, Ariel Martín Pérez */
@@ -123,6 +130,9 @@ html[data-font="2"] {
   --display-size: 0.96;
   --display-tracking: 1;
   --display-name-size: 0.85;
+  --big-w: 1.401;
+  --big-h: 0.734;
+  --big-base: 0.8;
 }
 
 /* 3. Le Murmure, Jérémy Landes */
@@ -132,6 +142,9 @@ html[data-font="3"] {
   --display-size: 1.24;
   --display-tracking: 1.1;
   --display-name-size: 0.9;
+  --big-w: 0.689;
+  --big-h: 0.828;
+  --big-base: 0.956;
 }
 
 /* 4. Sligoil (Micro Medium), Ariel Martín Pérez, Đông Trúc Nguyễn */
@@ -141,6 +154,9 @@ html[data-font="4"] {
   --display-size: 0.94;
   --display-tracking: 0.6;
   --display-name-size: 0.85;
+  --big-w: 1.8;
+  --big-h: 0.703;
+  --big-base: 0.8;
 }
 
 /* 5. Ouroboros, Ariel Martín Pérez, H·Alix Sanyas */
@@ -150,6 +166,9 @@ html[data-font="5"] {
   --display-size: 0.94;
   --display-tracking: 0.8;
   --display-name-size: 0.9;
+  --big-w: 1.986;
+  --big-h: 0.703;
+  --big-base: 0.8;
 }
 
 /* 6. Façade (Ouest), Éléonore Fines */
@@ -159,6 +178,9 @@ html[data-font="6"] {
   --display-size: 0.98;
   --display-tracking: 1;
   --display-name-size: 0.9;
+  --big-w: 1.27;
+  --big-h: 0.797;
+  --big-base: 0.839;
 }
 
 /* 7. Karrik, Jean-Baptiste Morizot, Lucas Le Bihan */
@@ -168,6 +190,9 @@ html[data-font="7"] {
   --display-size: 1;
   --display-tracking: 1;
   --display-name-size: 0.92;
+  --big-w: 1.938;
+  --big-h: 0.688;
+  --big-base: 0.85;
 }
 
 /* 8. Trickster, Jean-Baptiste Morizot */
@@ -177,6 +202,9 @@ html[data-font="8"] {
   --display-size: 0.92;
   --display-tracking: 0.9;
   --display-name-size: 0.82;
+  --big-w: 1.553;
+  --big-h: 0.766;
+  --big-base: 0.925;
 }
 
 /* 9. Compagnon (Medium), Juliette Duhé, Léa Pradine, Valentin Papon, Chloé Lozano, Sébastien Riollier */
@@ -186,6 +214,9 @@ html[data-font="9"] {
   --display-size: 1.1;
   --display-tracking: 0.6;
   --display-name-size: 0.95;
+  --big-w: 1.8;
+  --big-h: 0.594;
+  --big-base: 0.94;
 }
 
 /* 10. Terminal Grotesque, Raphaël Bastide, Jérémy Landes */
@@ -195,4 +226,7 @@ html[data-font="10"] {
   --display-size: 1.08;
   --display-tracking: 1;
   --display-name-size: 1;
+  --big-w: 1.315;
+  --big-h: 0.625;
+  --big-base: 0.803;
 }

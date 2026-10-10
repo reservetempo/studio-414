@@ -3,7 +3,16 @@
 
   Lets friends try ten display faces (fonts.css) and ten colours (switcher.css)
   independently, and quote what they like in a comment ("colour 1 and font 6").
-  Option 0 of each is the original design (EB Garamond, gallery white) and the default.
+  Option 0 of each is the default design (EB Garamond, the Classic grey and navy).
+
+  The panel is a third 90s window, "Display" (#switcher, styled by boxes.css and
+  switcher.css), fixed to the screen. boxes.js lets it be dragged by its title bar
+  like the other boxes.
+
+  The panel also holds "Reset" for the layout of the boxes, shown only while a box
+  (this window included) has been moved or resized. boxes.js reports that with a
+  "studio414:layoutchange" event ({ detail: { custom } }); the button asks it to reset
+  with "studio414:layoutreset". Without boxes.js the row just stays hidden.
 
   The choice lives on <html data-font="N" data-color="N">. A small inline script in
   index.html's <head> sets those before first paint, from the URL (?font=6&color=1,
@@ -13,7 +22,8 @@
 
   To remove the switcher: delete switcher.js, switcher.css, fonts.css and fonts/,
   their <link> / <script> tags and the inline script in <head>. The tokens in
-  styles.css (--display-*, --accent-ink) keep the original look on their own.
+  styles.css (--display-*, --face, --title and the rest) keep the default look on
+  their own.
 */
 (function () {
   'use strict';
@@ -42,7 +52,7 @@
     color: {
       label: 'Colour',
       names: [
-        'Gallery white',
+        'Classic',
         'Vermilion',
         'Saffron',
         'Chartreuse',
@@ -54,10 +64,10 @@
         'Fuchsia',
         'Flamingo'
       ],
-      // The accent of each colour, for the swatch in the panel (as in switcher.css).
+      // The title bar of each colour, for the swatch in the panel (as in switcher.css).
       swatches: [
-        '#e9e6df', '#f0532f', '#f5b83d', '#cdea3c', '#35c27a', '#4fc6ad',
-        '#4db5f2', '#4766ff', '#b59dff', '#e455c8', '#ff88b1'
+        '#0a246a', '#b5301a', '#f5b83d', '#cdea3c', '#35c27a', '#0f5e52',
+        '#4db5f2', '#1a33d1', '#b59dff', '#9c1f86', '#ff88b1'
       ]
     }
   };
@@ -144,8 +154,22 @@
     return 'Colour ' + state.color + ', font ' + state.font;
   }
 
-  var panel = element('aside', 'switcher');
+  // A window like the boxes: a title bar with a pixel icon (a display showing three
+  // swatches and a line of text), then the rows. box--fixed tells boxes.js and
+  // boxes.css that it is fixed to the screen rather than placed in the page.
+  var panel = element('aside', 'switcher box box--fixed');
+  panel.id = 'switcher';
   panel.setAttribute('aria-label', 'Font and colour switcher');
+
+  var titlebar = element('div', 'box__titlebar');
+  titlebar.innerHTML =
+    '<svg class="box__icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false" shape-rendering="crispEdges">' +
+    '<path fill="currentColor" fill-rule="evenodd" d="M1 1h14v10H1zM2 2v8h12V2zM4 4h2v2H4zM7 4h2v2H7zM10 4h2v2h-2zM4 7h8v1H4zM7 11h2v2H7zM4 13h8v2H4z"/></svg>';
+  titlebar.appendChild(element('span', 'box__title', 'Display'));
+  panel.appendChild(titlebar);
+
+  var body = element('div', 'switcher__body');
+  panel.appendChild(body);
 
   var live = element('p', 'switcher__live');
   live.setAttribute('aria-live', 'polite');
@@ -196,9 +220,39 @@
     return row;
   }
 
-  panel.appendChild(buildRow('font'));
-  panel.appendChild(buildRow('color'));
-  panel.appendChild(live);
+  body.appendChild(buildRow('font'));
+  body.appendChild(buildRow('color'));
+
+  /* ---------- Resetting the layout of the boxes (boxes.js) ---------- */
+
+  var layoutRow = element('div', 'switcher__row');
+  layoutRow.setAttribute('role', 'group');
+  layoutRow.setAttribute('aria-label', 'Layout');
+  layoutRow.hidden = true;
+
+  var layoutLabel = element('span', 'switcher__label', 'Layout');
+  layoutLabel.setAttribute('aria-hidden', 'true');
+
+  var resetButton = element('button', 'switcher__reset', 'Reset');
+  resetButton.type = 'button';
+  resetButton.setAttribute('aria-label', 'Reset layout');
+  resetButton.title = 'Put the windows back where they were, at their original size';
+  resetButton.addEventListener('click', function () {
+    document.dispatchEvent(new CustomEvent('studio414:layoutreset'));
+    live.textContent = 'Layout reset.';
+  });
+
+  document.addEventListener('studio414:layoutchange', function (event) {
+    var custom = Boolean(event.detail && event.detail.custom);
+    // Keep focus in the panel when the button it was on goes away.
+    if (!custom && document.activeElement === resetButton) controls.color.select.focus();
+    layoutRow.hidden = !custom;
+  });
+
+  layoutRow.appendChild(layoutLabel);
+  layoutRow.appendChild(resetButton);
+  body.appendChild(layoutRow);
+  body.appendChild(live);
 
   /* ---------- "Insert the combination" in the comment box ---------- */
 
@@ -264,7 +318,7 @@
   document.body.appendChild(panel);
 
   // Keep a choice that came from the URL or storage, and show it in the address bar
-  // once it is anything other than the original design (or the URL already had it).
+  // once it is anything other than the default design (or the URL already had it).
   var params = new URLSearchParams(window.location.search);
   if (params.has('font') || params.has('color') || state.font || state.color) {
     save();

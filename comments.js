@@ -250,6 +250,9 @@
     var items = comments.map(function (comment) { return renderComment(comment, now); });
     listEl.replaceChildren.apply(listEl, items);
     listEl.hidden = items.length === 0;
+    // The list scrolls inside its box; show the newest, which are last, by the form.
+    var pane = listEl.parentNode;
+    pane.scrollTop = pane.scrollHeight;
   }
 
   // The status line stays in the page (empty when there is nothing to say), so

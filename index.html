@@ -23,61 +23,85 @@
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap">
+  <!-- 800 is only for the big 414; Google serves all three upright weights from one file. -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,800;1,400&display=swap">
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="boxes.css">
   <link rel="stylesheet" href="comments.css">
   <link rel="stylesheet" href="fonts.css">
   <link rel="stylesheet" href="switcher.css">
 </head>
 <body>
   <main class="hero">
-    <form class="signup" id="signup" novalidate>
-      <label class="signup__label" for="email">Join the mailing list</label>
-      <div class="signup__row">
-        <input class="signup__input" id="email" name="email" type="email"
-               placeholder="you@example.com" autocomplete="email" required>
-        <button class="signup__button" type="submit">Sign up</button>
+    <!-- The studio's name: a giant 414 over the photo, in the page colour (styles.css).
+         It reads "Studio 414" to screen readers. -->
+    <h1 class="big-414"><span class="visually-hidden">Studio </span>414</h1>
+
+    <!-- The two boxes are 90s-style windows (boxes.css); boxes.js adds a drag handle
+         to each title bar and a resize grip. The style switcher (switcher.js) adds a
+         third window. -->
+    <form class="signup box" id="signup" aria-labelledby="signup-title" novalidate>
+      <div class="box__titlebar">
+        <svg class="box__icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false" shape-rendering="crispEdges"><path fill="currentColor" fill-rule="evenodd" d="M1 3h14v10H1zM2 4v8h12V4zM2 4h1v1H2zM3 5h1v1H3zM4 6h1v1H4zM5 7h1v1H5zM6 8h1v1H6zM7 9h2v1H7zM9 8h1v1H9zM10 7h1v1h-1zM11 6h1v1h-1zM12 5h1v1h-1zM13 4h1v1h-1z"/></svg>
+        <span class="box__title" id="signup-title">Mailing list</span>
       </div>
-      <p class="signup__message" id="signup-message" role="status" aria-live="polite"></p>
+      <div class="signup__body">
+        <label class="signup__label" for="email">Join the mailing list</label>
+        <div class="signup__row">
+          <input class="signup__input" id="email" name="email" type="email"
+                 placeholder="you@example.com" autocomplete="email" required>
+          <button class="signup__button" type="submit">Sign up</button>
+        </div>
+        <p class="signup__message" id="signup-message" role="status" aria-live="polite"></p>
+      </div>
     </form>
   </main>
 
   <section class="comments" id="comments" aria-labelledby="comments-title">
-    <div class="comments__inner">
-      <h2 class="comments__title" id="comments-title">Comments</h2>
-      <p class="comments__note" id="comments-note" hidden></p>
-
-      <ol class="comments__list" id="comments-list" hidden></ol>
-      <div class="comments__state">
-        <p class="comments__status" id="comments-status" role="status" aria-live="polite"></p>
-        <button class="comments__link" id="comments-retry" type="button" hidden>Try again</button>
+    <div class="comments__inner box" id="comments-box">
+      <div class="box__titlebar">
+        <svg class="box__icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false" shape-rendering="crispEdges"><path fill="currentColor" d="M2 2h12v1H2zM1 3h1v7H1zM14 3h1v7h-1zM2 10h12v1H2zM3 11h1v3H3zM4 12h1v1H4zM5 11h1v1H5zM4 5h8v1H4zM4 7h6v1H4z"/></svg>
+        <h2 class="box__title" id="comments-title">Comments</h2>
       </div>
+      <div class="comments__body">
+        <p class="comments__note" id="comments-note" hidden></p>
 
-      <form class="comments__form" id="comments-form" novalidate>
-        <div class="comments__field" id="comments-name-field">
-          <label class="comments__label" for="comments-name">Your name</label>
-          <input class="comments__input" id="comments-name" name="name" type="text"
-                 maxlength="40" autocomplete="nickname" autocapitalize="words" spellcheck="false" required>
+        <!-- The comments scroll in here; focusable so the keyboard can scroll it too. -->
+        <div class="comments__pane" tabindex="0" role="region" aria-label="Comment list">
+          <ol class="comments__list" id="comments-list" hidden></ol>
+          <div class="comments__state">
+            <p class="comments__status" id="comments-status" role="status" aria-live="polite"></p>
+            <button class="comments__link" id="comments-retry" type="button" hidden>Try again</button>
+          </div>
         </div>
-        <p class="comments__identity" id="comments-identity" hidden>
-          Commenting as <span class="comments__identity-name" id="comments-identity-name"></span>
-          <button class="comments__link" id="comments-change" type="button" aria-label="Change your name">change</button>
-        </p>
-        <div class="comments__field">
-          <label class="comments__label" for="comments-body">Comment</label>
-          <textarea class="comments__textarea" id="comments-body" name="body" rows="5" required></textarea>
-        </div>
-        <div class="comments__actions">
-          <button class="comments__submit" id="comments-submit" type="submit">Post comment</button>
-          <p class="comments__message" id="comments-message" role="status" aria-live="polite"></p>
-        </div>
-      </form>
+
+        <form class="comments__form" id="comments-form" novalidate>
+          <div class="comments__field" id="comments-name-field">
+            <label class="comments__label" for="comments-name">Your name</label>
+            <input class="comments__input" id="comments-name" name="name" type="text"
+                   maxlength="40" autocomplete="nickname" autocapitalize="words" spellcheck="false" required>
+          </div>
+          <p class="comments__identity" id="comments-identity" hidden>
+            Commenting as <span class="comments__identity-name" id="comments-identity-name"></span>
+            <button class="comments__link" id="comments-change" type="button" aria-label="Change your name">change</button>
+          </p>
+          <div class="comments__field">
+            <label class="comments__label" for="comments-body">Comment</label>
+            <textarea class="comments__textarea" id="comments-body" name="body" rows="3" required></textarea>
+          </div>
+          <div class="comments__actions">
+            <button class="comments__submit" id="comments-submit" type="submit">Post comment</button>
+            <p class="comments__message" id="comments-message" role="status" aria-live="polite"></p>
+          </div>
+        </form>
+      </div>
     </div>
   </section>
 
   <script defer src="comments-config.js"></script>
   <script defer src="comments.js"></script>
   <script defer src="switcher.js"></script>
+  <script defer src="boxes.js"></script>
 
   <script>
     // Placeholder handler until the mailing list service is connected.

@@ -1,0 +1,183 @@
+/* Window chrome for the boxes: the mailing-list card (.signup), the comments box
+   (.comments__inner) and the style switcher, "Display" (.switcher). Each is a 90s
+   dialog window: a black frame with a 2px bevel, a solid fill, a title bar and, on
+   the first two, a resize grip in the bottom-right corner.
+   boxes.js adds the drag handle over the title bar and the grip, and moves and sizes
+   the boxes; the colours are the tokens in styles.css, swapped per colour in
+   switcher.css. Where each box sits by default is in styles.css (the card),
+   comments.css (the comments box) and switcher.css (Display). */
+
+.box {
+  /* Above the hero's shading; boxes.js restacks the boxes as they are used. */
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  /* Never shorter than its content, whatever size it is given (and so whatever
+     font is picked): nothing inside is ever clipped. */
+  min-height: min-content;
+  /* 1px frame + 2px bevel, then 1px of face around the title bar. */
+  padding: 3px;
+  border: 1px solid var(--dk-shadow);
+  background: var(--face);
+  color: var(--face-text);
+  box-shadow: inset -2px -2px var(--shadow), inset 2px 2px var(--hilight);
+  color-scheme: light;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Once moved or resized, boxes.js sets left, top, width and height in px on the box,
+   in page coordinates; these lift it out of its default layout. */
+.box.is-placed {
+  position: absolute;
+  max-width: none;
+  margin: 0;
+  aspect-ratio: auto;
+}
+
+/* A box fixed to the screen (Display) stays fixed once moved: its left and top are
+   then screen coordinates, and its default right and bottom no longer apply. */
+.box--fixed.is-placed {
+  position: fixed;
+  right: auto;
+  bottom: auto;
+}
+
+.box ::selection {
+  background: var(--title);
+  color: var(--title-text);
+}
+
+/* ---------- Title bar ---------- */
+
+.box__titlebar {
+  position: relative;
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 26px;
+  padding: 2px 6px 2px 5px;
+  background: var(--title);
+  color: var(--title-text);
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* A small pixel icon, as a 90s window has; only decoration. */
+.box__icon {
+  flex: none;
+  width: 16px;
+  height: 16px;
+}
+
+.box__title {
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  font-family: var(--display-font);
+  font-size: calc(1rem * var(--display-name-size));
+  font-weight: var(--display-weight);
+  line-height: 1.2;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* The drag handle (boxes.js): a transparent button over the whole title bar, so the
+   bar can be dragged and focused, and arrow keys move the box. Only it and the grip
+   take touch-action: none, so a finger anywhere else still scrolls the page. */
+.box__handle {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: move;
+  touch-action: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.box__handle:focus-visible {
+  outline: 1px dotted var(--title-text);
+  outline-offset: -3px;
+}
+
+/* ---------- Resize grip ---------- */
+
+/* The button is the hit area (larger for fingers); the ridges are drawn in its
+   bottom-right corner. */
+.box__grip {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 22px;
+  height: 22px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: nwse-resize;
+  touch-action: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Three diagonal ridges, light over dark, in the triangle under the diagonal. */
+.box__grip::after {
+  content: "";
+  position: absolute;
+  right: 3px;
+  bottom: 3px;
+  width: 13px;
+  height: 13px;
+  background: repeating-linear-gradient(135deg,
+    transparent 0 2px, var(--hilight) 2px 3px, var(--shadow) 3px 5px);
+  clip-path: polygon(100% 0, 100% 100%, 0 100%);
+}
+
+.box__grip:focus-visible {
+  outline: 1px dotted var(--focus);
+  outline-offset: -2px;
+}
+
+@media (pointer: coarse) {
+  .box__titlebar {
+    min-height: 34px;
+  }
+
+  .box__grip {
+    width: 32px;
+    height: 32px;
+  }
+}
+
+/* While a box is dragged or resized, keep its cursor everywhere and stop text being
+   selected on the way. */
+html.is-moving-box,
+html.is-moving-box * {
+  cursor: move !important;
+  -webkit-user-select: none !important;
+  user-select: none !important;
+}
+
+html.is-sizing-box,
+html.is-sizing-box * {
+  cursor: nwse-resize !important;
+  -webkit-user-select: none !important;
+  user-select: none !important;
+}
+
+/* High-contrast modes drop the bevels (box-shadow) and the gradient; keep a frame,
+   the title bar and the grip. */
+@media (forced-colors: active) {
+  .box__titlebar {
+    border-bottom: 1px solid CanvasText;
+  }
+
+  .box__grip::after {
+    background: CanvasText;
+  }
+}
