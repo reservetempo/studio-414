@@ -4,12 +4,6 @@ Managed by the main session (see CLAUDE.md). `/z <items>` adds tasks; `/z` works
 
 ## Next
 
-### 1. Add 10 Velvetyne fonts to the font switcher (user's step 1)
-- Goal: 10 more cool, distinctive fonts from Velvetyne (velvetyne.fr, open-source/OFL) in the site's font switcher, alongside the existing ones.
-- Files: `fonts/` (font files), `fonts.css`, `switcher.js` (and `switcher.css` only if needed). Check how the existing fonts are added and do the same (file format, naming, `?font=` values, licence notes if the existing ones have them).
-- Don't add a font that's already there. Pick ones that read well as headings on this site.
-- Done when: all 10 show up in the switcher, load, and apply when picked (previewed).
-
 ### 2. Add 10 color options to the color switcher (user's step 1)
 - Goal: 10 more good color options in the site's color switcher, alongside the existing ones.
 - Files: `switcher.js` and wherever the existing colors are defined (`styles.css` / `switcher.css`). Follow the existing pattern (`?color=` values, names, dark mode if colors have one).
@@ -62,4 +56,11 @@ Managed by the main session (see CLAUDE.md). `/z <items>` adds tasks; `/z` works
 - Files: `index.html`, `styles.css`.
 - Done when: previewed: the link sits at the bottom left of the form and opens a mail to that address.
 
+### 9. Fix the stale font-list comment in fonts.css
+- Goal: the comment at the top of `fonts.css` says "See README.md for the list", but the README no longer lists the fonts. Make the comment accurate (e.g. say where the list lives, in `fonts.css`/`switcher.js`), without changing any CSS.
+- Files: `fonts.css`.
+- Done when: the comment is accurate. Nothing visible changes, so no preview needed.
+
 ## Done
+
+- 1. Add 10 Velvetyne fonts to the font switcher: `34558eb`. Fonts 11-20: Anthony, Victorianna (Thin), Gulax, BackOut, Bluu Next (Bold), Daubenton, Grotesk, Kaeru Kaeru, Format 1452, Flor de Ruina. The font range is now 0-20; colours still 0-10.
