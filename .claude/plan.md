@@ -4,12 +4,6 @@ Managed by the main session (see CLAUDE.md). `/z <items>` adds tasks; `/z` works
 
 ## Next
 
-### 2. Add 10 color options to the color switcher (user's step 1)
-- Goal: 10 more good color options in the site's color switcher, alongside the existing ones.
-- Files: `switcher.js` and wherever the existing colors are defined (`styles.css` / `switcher.css`). Follow the existing pattern (`?color=` values, names, dark mode if colors have one).
-- Each new option must keep text readable (good contrast) and look distinct from the existing ones and from each other.
-- Done when: all 10 show up in the switcher and apply when picked (previewed).
-
 ### 3. Back end: several workshops, a spot count per order, and names (supports steps 2 and 4)
 - Goal: the Supabase/Stripe back end handles more than one workshop, buying several spots in one order, the buyer's name and an optional friend's name.
 - Files: `supabase/workshop.sql`, `supabase/functions/workshop-checkout/index.ts`, `supabase/functions/stripe-webhook/index.ts` (if needed), `README.md` (setup steps and "Still to do"). Don't change `workshop.js`: tasks 4 and 6 adapt the front end.
@@ -64,3 +58,4 @@ Managed by the main session (see CLAUDE.md). `/z <items>` adds tasks; `/z` works
 ## Done
 
 - 1. Add 10 Velvetyne fonts to the font switcher: `34558eb`. Fonts 11-20: Anthony, Victorianna (Thin), Gulax, BackOut, Bluu Next (Bold), Daubenton, Grotesk, Kaeru Kaeru, Format 1452, Flor de Ruina. The font range is now 0-20; colours still 0-10.
+- 2. Add 10 color options to the color switcher: `f7ffc9b`. Colours 11-20: Oxblood, Tangerine, Umber, Olive, Turquoise, Teal, Ultraviolet, Hot Pink, Porcelain, Raku. Colour range is now 0-20.
