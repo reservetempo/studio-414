@@ -284,6 +284,8 @@
    every control at 4.5:1 or more on all of them). Its title bar is in the display
    font like the others; the rows stay in EB Garamond, so the controls keep their
    shape while the fonts are browsed.
+   Its rows: Part (Everything or one window), Font and Colour for that part, then the
+   Styles and Layout "Reset" buttons, each shown only while there is something to reset.
    It is fixed to the screen, so it is at hand wherever the page is scrolled to.
    boxes.js moves it by its title bar (it has no resize grip: its rows have one size),
    keeps it on screen and stacks it with the other windows.
@@ -360,7 +362,8 @@
   box-shadow: var(--bevel-pressed);
 }
 
-/* "Reset", for the layout: shown once a box has been moved or resized (boxes.js). */
+/* "Reset", on the Styles row (shown while a window has its own font or colour) and on
+   the Layout row (shown once a box has been moved or resized, boxes.js). */
 .switcher__reset {
   grid-column: 2 / -1;
   padding: 0 12px;

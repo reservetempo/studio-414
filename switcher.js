@@ -20,22 +20,45 @@
   was left open is kept in localStorage under "studio414.display" ("open" or
   "closed"), so a first visit starts closed.
 
-  The panel also holds "Reset" for the layout of the boxes, shown only while a box
+  The rows, top to bottom: Part, Font, Colour, then two "Reset" buttons that show
+  only while there is something to reset (Styles and Layout).
+
+  Part picks what the Font and Colour rows show and change: "Everything" (the page
+  and every window) or one window (PARTS below: the mailing list, the comments, the
+  Workshops dialogs or Display itself with its paint roller).
+
+  Everything lives on <html data-font="N" data-color="N">. A small inline script in
+  index.html's <head> sets those before first paint, from the URL (?font=6&color=1,
+  which wins) or else from localStorage ("studio414.style.font" and ".color"); this
+  file builds the panel and keeps the attributes, localStorage and the URL in step as
+  the choice changes. Values that are not a whole number from 0 to the last option
+  (20 for the font and for the colour) count as 0.
+
+  A window's Font and Colour start with "Same as everything", its default; the ‹ ›
+  steps go through it too. Any other choice puts data-font / data-color on that
+  window's own elements, over Everything (switcher.css, fonts.css), and keeps it there
+  when Everything changes; "Same as everything" removes the attribute again. Each is
+  kept in localStorage under "studio414.style.<part>.font" and ".color" (the part's
+  key in PARTS, e.g. "studio414.style.comments.color"); a missing or invalid key means
+  "Same as everything". They are not put in the URL, which carries Everything alone.
+  A second inline script, in index.html's <body> just after the windows (before the
+  deferred scripts), sets them on the windows in the page before first paint; this
+  file sets Display's own as it builds it, and all of them again in case that script
+  is missing. Its list of windows and their selectors must match PARTS.
+
+  "Reset" on the Styles row puts every window back to "Same as everything" and clears
+  their keys; it shows only while some window has its own font or colour.
+  "Reset" on the Layout row is for the layout of the boxes, shown only while a box
   (this window included) has been moved or resized. boxes.js reports that with a
   "studio414:layoutchange" event ({ detail: { custom } }); the button asks it to reset
   with "studio414:layoutreset". Without boxes.js the row just stays hidden.
-
-  The choice lives on <html data-font="N" data-color="N">. A small inline script in
-  index.html's <head> sets those before first paint, from the URL (?font=6&color=1,
-  which wins) or else from localStorage; this file builds the panel and keeps the
-  attributes, localStorage and the URL in step as the choice changes. Values that are
-  not a whole number from 0 to the last option (20 for the font and for the colour)
-  count as 0.
+  Either button gives the focus to the Colour dropdown when it goes away under it.
 
   To remove the switcher: delete switcher.js, switcher.css, fonts.css and fonts/,
-  their <link> / <script> tags and the inline script in <head>. The tokens in
-  styles.css (--display-*, --face, --title and the rest) keep the default colours on
-  their own, with EB Garamond (font 1) as the display face.
+  their <link> / <script> tags and the two inline scripts that mention it (in <head>,
+  and in <body> after the windows). The tokens in styles.css (--display-*, --face,
+  --title and the rest) keep the default colours on their own, with EB Garamond
+  (font 1) as the display face.
 */
 (function () {
   'use strict';
@@ -106,6 +129,21 @@
     }
   };
 
+  var KINDS = ['font', 'color'];
+
+  // What the Part row can pick. Everything (key null) is <html>; each other part is a
+  // window, its elements found by selector, that can carry its own font and colour.
+  // key names it in localStorage ("studio414.style.<key>.font" / ".color"). The inline
+  // script in index.html's <body>, after the windows, repeats these (all but Display,
+  // which this file builds).
+  var PARTS = [
+    { key: null, label: 'Everything' },
+    { key: 'mailing', label: 'Mailing list', selector: '#signup' },
+    { key: 'comments', label: 'Comments', selector: '#comments-box' },
+    { key: 'workshops', label: 'Workshops', selector: '#workshops, #workshop' },
+    { key: 'display', label: 'Display', selector: '#switcher, .switcher-toggle' }
+  ];
+
   /* ---------- Values, storage and the URL ---------- */
 
   // The number of the last option of a kind: 20 for the font and for the colour.
@@ -113,9 +151,15 @@
     return OPTIONS[kind].names.length - 1;
   }
 
-  function parse(value, kind) {
+  // A whole number from 0 to the last option, or else null.
+  function check(value, kind) {
     var text = String(value == null ? '' : value).trim();
-    return /^(0|[1-9][0-9]?)$/.test(text) && Number(text) <= last(kind) ? Number(text) : 0;
+    return /^(0|[1-9][0-9]?)$/.test(text) && Number(text) <= last(kind) ? Number(text) : null;
+  }
+
+  function parse(value, kind) {
+    var number = check(value, kind);
+    return number === null ? 0 : number;
   }
 
   function readStorage(key) {
@@ -131,6 +175,14 @@
       window.localStorage.setItem(key, value);
     } catch (error) {
       // Storage is optional: the URL still carries the choice.
+    }
+  }
+
+  function removeStorage(key) {
+    try {
+      window.localStorage.removeItem(key);
+    } catch (error) {
+      // Nothing to clear without storage.
     }
   }
 
@@ -157,6 +209,57 @@
   function save() {
     writeStorage(KEY_PREFIX + 'font', String(state.font));
     writeStorage(KEY_PREFIX + 'color', String(state.color));
+  }
+
+  // Each window's own choice, by its key: { font, color }, null for "Same as
+  // everything".
+  var own = {};
+  PARTS.forEach(function (part) {
+    if (part.key === null) return;
+    own[part.key] = {};
+    KINDS.forEach(function (kind) {
+      own[part.key][kind] = check(readStorage(KEY_PREFIX + part.key + '.' + kind), kind);
+    });
+  });
+
+  // The part's choice of a kind: a number, or null for a window that follows Everything.
+  function choice(part, kind) {
+    return part.key === null ? state[kind] : own[part.key][kind];
+  }
+
+  // The option the part actually shows.
+  function effective(part, kind) {
+    var value = choice(part, kind);
+    return value === null ? state[kind] : value;
+  }
+
+  function hasOwn() {
+    return PARTS.some(function (part) {
+      return part.key !== null && KINDS.some(function (kind) {
+        return own[part.key][kind] !== null;
+      });
+    });
+  }
+
+  // Puts a window's own choice on its elements, or takes it off to follow <html>.
+  function applyOwn(part) {
+    var elements = document.querySelectorAll(part.selector);
+    KINDS.forEach(function (kind) {
+      var value = own[part.key][kind];
+      Array.prototype.forEach.call(elements, function (node) {
+        if (value === null) node.removeAttribute('data-' + kind);
+        else node.setAttribute('data-' + kind, String(value));
+      });
+    });
+  }
+
+  function saveOwn(part) {
+    KINDS.forEach(function (kind) {
+      var key = KEY_PREFIX + part.key + '.' + kind;
+      var value = own[part.key][kind];
+      if (value === null) removeStorage(key);
+      else writeStorage(key, String(value));
+    });
   }
 
   // Puts ?font=N&color=N in the address bar (keeping any other parameters and the
@@ -187,6 +290,17 @@
   function describe(kind, value) {
     return OPTIONS[kind].label + ' ' + value + ', ' + OPTIONS[kind].names[value];
   }
+
+  // The part's choice in words: "Font 6, Façade", or for a window that follows
+  // Everything, "Font same as everything (6, Façade)".
+  function describeChoice(part, kind) {
+    if (choice(part, kind) !== null) return describe(kind, choice(part, kind));
+    return OPTIONS[kind].label + ' same as everything (' + state[kind] + ', ' +
+      OPTIONS[kind].names[state[kind]] + ')';
+  }
+
+  // The part the Font and Colour rows show and change.
+  var shown = PARTS[0];
 
   // A window like the boxes: a title bar with a pixel icon (a display showing three
   // swatches and a line of text), then the rows. box--fixed tells boxes.js and
@@ -219,54 +333,128 @@
   live.setAttribute('aria-live', 'polite');
   live.setAttribute('role', 'status');
 
-  var controls = {};
-
-  function buildRow(kind) {
-    var option = OPTIONS[kind];
+  // A row: a label, then a dropdown between ‹ and › step buttons. The aria-labels of
+  // the dropdown and the buttons are set by render(), as they name the part shown.
+  function buildRow(name, selectClass) {
     var row = element('div', 'switcher__row');
     row.setAttribute('role', 'group');
-    row.setAttribute('aria-label', option.label);
+    row.setAttribute('aria-label', name);
 
-    var label = element('span', 'switcher__label', option.label);
+    var label = element('span', 'switcher__label', name);
     label.setAttribute('aria-hidden', 'true');
 
     var prev = element('button', 'switcher__step', '‹');
     prev.type = 'button';
-    prev.setAttribute('aria-label', 'Previous ' + option.label.toLowerCase());
-
-    var select = element('select', 'switcher__select switcher__select--' + kind);
-    var max = last(kind);
-    select.setAttribute('aria-label', option.label + ' (0 to ' + max + ')');
-    option.names.forEach(function (name, index) {
-      var item = element('option', null, index + ' — ' + name);
-      item.value = String(index);
-      select.appendChild(item);
-    });
-
+    var select = element('select', 'switcher__select ' + selectClass);
     var next = element('button', 'switcher__step', '›');
     next.type = 'button';
-    next.setAttribute('aria-label', 'Next ' + option.label.toLowerCase());
-
-    prev.addEventListener('click', function () {
-      set(kind, (state[kind] + max) % (max + 1));
-    });
-    next.addEventListener('click', function () {
-      set(kind, (state[kind] + 1) % (max + 1));
-    });
-    select.addEventListener('change', function () {
-      set(kind, parse(select.value, kind));
-    });
 
     row.appendChild(label);
     row.appendChild(prev);
     row.appendChild(select);
     row.appendChild(next);
-    controls[kind] = { select: select };
-    return row;
+    return { row: row, prev: prev, select: select, next: next };
   }
 
-  body.appendChild(buildRow('font'));
-  body.appendChild(buildRow('color'));
+  /* Part */
+
+  var partControl = buildRow('Part', 'switcher__select--part');
+  partControl.select.setAttribute('aria-label', 'Part of the page to change');
+  partControl.prev.setAttribute('aria-label', 'Previous part');
+  partControl.next.setAttribute('aria-label', 'Next part');
+  PARTS.forEach(function (part, index) {
+    var item = element('option', null, part.label);
+    item.value = String(index);
+    partControl.select.appendChild(item);
+  });
+
+  function stepPart(by) {
+    show(PARTS[(PARTS.indexOf(shown) + by + PARTS.length) % PARTS.length]);
+  }
+
+  partControl.prev.addEventListener('click', function () {
+    stepPart(-1);
+  });
+  partControl.next.addEventListener('click', function () {
+    stepPart(1);
+  });
+  partControl.select.addEventListener('change', function () {
+    show(PARTS[Number(partControl.select.value)] || PARTS[0]);
+  });
+
+  body.appendChild(partControl.row);
+
+  /* Font and Colour */
+
+  var controls = {};
+
+  // The next value one step (by: 1 or -1) from value, round in a loop. A window's
+  // loop starts with "Same as everything" (null), before 0.
+  function step(kind, value, by) {
+    var count = last(kind) + 1;
+    if (shown.key === null) return (value + by + count) % count;
+    var index = value === null ? 0 : value + 1;
+    index = (index + by + count + 1) % (count + 1);
+    return index === 0 ? null : index - 1;
+  }
+
+  KINDS.forEach(function (kind) {
+    var option = OPTIONS[kind];
+    var control = buildRow(option.label, 'switcher__select--' + kind);
+    option.names.forEach(function (name, index) {
+      var item = element('option', null, index + ' — ' + name);
+      item.value = String(index);
+      control.select.appendChild(item);
+    });
+    // First in the list while a window is shown (render() puts it in and takes it out).
+    control.same = element('option', null, 'Same as everything');
+    control.same.value = '';
+
+    control.prev.addEventListener('click', function () {
+      set(kind, step(kind, choice(shown, kind), -1));
+    });
+    control.next.addEventListener('click', function () {
+      set(kind, step(kind, choice(shown, kind), 1));
+    });
+    control.select.addEventListener('change', function () {
+      var value = control.select.value;
+      set(kind, value === '' && shown.key !== null ? null : parse(value, kind));
+    });
+
+    controls[kind] = control;
+    body.appendChild(control.row);
+  });
+
+  /* ---------- Resetting the windows' own styles ---------- */
+
+  var stylesRow = element('div', 'switcher__row');
+  stylesRow.setAttribute('role', 'group');
+  stylesRow.setAttribute('aria-label', 'Styles');
+  stylesRow.hidden = true;
+
+  var stylesLabel = element('span', 'switcher__label', 'Styles');
+  stylesLabel.setAttribute('aria-hidden', 'true');
+
+  var stylesReset = element('button', 'switcher__reset', 'Reset');
+  stylesReset.type = 'button';
+  stylesReset.setAttribute('aria-label', 'Reset styles');
+  stylesReset.title = 'Give every window the same font and colour as everything';
+  stylesReset.addEventListener('click', function () {
+    PARTS.forEach(function (part) {
+      if (part.key === null) return;
+      KINDS.forEach(function (kind) {
+        own[part.key][kind] = null;
+      });
+      applyOwn(part);
+      saveOwn(part);
+    });
+    render();
+    live.textContent = 'Styles reset: every window is the same as everything.';
+  });
+
+  stylesRow.appendChild(stylesLabel);
+  stylesRow.appendChild(stylesReset);
+  body.appendChild(stylesRow);
 
   /* ---------- Resetting the layout of the boxes (boxes.js) ---------- */
 
@@ -367,22 +555,66 @@
 
   /* ---------- Updating ---------- */
 
+  // Shows the shown part's choices in the rows (with "Same as everything" first in the
+  // list for a window), names that part in the labels, and shows the Styles row while
+  // some window has its own choice.
   function render() {
-    controls.font.select.value = String(state.font);
-    controls.color.select.value = String(state.color);
-    controls.color.select.style.setProperty('--swatch', OPTIONS.color.swatches[state.color]);
-    controls.font.select.title = describe('font', state.font);
-    controls.color.select.title = describe('color', state.color);
+    var isWindow = shown.key !== null;
+    var part = shown.label.toLowerCase();
+    partControl.select.value = String(PARTS.indexOf(shown));
+
+    KINDS.forEach(function (kind) {
+      var control = controls[kind];
+      var select = control.select;
+      var name = OPTIONS[kind].label.toLowerCase();
+      var range = '0 to ' + last(kind);
+      var value = choice(shown, kind);
+
+      if (isWindow && control.same.parentNode !== select) {
+        select.insertBefore(control.same, select.firstChild);
+      } else if (!isWindow && control.same.parentNode === select) {
+        select.removeChild(control.same);
+      }
+      select.value = value === null ? '' : String(value);
+      select.title = describeChoice(shown, kind);
+      select.setAttribute('aria-label', isWindow ?
+        shown.label + ' ' + name + ' (Same as everything, or ' + range + ')' :
+        OPTIONS[kind].label + ' for everything (' + range + ')');
+      control.prev.setAttribute('aria-label', 'Previous ' + name + ' for ' + part);
+      control.next.setAttribute('aria-label', 'Next ' + name + ' for ' + part);
+    });
+    // The colour the shown part actually has, even when it follows Everything.
+    controls.color.select.style.setProperty('--swatch', OPTIONS.color.swatches[effective(shown, 'color')]);
+
+    var custom = hasOwn();
+    // Keep focus in the panel when the button it was on goes away.
+    if (!custom && document.activeElement === stylesReset) controls.color.select.focus();
+    stylesRow.hidden = !custom;
   }
 
+  // Sets the shown part's choice of a kind (null: a window back to "Same as everything").
   function set(kind, value) {
-    if (state[kind] === value) return;
-    state[kind] = value;
-    apply();
-    save();
-    reflectInUrl();
+    if (choice(shown, kind) === value) return;
+    if (shown.key === null) {
+      state[kind] = value;
+      apply();
+      save();
+      reflectInUrl();
+    } else {
+      own[shown.key][kind] = value;
+      applyOwn(shown);
+      saveOwn(shown);
+    }
     render();
-    live.textContent = describe(kind, value) + '.';
+    live.textContent = (shown.key === null ? '' : shown.label + ': ') + describeChoice(shown, kind) + '.';
+  }
+
+  // Shows another part in the Font and Colour rows.
+  function show(part) {
+    if (part === shown) return;
+    shown = part;
+    render();
+    live.textContent = 'Part: ' + part.label + '.';
   }
 
   /* ---------- Start ---------- */
@@ -393,6 +625,11 @@
   // The paint roller just before the window, so Tab goes from one into the other.
   document.body.appendChild(toggle);
   document.body.appendChild(panel);
+  // Each window's own choice, Display's included now it is in the page (the inline
+  // script in index.html's <body> has set the others already).
+  PARTS.forEach(function (part) {
+    if (part.key !== null) applyOwn(part);
+  });
 
   // Keep a choice that came from the URL or storage, and show it in the address bar
   // once it is anything other than the default design (or the URL already had it).
