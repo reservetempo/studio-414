@@ -4,12 +4,6 @@ Managed by the main session (see CLAUDE.md). `/z <items>` adds tasks; `/z` works
 
 ## Next
 
-- 11. Workshops link opens the calendar directly, with a list of links under it. Files: `index.html` (dialogs `#workshops` ~line 137, `#workshop` sign-up ~161, `#calendar` ~245), `workshop.js` (builds the list window `#workshops`/`#workshops-list`, the launcher `#workshop-button`, the sign-up's "All workshops" back button, exposes `window.studioWorkshops`, `makeWindow`), `calendar.js` (month grid; opener is `#workshops-calendar` "See in calendar"; `#calendar-back` "All workshops"), `calendar.css`, `workshop.css`. Depends on task 10 (same files), so run after it.
-  - Clicking Workshops opens the calendar window straight away (title "Workshops"), starting on the month of the next workshop as now. Day buttons in the grid still open that workshop's sign-up.
-  - Under the calendar, a simple list with one link per workshop coming up: underlined, classic web blue `#0000EE`, visited `#551A8B`, always (not following the colour switcher). Link text is name and date, e.g. "Paint a piece, Sat 7 Nov"; spots left / "Sold out" in plain text after the link (as the list window shows now). Each opens that workshop's sign-up.
-  - Remove the separate Workshops list window and its "See in calendar" button, and the calendar's "All workshops" back button. The sign-up window's "All workshops" back button now returns to the calendar window. Only one window open at a time, as now.
-  - Update the header comments in `workshop.js`, `calendar.js` and the dialog comments in `index.html` to match.
-  - Done: Workshops → calendar with links below; a link or a marked day → sign-up; "All workshops" → back to the calendar; works at phone width; the Stripe return message still works.
 
 ## Done
 
@@ -23,3 +17,4 @@ Managed by the main session (see CLAUDE.md). `/z <items>` adds tasks; `/z` works
 - 8. "Email us" link under the mailing list form: `b3df5c3`. Small link at the bottom left of the form (`.signup__email`).
 - 9. Fix the stale font-list comment in fonts.css: `96e3f1d`.
 - 10. "Opening soon!" and Workshops as plain text: `8d56a8a`. Plain italic "Opening soon!" top left; Workshops a plain underlined button fixed top right; both in the display font with a page-colour halo over the photo. Corner room for the 414 shrunk. Italic is browser-slanted in every font but EB Garamond.
+- 11. Workshops opens on the calendar with a list of links: `582fec4`. One "Workshops" window: month calendar, then blue underlined links ("Paint a piece, Sat 7 Nov") with spots left in plain text. `#calendar` dialog and "See in calendar" removed; sign-up's "All workshops" returns here. Links are buttons styled as links; "visited" (purple) lasts until reload.
