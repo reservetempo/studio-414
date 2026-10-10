@@ -4,16 +4,6 @@ Managed by the main session (see CLAUDE.md). `/z <items>` adds tasks; `/z` works
 
 ## Next
 
-### 4. Workshops list window (user's step 2)
-- Goal: the Workshops button (top right, `#workshop-button`) opens a "Workshops" window listing the upcoming workshops (name, date, spots left). Clicking one opens the sign-up window for that workshop.
-- Files: `workshop.js`, `workshop.css`, `index.html` (button label, if needed).
-- Use the API documented at the top of `supabase/functions/workshop-checkout/index.ts` (task 3): POST sends the workshop id.
-- The functions aren't deployed yet, so names and dates must show even when the API can't be reached: keep the list in `workshop.js`, with ids matching the server's, and a comment in each place pointing to the other. Spots left come from the API when it answers.
-- The back end returns `{ workshops: [...] }`; ids are `paint-a-piece` (2026-11-07) and `hand-building` (2026-12-05), price in cents. Until task 6 adds the name field, POST will still be rejected (name is required): that's expected; leave the README's "Still to do" note for task 6 to remove.
-- Workshops whose date has passed drop off the list. The button hides when none are left.
-- Same 90s window style, dragging, keyboard and screen-reader behaviour as the existing sign-up window. Update the header comment of `workshop.js`.
-- Done when: previewed: the list shows both workshops, and each one opens its own sign-up.
-
 ### 5. "See in calendar" month view (user's step 3)
 - Goal: a "See in calendar" option in the workshops list window opens a small 90s-style window with a month grid.
 - The grid starts on the month of the next workshop, with previous/next month buttons. Workshop dates are marked; clicking a marked date opens that workshop's sign-up.
@@ -52,3 +42,4 @@ Managed by the main session (see CLAUDE.md). `/z <items>` adds tasks; `/z` works
 - 1. Add 10 Velvetyne fonts to the font switcher: `34558eb`. Fonts 11-20: Anthony, Victorianna (Thin), Gulax, BackOut, Bluu Next (Bold), Daubenton, Grotesk, Kaeru Kaeru, Format 1452, Flor de Ruina. The font range is now 0-20; colours still 0-10.
 - 2. Add 10 color options to the color switcher: `f7ffc9b`. Colours 11-20: Oxblood, Tangerine, Umber, Olive, Turquoise, Teal, Ultraviolet, Hot Pink, Porcelain, Raku. Colour range is now 0-20.
 - 3. Back end for several workshops, spot counts and names: `c2e148f`. GET `{ workshops: [...] }`; POST `{ workshop, email, name, quantity, friendName? }`; API documented at the top of `workshop-checkout/index.ts`. Assumes Eastern time (`America/Toronto`). Not type-checked with Deno (not installed); SQL not run.
+- 4. Workshops list window: `100b454`. Button reads "Workshops", opens a list; each workshop opens its own sign-up with "All workshops" to go back. Workshop list kept in `workshop.js`; paid workshop id kept in `sessionStorage` for the Stripe return message.
