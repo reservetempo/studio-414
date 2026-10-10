@@ -33,9 +33,11 @@
 }
 
 /* Once moved or resized, boxes.js sets left, top, width and height in px on the box,
-   in page coordinates; these lift it out of its default layout. */
+   in page coordinates; these lift it out of its default layout (the card's default
+   place is set by its bottom edge). */
 .box.is-placed {
   position: absolute;
+  bottom: auto;
   max-width: none;
   margin: 0;
   aspect-ratio: auto;

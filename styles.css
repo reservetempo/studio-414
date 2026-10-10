@@ -11,6 +11,9 @@
   --window-h: 0.0964;
 
   --phi: 1.618;
+  /* How much of the big 414 and of the card lies over the photo, at its top and
+     bottom edge: 1/phi^3 of their height, about a quarter. */
+  --dip: 0.236;
 
   /* The boxes (the mailing-list card and the comments box) are 90s dialog windows:
      solid fills, a title bar and 2px bevels. These are colour 0, "Classic": a warm
@@ -114,7 +117,7 @@ body {
 
 .hero {
   /* Size and offset of the photo in the hero. They are in cqw / cqh of the hero,
-     so they only mean anything inside it (.hero::before and .signup). */
+     so they only mean anything inside it (.hero::before, .big-414 and .signup). */
   --photo-w: 100cqw;
   --photo-h: 100cqw * 1920 / 2462;
   --photo-x: (100cqw - var(--photo-w)) / 2;
@@ -123,8 +126,10 @@ body {
   position: relative;
   height: 100vh;
   height: 100dvh;
-  /* No overflow: hidden, so the card can be dragged out of the hero (boxes.js). */
-  /* Lets .signup and .hero::before measure the hero (cqw / cqh) to find the photo in it. */
+  /* No overflow: hidden, so the card and the 414 can be dragged out of the hero
+     (boxes.js). */
+  /* Lets .signup, .big-414 and .hero::before measure the hero (cqw / cqh) to find the
+     photo in it. */
   container-type: size;
   /* The photo always spans the full width at its own aspect ratio, centred vertically.
      On screens at least as wide as the photo (2462 : 1920) that is exactly what
@@ -186,56 +191,104 @@ body {
 
 /* ---------- The big 414 ----------
    The studio's name (the page's <h1>), as big as the digits on a "page not found"
-   page, in the page colour and the display font. It hangs centred over the photo,
-   its baseline just above the window, like a sign over it: clear of the window, of
-   the card under the window and of the comments box on the right wall.
-   It is fitted to the room there, so it scales with the screen:
+   page, in the page colour and the display font. It stands centred above the photo,
+   mostly in the band of page colour over it, and the foot of the figures dips into
+   the photo's top edge by a 1/phi^3 share of their height (--dip, about a quarter),
+   as the card dips into its bottom edge (.signup, below):
+   - where the band above the photo (screens narrower than the photo) is tall enough,
+     the 414 stands in it and dips just that share into the photo;
+   - where the photo fills the top of the hero (wider screens), it goes as high as it
+     can, 16px from the top of the page, over the ceiling. Where the band is short, it
+     keeps that size and the photo slides down under it as the band grows, until the
+     figures only dip by that share.
+   It is fitted to the room it has, so it scales with the screen:
    - its width: the window's own width where the comments box floats beside the
      window (which keeps clear of the box), otherwise up to 80% of the photo;
-   - its height: from its baseline up to the photo's top edge, or 16px from the top of
-     the page where the photo runs past it. Where there is a band of page colour above
-     the photo (screens narrower than the photo), the digits rise into it by up to 12%
-     of the photo's height: they come up out of the page colour, drawn there by
-     their edge alone, and turn solid over the photo.
+   - its height: whichever is more of what the band leaves it from 16px down at that
+     dip, and the ceiling over the window less 16px (the ceiling that shows: from
+     the photo's top edge, or from the top of the page where the photo runs past it).
+     Either way its foot stays above the window, clear of it and of the card;
+   - the workshop button (workshop.css) has the top-right corner: the 414 either stays
+     narrower than the room between that corner and the same width on the left, or
+     starts below the button and stands in the band, whichever lets it be bigger.
    Whichever runs out first sets the size, using each face's measurements (--big-* in
    :root and fonts.css), so every face fills the same room.
    Being the page colour, it would vanish into the darkened photo for most colours
    (the walls and ceiling come to between 1.4:1 and 3.3:1 against them), so each digit
    is edged in the colour's own title-bar text colour, white or black, as the title
    bars are: 3.3:1 or more against the photo behind it (4:1 to 5:1 on average), and
-   6:1 or more against the digit and the band. */
+   6:1 or more against the digit and the band.
+   This box is the figures and nothing more (the advance width of "414" by the height
+   of its figures; the heading's line box reaches past it): that is what boxes.js
+   moves, so the 414 can be dragged like the windows. A mouse or pen drags it at once;
+   a finger after a long press, so a swipe over it still scrolls the page. Its
+   "Move 414" button (below) takes the arrow keys. */
 .big-414 {
-  --baseline: calc(var(--photo-y) + var(--photo-h) * (var(--window-bottom) - var(--window-h))
+  /* The lowest its foot (the baseline) may come: just above the window. */
+  --sill: calc(var(--photo-y) + var(--photo-h) * (var(--window-bottom) - var(--window-h))
     - max(10px, var(--photo-h) * 0.025));
+  /* The band of page colour above the photo; none where the photo runs past the top. */
+  --band: max(0px, var(--photo-y));
   --room-w: min(100cqw - 32px, var(--photo-w) * 0.8);
   --room-top: 16px;
-  --rise: calc(var(--photo-h) * 0.12);
-  --room-h: calc(var(--baseline) - max(var(--room-top), var(--photo-y) - var(--rise)));
+  /* The workshop button's corner: how far in from the right edge and down from the
+     top it reaches, with room to spare (workshop.css). Without it, no corner. */
+  --corner-w: var(--workshop-reach, 0px);
+  --corner-h: var(--workshop-drop, var(--room-top));
+  /* The two ways to fit, as font sizes. High: from 16px down, between the corner and
+     the same width on the left (but never under a quarter of the room, so it can't
+     vanish in the smallest windows). Low: below the button, the full room wide,
+     standing in the band. */
+  --fit-high: min(
+    min(var(--room-w), max(100cqw - 2 * var(--corner-w), var(--room-w) / 4)) / var(--big-w),
+    max((var(--band) - var(--room-top)) / (1 - var(--dip)),
+      var(--sill) - var(--band) - var(--room-top)) / var(--big-h));
+  --fit-low: min(var(--room-w) / var(--big-w),
+    (var(--band) - var(--corner-h)) / (1 - var(--dip)) / var(--big-h));
+  /* The highest its top may go: 16px down, or below the button where the low fit
+     wins (a step from one to the other). */
+  --top-min: clamp(var(--room-top), var(--room-top) + (var(--fit-low) - var(--fit-high)) * 1000, var(--corner-h));
+  /* Its foot: into the photo by the dip, unless that would lift its top past top-min. */
+  --foot: max(var(--top-min) + var(--big-h) * 1em, var(--photo-y) + var(--dip) * var(--big-h) * 1em);
   /* The edge, drawn outside the digit (the stroke is twice as wide, under the fill). */
   --edge: clamp(1.5px, 0.0125em, 4px);
 
   position: absolute;
+  /* Centred: as wide as the figures, between equal margins. */
   left: 0;
   right: 0;
-  top: calc(var(--baseline) - var(--big-base) * 1em);
+  top: calc(var(--foot) - var(--big-h) * 1em);
   /* Under the boxes (z-index 1 and up), over the photo's shading. */
   z-index: 0;
-  margin: 0;
+  width: max-content;
+  height: calc(var(--big-h) * 1em);
+  margin: 0 auto;
   color: var(--page-bg);
   font-family: var(--display-font);
-  font-size: min(var(--room-w) / var(--big-w), var(--room-h) / var(--big-h));
+  font-size: max(var(--fit-high), var(--fit-low));
   font-weight: var(--big-weight);
   font-synthesis: none;
   font-variant-numeric: lining-nums;
   line-height: 1;
-  text-align: center;
   white-space: nowrap;
   -webkit-text-stroke: calc(2 * var(--edge)) var(--page-text);
   paint-order: stroke fill;
-  /* Only decoration for the pointer: drags and clicks go straight through it. */
-  pointer-events: none;
+  /* Picked up and dragged (boxes.js); a finger only after a long press, so no
+     touch-action here: a swipe over it scrolls the page. */
+  cursor: grab;
   -webkit-user-select: none;
   user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* The heading itself: its 1em line box is pulled up so the top of the figures is the
+   top of the box round it. The line box reaches above and below that box; pointer
+   events pass through it, so only the box round the figures can be picked up. */
+.big-414__name {
+  margin: calc((var(--big-h) - var(--big-base)) * 1em) 0 0;
+  font: inherit;
+  pointer-events: none;
 }
 
 /* Where the comments box floats on the wall right of the window (comments.css), keep
@@ -246,36 +299,89 @@ body {
   }
 }
 
-/* Where the Display window starts at the top instead of the bottom (switcher.css),
-   keep out of its way: on short screens it is in the top-left corner (16px in,
-   360px wide), so the 414 is centred in the room to the right of it; on the
-   shortest phones it spans the top (about 100px tall), so the 414 starts below it. */
-@media (max-height: 620px) and (min-width: 481px) and (max-width: 1067px) {
-  .big-414 {
-    left: 392px;
-    right: 16px;
-    --room-w: calc(100cqw - 408px);
-  }
+/* Moved: boxes.js sets left and top in px, from the corner of the hero. */
+.big-414.is-placed {
+  right: auto;
+  margin: 0;
 }
 
-@media (max-height: 560px) and (max-width: 480px) {
-  .big-414 {
-    --room-top: 112px;
-  }
+/* Picked up: a hard 90s shadow, and the closed hand wherever the pointer goes. */
+.big-414.is-lifted {
+  filter: drop-shadow(0.02em 0.02em 0 rgba(0, 0, 0, 0.45));
+}
+
+html.is-moving-414,
+html.is-moving-414 * {
+  cursor: grabbing !important;
+  -webkit-user-select: none !important;
+  user-select: none !important;
+}
+
+/* "Move 414" (boxes.js): beside the heading, not in it, so the heading still reads
+   "Studio 414". Out of sight until the keyboard reaches it; then a small 90s button
+   under the figures, which get a dotted frame. The arrow keys move the 414, as on the
+   windows' title bars. */
+.big-414__handle {
+  position: absolute;
+  top: calc(100% + 14px);
+  left: 50%;
+  translate: -50% 0;
+  height: 32px;
+  margin: 0;
+  padding: 0 12px;
+  border: 1px solid var(--dk-shadow);
+  border-radius: 0;
+  background: var(--face);
+  color: var(--face-text);
+  box-shadow: var(--bevel-raised);
+  font: italic 0.9375rem/1 var(--body-font);
+  -webkit-text-stroke: 0;
+  white-space: nowrap;
+  cursor: grab;
+}
+
+.big-414__handle:not(:focus) {
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+
+.big-414__handle:focus {
+  outline: 1px dotted var(--focus);
+  outline-offset: -5px;
+}
+
+.big-414:focus-within {
+  outline: 2px dotted var(--page-text);
+  outline-offset: 8px;
 }
 
 .signup {
-  /* Golden-ratio steps down from the window:
-     gap : window height : card height = 1/phi : 1 : phi,
-     and card width = window width / phi, which makes the card a golden rectangle.
-     That is its default size; once someone resizes it (boxes.js) it keeps theirs. */
+  /* Golden-ratio size, from the window: card width = window width / phi, which makes
+     the card a golden rectangle. That is its default size; once someone resizes it
+     (boxes.js) it keeps theirs. */
   --card-w: clamp(min(300px, 100cqw - 32px), var(--photo-w) * var(--window-w) / var(--phi), 480px);
-  --card-top: calc(var(--photo-y) + var(--photo-h) * (var(--window-bottom) + var(--window-h) / var(--phi)));
+  --card-h: var(--card-w) / var(--phi);
+  /* The photo's bottom edge as it shows: its own, where there is a band of page colour
+     below it, or else the bottom of the hero, where the photo runs past it. */
+  --photo-end: min(var(--photo-y) + var(--photo-h), 100cqh);
+  /* The lowest it may sit: 16px above the bottom of the hero, wholly on the first
+     screen (on narrow phones, clear of the paint roller: below). */
+  --card-gutter: 16px;
 
   position: absolute;
   /* Centred under the window, but kept inside a 16px gutter. */
   left: clamp(16px, var(--photo-x) + var(--photo-w) * var(--window-cx) - var(--card-w) / 2, 100cqw - 16px - var(--card-w));
-  top: min(var(--card-top), 100cqh - 16px - var(--card-w) / var(--phi));
+  /* Across the photo's bottom edge, mostly below it: the top 1/phi^3 of the card
+     (about a quarter) lies over the photo, as the 414 dips into its top edge. Where
+     the photo runs past the bottom of the hero, or the band below it is too short,
+     that would take the card off the first screen, so it sits on the gutter instead.
+     Set by its bottom edge, so a card that its content makes taller grows upwards and
+     still keeps to the gutter. */
+  bottom: max(var(--card-gutter), 100cqh - var(--photo-end) - var(--card-h) * (1 - var(--dip)));
   width: var(--card-w);
   /* Grows past the golden rectangle only if its content needs the room. */
   aspect-ratio: var(--phi);
@@ -284,6 +390,15 @@ body {
   /* Lets the padding below follow the card's width. The window chrome (frame, title
      bar, resize grip) is in boxes.css. */
   container-type: inline-size;
+}
+
+/* Phones narrow enough for the card (300px, centred) to reach over the paint roller in
+   the bottom-left corner (44px square, 8px in: switcher.css): the card keeps above it,
+   with 8px to spare. */
+@media (max-width: 419px) {
+  .signup {
+    --card-gutter: 60px;
+  }
 }
 
 /* Everything under the title bar, centred in the space left. In proportion to the

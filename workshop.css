@@ -6,12 +6,28 @@
    switcher like everything else. With reduced motion nothing moves or blinks.
 
    Where the button sits: the top-right corner, 16px in (8px on phones), over the
-   ceiling or the band of page colour above the photo, clear of the big 414. Where the
-   top right is taken (short screens, where the Display window starts at the top, see
-   switcher.css; roughly square ones, where the 414 reaches into the corner) it moves
-   to the bottom-right corner, beside or below the card. Where the comments box floats
-   on the wall right of the window, comments.css starts it lower to leave the corner to
-   the button. */
+   ceiling or the band of page colour above the photo, on every screen. The corner is
+   kept for it: --workshop-reach and --workshop-drop (below) say how far it reaches in
+   from the right edge and down from the top, and the big 414 keeps out of that corner
+   (styles.css), the card sits at the bottom (styles.css) and the paint roller at the
+   bottom left (switcher.css). Where the comments box floats on the wall right of the
+   window, comments.css starts it lower to leave the corner to the button. */
+
+/* The corner the button takes, with room to spare: its 16px gutter, the button itself
+   (156px at most, in the widest face) and the starburst over its left end (40px), and
+   down to the starburst's lowest point (43px below the top of the button, as it
+   pulses); the big 414 keeps 8px clear of that. */
+:root {
+  --workshop-reach: calc(max(16px, env(safe-area-inset-right)) + 204px);
+  --workshop-drop: calc(max(16px, env(safe-area-inset-top)) + 52px);
+}
+
+@media (max-width: 480px) {
+  :root {
+    --workshop-reach: calc(max(8px, env(safe-area-inset-right)) + 204px);
+    --workshop-drop: calc(max(12px, env(safe-area-inset-top)) + 52px);
+  }
+}
 
 /* ---------- The button ---------- */
 
@@ -170,67 +186,10 @@
 }
 
 /* Phones: the same 8px gutter as the Display window at the side, and room above for
-   the starburst. */
+   the starburst (and so a corner of their own, above). */
 @media (max-width: 480px) {
   .workshop-button {
     top: max(12px, env(safe-area-inset-top));
-    right: max(8px, env(safe-area-inset-right));
-  }
-}
-
-/* Where Display starts at the top (switcher.css) and the 414 moves out of its way into
-   the top-right corner (styles.css), the button goes to the bottom-right corner, beside
-   the card; without the starburst, which would reach over the card's corner on phones
-   turned sideways. */
-@media (max-height: 620px) and (min-width: 481px) and (max-width: 1067px) {
-  .workshop-button {
-    top: auto;
-    bottom: max(16px, env(safe-area-inset-bottom));
-  }
-}
-
-@media (max-height: 560px) and (max-width: 480px) {
-  .workshop-button {
-    top: auto;
-    bottom: max(8px, env(safe-area-inset-bottom));
-  }
-}
-
-@media (max-height: 620px) and (min-width: 481px) and (max-width: 1067px),
-  (max-height: 560px) and (max-width: 480px) {
-  .workshop-button__burst {
-    display: none;
-  }
-}
-
-/* On roughly square screens under 1100px wide the 414 is as wide as it gets (80% of
-   the photo) and reaches the top of the page, right into the corner: there the button
-   goes to the bottom-right corner too, clear of the card above it and Display on the
-   left. */
-@media (min-width: 481px) and (max-width: 1099px) and (min-height: 621px) and (min-aspect-ratio: 8/9) and (max-aspect-ratio: 13/10) {
-  .workshop-button {
-    top: auto;
-    bottom: max(16px, env(safe-area-inset-bottom));
-  }
-}
-
-/* The wider faces (fonts.css) draw a wider 414, which reaches the corner on screens up
-   to half as wide again as they are tall. */
-@media (min-width: 481px) and (max-width: 1099px) and (min-height: 621px) and (min-aspect-ratio: 8/9) and (max-aspect-ratio: 3/2) {
-  html[data-font="1"] .workshop-button,
-  html[data-font="2"] .workshop-button,
-  html[data-font="5"] .workshop-button,
-  html[data-font="6"] .workshop-button,
-  html[data-font="8"] .workshop-button,
-  html[data-font="10"] .workshop-button {
-    top: auto;
-    bottom: max(16px, env(safe-area-inset-bottom));
-  }
-}
-
-/* Phones turned sideways: the phones' 8px gutter, to stay clear of the card. */
-@media (max-height: 620px) and (min-width: 481px) and (max-width: 699px) {
-  .workshop-button {
     right: max(8px, env(safe-area-inset-right));
   }
 }

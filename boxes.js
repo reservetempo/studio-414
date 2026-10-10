@@ -33,12 +33,30 @@
     attribute). A closed box has no size, so it is never measured, fitted or saved
     while closed (its stored place is kept, and a drag of it is called off); when it
     opens again it is fitted to the screen where it was left and comes to the front.
+
+  The big 414 (#big-414, styles.css) moves the same way, though it is not a window:
+  - It is picked up anywhere on its figures. A mouse or pen drags it at once (a grab
+    cursor). A finger has to rest on it for a moment first (HOLD, below): a swipe over
+    it scrolls the page as before, since it takes no touch-action, and only once it is
+    lifted are the finger's moves kept from scrolling (touchmove is cancelled), so
+    they move the 414 instead.
+  - Keyboard: a "Move 414" button, added beside the heading (not in it, so the
+    heading still reads "Studio 414"), shows when Tab reaches it; the arrow keys move
+    the 414, as on the title bars. Escape during a drag puts it back.
+  - It is placed, fitted, saved (under "414" with the boxes) and reset like a box, and
+    fitted again when the font changes (which changes its size). While dragged it
+    stays wholly in view, and once placed wholly on the page. It always stays under
+    the windows: it is not restacked.
 */
 (function () {
   'use strict';
 
   var STORAGE_KEY = 'studio414.layout';
   var STEP = 10;
+  // How long a finger rests on the 414 before it lifts (ms), and how far it may
+  // wander meanwhile (px); moving further is a swipe, which scrolls the page.
+  var HOLD = 450;
+  var SLOP = 10;
   var KEYS = {
     ArrowLeft: [-1, 0],
     ArrowRight: [1, 0],
@@ -56,18 +74,25 @@
   ].filter(function (box) {
     return box.el && box.el.querySelector('.box__titlebar');
   });
-  if (!boxes.length || !window.PointerEvent) return;
   boxes.forEach(function (box) {
     box.fixed = box.el.classList.contains('box--fixed');
+    box.stacked = true;
   });
 
+  // Everything that moves: the boxes, and the big 414, which stays under them.
+  var signEl = document.getElementById('big-414');
+  var sign = signEl ? { id: '414', el: signEl, grip: false, fixed: false, stacked: false } : null;
+  var items = sign ? boxes.concat(sign) : boxes.slice();
+  if (!items.length || !window.PointerEvent) return;
+
   var byId = {};
-  boxes.forEach(function (box) { byId[box.id] = box; });
+  items.forEach(function (item) { byId[item.id] = item; });
   var DEFAULT_ORDER = boxes.map(function (box) { return box.id; });
 
   var placed = {};                     // id -> { x, y, w, h }, page px, as the visitor set it
-  var order = DEFAULT_ORDER.slice();   // back to front
+  var order = DEFAULT_ORDER.slice();   // back to front (the boxes only)
   var gesture = null;
+  var hold = null;                     // a finger resting on the 414, until it lifts
 
   /* ---------- localStorage, always optional ---------- */
 
@@ -87,13 +112,13 @@
     }
     if (!data || typeof data !== 'object') return;
     if (data.boxes && typeof data.boxes === 'object') {
-      boxes.forEach(function (box) {
-        if (isRect(data.boxes[box.id])) placed[box.id] = roundRect(data.boxes[box.id]);
+      items.forEach(function (item) {
+        if (isRect(data.boxes[item.id])) placed[item.id] = roundRect(data.boxes[item.id]);
       });
     }
     if (Array.isArray(data.order)) {
       var known = data.order.filter(function (id, index) {
-        return byId[id] && data.order.indexOf(id) === index;
+        return byId[id] && byId[id].stacked && data.order.indexOf(id) === index;
       });
       // Boxes the stored order doesn't know yet (Display, for layouts saved before
       // it was a window) go on top, as they would by default.
@@ -160,8 +185,8 @@
     return roundRect({ x: r.left + dx, y: r.top + dy, w: r.width, h: r.height });
   }
 
-  // Where left: 0; top: 0 puts a placed box: the corner of the hero for the card, of
-  // the page for the comments box.
+  // Where left: 0; top: 0 puts a placed box: the corner of the hero for the card and
+  // the 414, of the page for the comments box.
   function origin(el) {
     var parent = el.offsetParent;
     if (!parent || parent === document.body || parent === root) return { x: 0, y: 0 };
@@ -198,16 +223,20 @@
     return height;
   }
 
-  // How far below the top of the box its title bar ends.
-  function titleBottom(el) {
+  // How far below its top a box has to stay in reach: where its title bar ends, or,
+  // for the 414, all of it.
+  function grabBottom(box) {
+    var el = box.el;
+    if (!box.stacked) return el.offsetHeight;
     var bar = el.querySelector('.box__titlebar');
     return Math.ceil(bar.getBoundingClientRect().bottom - el.getBoundingClientRect().top);
   }
 
-  // Fits a rectangle to the screen. live (while dragging): the title bar stays in the
-  // visible viewport; otherwise anywhere on the page. A fixed box stays wholly on
-  // screen (or, if it were ever taller than the screen, with its title bar at the top).
-  // A box without a grip keeps the size its CSS gives it; only its place is fitted.
+  // Fits a rectangle to the screen. live (while dragging): the title bar (all of the
+  // 414) stays in the visible viewport; otherwise anywhere on the page. A fixed box
+  // stays wholly on screen (or, if it were ever taller than the screen, with its title
+  // bar at the top). A box without a grip, and the 414, keep the size their CSS gives
+  // them; only their place is fitted.
   function fit(box, r, live) {
     var el = box.el;
     var vp = viewport();
@@ -228,7 +257,7 @@
       bottom = vp.height - h;
     } else {
       top = live ? vp.top : 0;
-      bottom = (live ? vp.top + vp.height : pageBottom()) - titleBottom(el);
+      bottom = (live ? vp.top + vp.height : pageBottom()) - grabBottom(box);
     }
     var y = clamp(r.y, top, Math.max(top, bottom));
     return roundRect({ x: x, y: y, w: w, h: h });
@@ -290,18 +319,19 @@
   }
 
   function applyAll() {
-    boxes.forEach(function (box) {
-      if (placed[box.id]) {
-        refit(box);
+    items.forEach(function (item) {
+      if (placed[item.id]) {
+        refit(item);
       } else {
-        unplace(box);
+        unplace(item);
       }
     });
     stack();
   }
 
+  // Brings a box to the front (the 414 stays under the boxes).
   function raise(box) {
-    if (order[order.length - 1] === box.id) return;
+    if (!box.stacked || order[order.length - 1] === box.id) return;
     order = order.filter(function (id) { return id !== box.id; }).concat(box.id);
     stack();
     save();
@@ -320,26 +350,36 @@
     if (gesture || !event.isPrimary || event.button !== 0) return;
     // No text selection and no focus change; the box keeps whatever had focus.
     event.preventDefault();
+    lift(box, kind, event.currentTarget, event.pointerId, event.clientX, event.clientY);
+  }
+
+  // Starts a drag of the box by the pointer at (x, y), captured by target.
+  function lift(box, kind, target, pointerId, x, y) {
     raise(box);
     var before = placed[box.id] || null;
     var start = place(box);
     gesture = {
       box: box,
       kind: kind,
-      target: event.currentTarget,
-      pointerId: event.pointerId,
-      x: event.clientX,
-      y: event.clientY,
+      target: target,
+      pointerId: pointerId,
+      x: x,
+      y: y,
       before: before,
       start: start,
       rect: start
     };
     try {
-      gesture.target.setPointerCapture(event.pointerId);
+      target.setPointerCapture(pointerId);
     } catch (error) {
       // Without capture the drag still follows the pointer over the handle.
     }
-    root.classList.add(kind === 'move' ? 'is-moving-box' : 'is-sizing-box');
+    if (box.stacked) {
+      root.classList.add(kind === 'move' ? 'is-moving-box' : 'is-sizing-box');
+    } else {
+      root.classList.add('is-moving-414');
+      box.el.classList.add('is-lifted');
+    }
   }
 
   function track(event) {
@@ -356,7 +396,8 @@
     var g = gesture;
     if (!g) return;
     gesture = null;
-    root.classList.remove('is-moving-box', 'is-sizing-box');
+    root.classList.remove('is-moving-box', 'is-sizing-box', 'is-moving-414');
+    g.box.el.classList.remove('is-lifted');
     try {
       g.target.releasePointerCapture(g.pointerId);
     } catch (error) {
@@ -457,7 +498,99 @@
     el.addEventListener('focusin', function () { raise(box); });
   });
 
+  /* ---------- The big 414 ---------- */
+
+  // A finger resting on the 414 lifts it after HOLD ms, unless it lets go or moves
+  // more than SLOP px first: that is a swipe, which the browser scrolls.
+  function holdStart(event) {
+    if (gesture || hold || !event.isPrimary) return;
+    hold = {
+      pointerId: event.pointerId,
+      target: event.currentTarget,
+      x0: event.clientX,
+      y0: event.clientY,
+      x: event.clientX,
+      y: event.clientY
+    };
+    hold.timer = window.setTimeout(function () {
+      var h = hold;
+      hold = null;
+      if (!h || gesture) return;
+      // Its shadow (styles.css) says it has been picked up.
+      lift(sign, 'move', h.target, h.pointerId, h.x, h.y);
+    }, HOLD);
+  }
+
+  function holdMove(event) {
+    if (!hold || event.pointerId !== hold.pointerId) return;
+    hold.x = event.clientX;
+    hold.y = event.clientY;
+    if (Math.abs(hold.x - hold.x0) > SLOP || Math.abs(hold.y - hold.y0) > SLOP) holdCancel();
+  }
+
+  function holdCancel() {
+    if (!hold) return;
+    window.clearTimeout(hold.timer);
+    hold = null;
+  }
+
+  if (sign) {
+    signEl.title = 'Drag to move. On a touch screen, press and hold it first.';
+
+    // For the keyboard: beside the heading, not in it (styles.css shows it on focus).
+    var signHandle = document.createElement('button');
+    signHandle.type = 'button';
+    signHandle.className = 'big-414__handle';
+    signHandle.textContent = 'Move 414 with the arrow keys';
+    signEl.appendChild(signHandle);
+    signHandle.addEventListener('keydown', function (event) { nudge(sign, 'move', event); });
+
+    // A mouse or pen picks it up at once; a finger after a long press.
+    signEl.addEventListener('pointerdown', function (event) {
+      if (event.pointerType === 'touch') {
+        holdStart(event);
+      } else {
+        begin(sign, 'move', event);
+      }
+    });
+    signEl.addEventListener('pointermove', function (event) {
+      holdMove(event);
+      track(event);
+    });
+    ['pointerup', 'pointercancel'].forEach(function (type) {
+      signEl.addEventListener(type, function (event) {
+        if (hold && event.pointerId === hold.pointerId) holdCancel();
+        end(event);
+      });
+    });
+    signEl.addEventListener('lostpointercapture', end);
+
+    // Once it is lifted, the finger's moves drag it instead of scrolling the page.
+    // Until then nothing is cancelled, so a swipe over it scrolls as usual.
+    signEl.addEventListener('touchmove', function (event) {
+      if (gesture && gesture.box === sign && event.cancelable) event.preventDefault();
+    }, { passive: false });
+
+    // No context menu for a long press.
+    signEl.addEventListener('contextmenu', function (event) {
+      if (hold || (gesture && gesture.box === sign)) event.preventDefault();
+    });
+
+    // Its size follows the font: fit a moved 414 to the screen again when the font
+    // changes, or a face finishes loading.
+    var refitSign = function () {
+      if (!gesture) refit(sign);
+    };
+    if (window.MutationObserver) {
+      new MutationObserver(refitSign).observe(root, { attributes: true, attributeFilter: ['data-font'] });
+    }
+    if (document.fonts && document.fonts.addEventListener) {
+      document.fonts.addEventListener('loadingdone', refitSign);
+    }
+  }
+
   document.addEventListener('studio414:layoutreset', function () {
+    holdCancel();
     if (gesture) finish(true);
     placed = {};
     order = DEFAULT_ORDER.slice();
