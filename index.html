@@ -9,18 +9,6 @@
     // paint, from ?font=&color= in the URL (which wins) or else from localStorage.
     (function () {
       var params = new URLSearchParams(location.search);
-      // The fonts were renumbered when Terminal Grotesque (was 10) became font 0, the
-      // default, and the others moved up one. This converts a font saved under the old
-      // numbers, once; a saved 0 was the old default, so it stays the default.
-      try {
-        if (localStorage.getItem('studio414.style.fontorder') !== '2') {
-          var old = localStorage.getItem('studio414.style.font');
-          if (old !== null && /^([1-9]|10)$/.test(old.trim())) {
-            localStorage.setItem('studio414.style.font', String((Number(old.trim()) + 1) % 11));
-          }
-          localStorage.setItem('studio414.style.fontorder', '2');
-        }
-      } catch (e) {}
       function pick(name) {
         var value = params.get(name);
         if (value === null) {
