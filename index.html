@@ -104,20 +104,40 @@
     </div>
   </section>
 
-  <!-- Workshop sign-up (workshop.js, workshop.css): the flashy button fixed at the top
-       right opens the sign-up window, a modal 90s dialog like the boxes. The button
-       stays hidden until workshop.js runs, as it does nothing without it. -->
+  <!-- Workshops (workshop.js, workshop.css): the flashy button fixed at the top right
+       opens the Workshops window, which lists the workshops coming up; each one opens
+       its own sign-up window. Both are modal 90s dialogs like the boxes. The button
+       stays hidden until workshop.js runs, as it does nothing without it, and again
+       once no workshops are left. -->
   <button class="workshop-button" id="workshop-button" type="button"
-          aria-label="Workshop sign-up" aria-haspopup="dialog" aria-controls="workshop" hidden>
+          aria-label="Workshops" aria-haspopup="dialog" aria-controls="workshops" hidden>
     <span class="workshop-button__burst" aria-hidden="true">New!</span>
     <svg class="workshop-button__star" viewBox="0 0 9 9" aria-hidden="true" focusable="false" shape-rendering="crispEdges"><path fill="currentColor" d="M4 0h1v2H4zM3 2h3v1H3zM0 3h9v1H0zM1 4h7v1H1zM2 5h5v1H2zM2 6h2v1H2zM5 6h2v1H5zM1 7h2v1H1zM6 7h2v1H6zM1 8h1v1H1zM7 8h1v1H7z"/></svg>
-    <span class="workshop-button__label" id="workshop-button-label">Workshop</span>
+    <span class="workshop-button__label" id="workshop-button-label">Workshops</span>
     <svg class="workshop-button__star" viewBox="0 0 9 9" aria-hidden="true" focusable="false" shape-rendering="crispEdges"><path fill="currentColor" d="M4 0h1v2H4zM3 2h3v1H3zM0 3h9v1H0zM1 4h7v1H1zM2 5h5v1H2zM2 6h2v1H2zM5 6h2v1H5zM1 7h2v1H1zM6 7h2v1H6zM1 8h1v1H1zM7 8h1v1H7z"/></svg>
   </button>
 
-  <!-- The title bar says how many spots are left once they are in, counting down to
-       them (workshop.js). The dialog's name stays "Workshop sign-up" all the while, and
-       screen readers hear the count once, from #workshop-count. -->
+  <!-- The Workshops window: workshop.js fills the list (#workshops-list), one button
+       per workshop coming up, with its name, date and, once they are in, its spots
+       left. -->
+  <dialog class="workshop workshop--list box" id="workshops" aria-labelledby="workshops-title">
+    <div class="box__titlebar">
+      <svg class="box__icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false" shape-rendering="crispEdges"><path fill="currentColor" d="M13 1h2v1h-2zM12 2h2v1h-2zM11 3h2v1h-2zM10 4h2v1h-2zM9 5h2v1H9zM7 6h4v1H7zM6 7h4v1H6zM4 9h4v1H4zM3 10h4v1H3zM2 11h4v1H2zM1 12h4v1H1zM1 13h3v1H1zM1 14h2v1H1zM10 13h5v2h-5z"/></svg>
+      <h2 class="box__title" id="workshops-title">Workshops</h2>
+      <button class="workshop__close" id="workshops-close" type="button" aria-label="Close">
+        <svg viewBox="0 0 8 7" aria-hidden="true" focusable="false" shape-rendering="crispEdges"><path fill="currentColor" d="M0 0h2v1H0zM6 0h2v1H6zM1 1h2v1H1zM5 1h2v1H5zM2 2h4v1H2zM3 3h2v1H3zM2 4h4v1H2zM1 5h2v1H1zM5 5h2v1H5zM0 6h2v1H0zM6 6h2v1H6z"/></svg>
+      </button>
+    </div>
+    <div class="workshop__body" id="workshops-body">
+      <p class="workshop__intro" id="workshops-intro">Pick a workshop to sign up.</p>
+      <ul class="workshop__list" id="workshops-list"></ul>
+    </div>
+  </dialog>
+
+  <!-- A workshop's sign-up window: workshop.js fills in the workshop (its name, date
+       and price), names the dialog after it ("Paint a piece sign-up"), and once the
+       spots are in, the title bar says how many are left, counting down to them.
+       Screen readers hear the count once, from #workshop-count. -->
   <dialog class="workshop box" id="workshop" aria-label="Workshop sign-up">
     <div class="box__titlebar">
       <svg class="box__icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false" shape-rendering="crispEdges"><path fill="currentColor" d="M13 1h2v1h-2zM12 2h2v1h-2zM11 3h2v1h-2zM10 4h2v1h-2zM9 5h2v1H9zM7 6h4v1H7zM6 7h4v1H6zM4 9h4v1H4zM3 10h4v1H3zM2 11h4v1H2zM1 12h4v1H1zM1 13h3v1H1zM1 14h2v1H1zM10 13h5v2h-5z"/></svg>
@@ -127,7 +147,14 @@
       </button>
     </div>
     <div class="workshop__body">
-      <!-- After Stripe: "You're in!" or "Payment cancelled" (workshop.js). -->
+      <!-- Back to the Workshops window. -->
+      <button class="workshop__back" id="workshop-back" type="button">
+        <svg viewBox="0 0 4 7" aria-hidden="true" focusable="false" shape-rendering="crispEdges"><path fill="currentColor" d="M3 0h1v1H3zM2 1h1v1H2zM1 2h1v1H1zM0 3h1v1H0zM1 4h1v1H1zM2 5h1v1H2zM3 6h1v1H3z"/></svg>
+        All workshops
+      </button>
+
+      <!-- After Stripe: "You're in!" or "Payment cancelled" (workshop.js). It shows in
+           the Workshops window instead when it isn't known which workshop it was. -->
       <div class="workshop__result" id="workshop-result" hidden>
         <svg class="workshop__result-icon" id="workshop-result-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false" shape-rendering="crispEdges"></svg>
         <div>
@@ -136,12 +163,12 @@
         </div>
       </div>
 
-      <p class="workshop__name">Paint a piece</p>
+      <p class="workshop__name" id="workshop-name"></p>
       <dl class="workshop__facts">
         <dt>Date</dt>
-        <dd><time datetime="2026-11-07">Saturday 7 November 2026</time></dd>
+        <dd><time id="workshop-date"></time></dd>
         <dt>Price</dt>
-        <dd>$59.99</dd>
+        <dd id="workshop-price"></dd>
       </dl>
 
       <!-- Only while there is something to say: "Checking spots…" or "not open yet". -->
@@ -153,7 +180,7 @@
         <input class="workshop__input" id="workshop-email" name="email" type="email"
                placeholder="you@example.com" autocomplete="email" maxlength="254"
                spellcheck="false" autocapitalize="off" required>
-        <button class="workshop__pay" id="workshop-pay" type="submit" disabled>Pay $59.99 with Stripe</button>
+        <button class="workshop__pay" id="workshop-pay" type="submit" disabled>Pay with Stripe</button>
         <p class="workshop__message" id="workshop-message" role="status" aria-live="polite"></p>
       </form>
 

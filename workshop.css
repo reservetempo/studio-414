@@ -1,9 +1,10 @@
-/* Workshop sign-up (workshop.js): a small, flashy button fixed at the top right of the
+/* Workshops (workshop.js): a small, flashy button fixed at the top right of the
    screen, as 90s home pages had them (a rainbow frame that runs round, blinking stars
-   and a "NEW!" starburst), and the window it opens, "Workshop sign-up": a 90s dialog
-   like the boxes. boxes.css gives the window its frame, title bar and drag handle, and
-   the colours and fonts are the tokens in styles.css, so both follow the style
-   switcher like everything else. With reduced motion nothing moves or blinks.
+   and a "NEW!" starburst), and the windows it opens, 90s dialogs like the boxes: the
+   "Workshops" list (.workshop--list), and a workshop's sign-up window. boxes.css gives
+   the windows their frame, title bar and drag handle, and the colours and fonts are
+   the tokens in styles.css, so all of it follows the style switcher like everything
+   else. With reduced motion nothing moves or blinks.
 
    Where the button sits: the top-right corner, 16px in (8px on phones), over the
    ceiling or the band of page colour above the photo, on every screen. The corner is
@@ -14,17 +15,17 @@
    window, comments.css starts it lower to leave the corner to the button. */
 
 /* The corner the button takes, with room to spare: its 16px gutter, the button itself
-   (156px at most, in the widest face) and the starburst over its left end (40px), and
-   down to the starburst's lowest point (43px below the top of the button, as it
-   pulses); the big 414 keeps 8px clear of that. */
+   (166px at most, saying "Workshops" in the widest face) and the starburst over its
+   left end (40px), and down to the starburst's lowest point (43px below the top of the
+   button, as it pulses); the big 414 keeps 8px clear of that. */
 :root {
-  --workshop-reach: calc(max(16px, env(safe-area-inset-right)) + 204px);
+  --workshop-reach: calc(max(16px, env(safe-area-inset-right)) + 214px);
   --workshop-drop: calc(max(16px, env(safe-area-inset-top)) + 52px);
 }
 
 @media (max-width: 480px) {
   :root {
-    --workshop-reach: calc(max(8px, env(safe-area-inset-right)) + 204px);
+    --workshop-reach: calc(max(8px, env(safe-area-inset-right)) + 214px);
     --workshop-drop: calc(max(12px, env(safe-area-inset-top)) + 52px);
   }
 }
@@ -194,10 +195,11 @@
   }
 }
 
-/* ---------- The window ---------- */
+/* ---------- The windows ---------- */
 
-/* A modal <dialog> in the top layer, centred until it is dragged by its title bar
-   (workshop.js). On screens too short for it, it scrolls inside its frame. */
+/* Each a modal <dialog> in the top layer, centred until it is dragged by its title bar
+   (workshop.js). On screens too short for it, it scrolls inside its frame. What
+   follows is for both, up to the list, then the sign-up window's own. */
 .workshop {
   width: min(420px, 100vw - 32px);
   max-width: none;
@@ -278,6 +280,159 @@
   flex-direction: column;
   gap: 12px;
   padding: 14px 16px 16px;
+}
+
+/* ---------- The Workshops window ---------- */
+
+.workshop--list {
+  width: min(380px, 100vw - 32px);
+}
+
+.workshop__intro {
+  margin: 0;
+}
+
+/* The workshops, as a 90s list box: a sunken white panel of rows, each a button that
+   lights up in the title-bar colour under the pointer or the keyboard focus. */
+.workshop__list {
+  margin: 0;
+  padding: 2px;
+  border: 1px solid;
+  border-color: var(--sunken-border);
+  background: var(--field);
+  color: var(--field-text);
+  box-shadow: var(--sunken-edge);
+  list-style: none;
+}
+
+.workshop__list li + li {
+  border-top: 1px dotted var(--shadow);
+}
+
+.workshop__pick {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: 2px 12px;
+  width: 100%;
+  margin: 0;
+  padding: 8px 10px 9px;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.workshop__pick:hover,
+.workshop__pick:focus-visible {
+  background: var(--title);
+  color: var(--title-text);
+}
+
+/* The dotted focus rectangle, inside the lit row. */
+.workshop__pick:focus-visible {
+  outline: 1px dotted var(--title-text);
+  outline-offset: -3px;
+}
+
+/* The name, with the spots left at the right of it, and the date under both. */
+.workshop__pick-name {
+  color: var(--accent-ink);
+  font-family: var(--display-font);
+  font-size: calc(1.5rem * var(--display-name-size));
+  font-weight: var(--display-weight);
+  line-height: 1.1;
+}
+
+.workshop__pick-date {
+  grid-column: 1 / -1;
+  font-size: 1.0625rem;
+}
+
+/* Spots left, once they are in (small spaced capitals, as the labels); "Sold out" in
+   the error colour. */
+.workshop__pick-spots {
+  grid-row: 1;
+  grid-column: 2;
+  font-family: var(--display-font);
+  font-size: calc(0.75rem * var(--display-size));
+  font-weight: var(--display-weight);
+  line-height: 1.2;
+  letter-spacing: calc(0.22em * var(--display-tracking));
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.workshop__pick-spots:empty {
+  display: none;
+}
+
+.workshop__pick[data-state="soldout"] .workshop__pick-spots {
+  color: var(--error);
+}
+
+.workshop__pick:hover .workshop__pick-name,
+.workshop__pick:focus-visible .workshop__pick-name,
+.workshop__pick:hover .workshop__pick-spots,
+.workshop__pick:focus-visible .workshop__pick-spots {
+  color: inherit;
+}
+
+.workshop__none {
+  padding: 8px 10px;
+  color: var(--face-muted);
+  font-style: italic;
+}
+
+/* ---------- The sign-up window ---------- */
+
+/* "All workshops", back to the list: a small raised button with a pixel arrow. */
+.workshop__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  align-self: flex-start;
+  min-height: 26px;
+  margin: -4px 0 0;
+  padding: 3px 9px 3px 8px;
+  border: 0;
+  border-radius: 0;
+  background: var(--face);
+  color: var(--face-text);
+  box-shadow: var(--bevel-raised);
+  font-family: var(--display-font);
+  font-size: calc(0.75rem * var(--display-size));
+  font-weight: var(--display-weight);
+  line-height: 1.2;
+  letter-spacing: calc(0.2em * var(--display-tracking));
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.workshop__back svg {
+  flex: none;
+  width: 4px;
+  height: 7px;
+}
+
+.workshop__back:active {
+  padding: 4px 8px 2px 9px;
+  box-shadow: var(--bevel-pressed);
+}
+
+.workshop__back:focus-visible {
+  outline: 1px dotted var(--focus);
+  outline-offset: -4px;
+}
+
+@media (pointer: coarse) {
+  .workshop__back {
+    min-height: 34px;
+  }
 }
 
 /* "You're in!" or "Payment cancelled", as a 90s message box: an icon and the text. */
@@ -506,6 +661,13 @@
 
   .workshop-button__burst::before {
     display: none;
+  }
+
+  .workshop__pick:hover,
+  .workshop__pick:focus-visible {
+    forced-color-adjust: none;
+    background: Highlight;
+    color: HighlightText;
   }
 
   .workshop__spots::before {
