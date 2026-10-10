@@ -1,0 +1,13 @@
+# Supabase CLI settings for Studio 414 (used by `supabase functions deploy`).
+# project_id only names the local development stack; the real project is chosen
+# with `supabase link --project-ref cgbqzdhjhquprjgtcmwh`.
+project_id = "studio-414"
+
+# Both workshop functions run without Supabase JWT verification: the site calls
+# workshop-checkout with its publishable key (not a JWT), and Stripe can't send a
+# JWT to stripe-webhook, which checks Stripe's signature instead.
+[functions.workshop-checkout]
+verify_jwt = false
+
+[functions.stripe-webhook]
+verify_jwt = false

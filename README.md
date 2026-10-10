@@ -68,6 +68,106 @@ There is no login, so anyone who has the page's URL can post a comment under any
 
 Free Supabase projects are paused after a week or so without activity; if comments stop loading, restore the project from the dashboard.
 
+## Workshop sign-ups
+
+The site can take paid sign-ups for the **Paint a piece** workshop on Saturday 7 November 2026: 10 places at **$59.99 CAD** each (Canadian dollars), paid by card through [Stripe Checkout](https://stripe.com/payments/checkout). The backend lives in the same Supabase project as the comments:
+
+- [`supabase/workshop.sql`](supabase/workshop.sql): the `workshop_signups` table and two database functions. Emails are private: Row Level Security is on with no policies, so the site's public key can't read or change anything in it.
+- [`supabase/functions/workshop-checkout`](supabase/functions/workshop-checkout/index.ts): tells the page how many places are left, and starts a Stripe checkout for an email address.
+- [`supabase/functions/stripe-webhook`](supabase/functions/stripe-webhook/index.ts): Stripe calls it when someone has paid or a checkout ran out of time.
+- [`supabase/config.toml`](supabase/config.toml): turns off Supabase's JWT check for both functions (the site's publishable key isn't a JWT, and Stripe can't send one; the webhook checks Stripe's signature instead).
+
+How a sign-up goes: the visitor enters their email, `workshop-checkout` holds a place for them for 31 minutes (Stripe's 30-minute minimum for a checkout, plus a minute's margin) and sends them to Stripe's payment page. When they pay, the webhook marks their sign-up **paid**; if they give up, Stripe expires the checkout and the place is free again. A place held by someone who is paying right now counts as taken, so the last place can't be sold twice. The workshop's name, date, number of places, price and currency are constants at the top of [`workshop-checkout/index.ts`](supabase/functions/workshop-checkout/index.ts).
+
+### Setting it up
+
+Do this with Stripe's **test mode** first (no real money moves), then repeat the Stripe parts with live keys (see [Going live](#going-live)). Never put a Stripe secret key in the site's files or commit it: it only goes into Supabase's secrets.
+
+1. **Database.** In the Supabase dashboard open **SQL Editor**, paste in the contents of [`supabase/workshop.sql`](supabase/workshop.sql) and click **Run**. It is safe to run again. (The Security Advisor may note that `workshop_signups` has RLS enabled but no policies; that is on purpose.)
+2. **Supabase CLI.** The easiest way on any computer with Node.js is `npx`: `npx supabase --version` downloads and runs it (on Windows you can also install it with [Scoop](https://supabase.com/docs/guides/local-development/cli/getting-started)). The commands below are written as `supabase …`; with npx, type `npx supabase …`. Run them from this folder.
+3. **Log in and link the project:**
+
+   ```sh
+   supabase login
+   supabase link --project-ref cgbqzdhjhquprjgtcmwh
+   ```
+
+   If `link` asks for the database password, you can leave it blank.
+4. **Stripe key and site address.** In the [Stripe Dashboard](https://dashboard.stripe.com), switch to test mode (or a sandbox) and copy the **Secret key** (`sk_test_…`) from **Developers → API keys**. `SITE_URL` is the address of the page visitors come back to after paying, without a trailing slash: the live site's address, or `http://localhost:8000` while trying it locally.
+
+   ```sh
+   supabase secrets set STRIPE_SECRET_KEY=sk_test_... SITE_URL=https://your-site-address
+   ```
+
+5. **Deploy both functions.** `--no-verify-jwt` turns off the JWT check (as `config.toml` does too); it is needed for both.
+
+   ```sh
+   supabase functions deploy workshop-checkout --no-verify-jwt
+   supabase functions deploy stripe-webhook --no-verify-jwt
+   ```
+
+   Check it by opening <https://cgbqzdhjhquprjgtcmwh.supabase.co/functions/v1/workshop-checkout> in a browser: it should show `{"capacity":10,"taken":0,"remaining":10}`.
+6. **Stripe webhook.** In the Stripe Dashboard (still in test mode) open **Developers → Webhooks** (in newer dashboards **Workbench → Webhooks**) and add an endpoint (a "destination" for events from your account) with:
+   - Endpoint URL: `https://cgbqzdhjhquprjgtcmwh.supabase.co/functions/v1/stripe-webhook`
+   - Events: `checkout.session.completed` and `checkout.session.expired`
+
+   Then copy the endpoint's **Signing secret** (`whsec_…`).
+7. **Webhook secret.** Save it and redeploy the webhook:
+
+   ```sh
+   supabase secrets set STRIPE_WEBHOOK_SECRET=whsec_...
+   supabase functions deploy stripe-webhook --no-verify-jwt
+   ```
+
+### Testing
+
+1. Sign up through the form with your own email. (Before the form is on the page, you can start a checkout from your browser's developer console on any page: `fetch("https://cgbqzdhjhquprjgtcmwh.supabase.co/functions/v1/workshop-checkout", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email: "you@example.com" }) }).then((r) => r.json()).then(console.log)`, then open the `url` it prints.)
+2. On Stripe's page pay with the test card **4242 4242 4242 4242**, any future expiry date, any CVC and any postcode. (4000 0000 0000 0002 tries a declined card.)
+3. You should land back on `SITE_URL/?workshop=success`, and within a few seconds the sign-up's row in **Table Editor → workshop_signups** should say `paid`.
+
+If it stays `pending`, look at the webhook's deliveries in Stripe (**Webhooks →** your endpoint) and at the functions' logs in Supabase (**Edge Functions →** the function **→ Logs**). A wrong `STRIPE_WEBHOOK_SECRET` shows up as "Invalid signature" (HTTP 400) there.
+
+### Going live
+
+1. In **Table Editor → workshop_signups**, delete the rows from your tests: paid test sign-ups would otherwise count as taken places.
+2. Switch the Stripe Dashboard to live mode and copy the live **Secret key** (`sk_live_…`). Live mode has its own webhooks, so add the same endpoint and events again there and copy its new **Signing secret**.
+3. Set the live values (and the live site's address, if `SITE_URL` was localhost) and redeploy both functions:
+
+   ```sh
+   supabase secrets set STRIPE_SECRET_KEY=sk_live_... STRIPE_WEBHOOK_SECRET=whsec_... SITE_URL=https://your-site-address
+   supabase functions deploy workshop-checkout --no-verify-jwt
+   supabase functions deploy stripe-webhook --no-verify-jwt
+   ```
+
+### Seeing who signed up
+
+In the Supabase dashboard open **Table Editor → workshop_signups** and add a filter **status** equals **paid**: those are the confirmed places, with each person's `email` and when they paid (`paid_at`). `pending` rows are people in the middle of paying (or who left without finishing, until Stripe expires the checkout), and `expired` rows are checkouts that were never paid; neither has paid. Each payment is also in the Stripe Dashboard under **Payments**, with the email address.
+
+Or in the **SQL Editor**:
+
+```sql
+select email, paid_at
+from public.workshop_signups
+where workshop = 'paint-a-piece-2026-11-07' and status = 'paid'
+order by paid_at;
+```
+
+If someone cancels, refund them in Stripe (**Payments →** the payment **→ Refund**), then set their row's `status` to `expired` in the Table Editor to free the place.
+
+### The API (for the sign-up form)
+
+Both calls go to `https://cgbqzdhjhquprjgtcmwh.supabase.co/functions/v1/workshop-checkout`, need no key, and answer JSON from any origin.
+
+- `GET` → `200 {"capacity": 10, "taken": 3, "remaining": 7}`. `taken` counts paid sign-ups and checkouts in progress; `remaining` is never below 0.
+- `POST` with the body `{"email": "someone@example.com"}` (and `Content-Type: application/json`):
+  - `200 {"url": "https://checkout.stripe.com/…"}`: send the visitor to `url`. Afterwards Stripe brings them back to `/?workshop=success`, or to `/?workshop=cancelled` if they went back.
+  - `400 {"error": "invalid_email"}`
+  - `409 {"error": "already_signed_up"}`: this email has already paid.
+  - `409 {"error": "full"}`
+  - `500 {"error": "server_error"}`: details are in the function's logs.
+
+Emails are trimmed and lower-cased. If the same email starts a new checkout while an earlier one is still open, the earlier one is closed, so one person doesn't hold two places. The form should disable its button while a request is on its way, so a double click doesn't start two checkouts.
+
 ## Font and colour switcher
 
 A small window titled **Display** lets visitors try 10 display fonts and 10 colours independently, so friends can browse combinations and say which they like in a comment ("colour 1 and font 6"). Option 0 of each is the default design (Terminal Grotesque, the Classic grey and navy), so nothing changes for anyone who never touches it; font 1 is EB Garamond, the original face. The window follows the selected colour like the others, and its title bar the selected font; its rows stay in EB Garamond so the controls keep their shape while you browse. See [The boxes](#the-boxes) for where it sits and how it moves.
