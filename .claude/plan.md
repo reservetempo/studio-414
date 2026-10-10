@@ -4,13 +4,6 @@ Managed by the main session (see CLAUDE.md). `/z <items>` adds tasks; `/z` works
 
 ## Next
 
-### 5. "See in calendar" month view (user's step 3)
-- Goal: a "See in calendar" option in the workshops list window opens a small 90s-style window with a month grid.
-- The grid starts on the month of the next workshop, with previous/next month buttons. Workshop dates are marked; clicking a marked date opens that workshop's sign-up.
-- Files: `workshop.js` and `workshop.css`, or a new `calendar.js`/`calendar.css` (linked from `index.html`) if that keeps things tidier.
-- Works with the keyboard and screen readers, and at phone width.
-- Done when: previewed: November and December 2026 show their workshops, and clicking one opens its sign-up.
-
 ### 6. Sign-up form: name, "buying for a friend", and × N spots (user's step 4)
 - Goal: the workshop sign-up form gets:
   - a required name field;
@@ -43,3 +36,4 @@ Managed by the main session (see CLAUDE.md). `/z <items>` adds tasks; `/z` works
 - 2. Add 10 color options to the color switcher: `f7ffc9b`. Colours 11-20: Oxblood, Tangerine, Umber, Olive, Turquoise, Teal, Ultraviolet, Hot Pink, Porcelain, Raku. Colour range is now 0-20.
 - 3. Back end for several workshops, spot counts and names: `c2e148f`. GET `{ workshops: [...] }`; POST `{ workshop, email, name, quantity, friendName? }`; API documented at the top of `workshop-checkout/index.ts`. Assumes Eastern time (`America/Toronto`). Not type-checked with Deno (not installed); SQL not run.
 - 4. Workshops list window: `100b454`. Button reads "Workshops", opens a list; each workshop opens its own sign-up with "All workshops" to go back. Workshop list kept in `workshop.js`; paid workshop id kept in `sessionStorage` for the Stripe return message.
+- 5. "See in calendar" month view: `b236d84`. New `calendar.js`/`calendar.css` and `<dialog id="calendar">`; `workshop.js` exposes `window.studioWorkshops`. Week starts on Sunday.
