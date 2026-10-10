@@ -9,7 +9,7 @@
     // paint, from ?font=&color= in the URL (which wins) or else from localStorage.
     (function () {
       var params = new URLSearchParams(location.search);
-      // max is the number of the last option: 20 for the font, 10 for the colour.
+      // max is the number of the last option: 20 for the font and for the colour.
       function pick(name, max) {
         var value = params.get(name);
         if (value === null) {
@@ -19,7 +19,7 @@
         return /^(0|[1-9][0-9]?)$/.test(value) && Number(value) <= max ? value : '0';
       }
       document.documentElement.setAttribute('data-font', pick('font', 20));
-      document.documentElement.setAttribute('data-color', pick('color', 10));
+      document.documentElement.setAttribute('data-color', pick('color', 20));
     })();
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">

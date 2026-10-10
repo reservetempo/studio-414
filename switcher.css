@@ -1,7 +1,7 @@
-/* Style switcher: the ten colours, and the window that picks them and the fonts
+/* Style switcher: the twenty colours, and the window that picks them and the fonts
    (switcher.js; the fonts are in fonts.css).
 
-   <html data-color="1"> to data-color="10" picks a colour; 0 (or no attribute) keeps
+   <html data-color="1"> to data-color="20" picks a colour; 0 (or no attribute) keeps
    "Classic", the palette in styles.css. Each colour is a 90s window scheme for the
    three windows: a tinted face (with its own bevel highlight, light and shadow), a
    title bar and its text, and an ink for comment names and links. The title-bar colour
@@ -9,8 +9,11 @@
    and the title text is the text on the page and the edge of the 414 (--page-text).
    Black text and frames, white fields, the error red and the focus rings stay the same
    for all of them.
-   Deep title bars (Vermilion, Verdigris, Klein Blue, Fuchsia) take white text; light
-   ones (Saffron, Chartreuse, Malachite, Cerulean, Wisteria, Flamingo) take black.
+   Deep title bars (Vermilion, Verdigris, Klein Blue, Fuchsia, Oxblood, Umber, Olive,
+   Ultraviolet, Raku) take white text; light ones (Saffron, Chartreuse, Malachite,
+   Cerulean, Wisteria, Flamingo, Tangerine, Turquoise, Teal, Hot Pink, Porcelain) take
+   black. The two near-neutrals borrow a glaze for their ink: cobalt for Porcelain,
+   copper for Raku.
    Contrast was checked for every colour: text 4.5:1 or more (title text on the title
    bar, and so on the page; text, secondary text, names, links and errors on the face
    and on the white fields), and 3:1 or more for the bevel shadow against the face and
@@ -18,7 +21,7 @@
    window against the page (the face, or else the black frame round it: 4.3:1 or
    more either way). */
 
-/* ---------- The ten colours ---------- */
+/* ---------- The twenty colours ---------- */
 
 /* 1. Vermilion */
 html[data-color="1"] {
@@ -138,6 +141,126 @@ html[data-color="10"] {
   --title: #ff88b1;
   --title-text: #000000;
   --accent-ink: #a3134f;
+}
+
+/* 11. Oxblood */
+html[data-color="11"] {
+  --face: #f4d5dc;
+  --face-muted: #773c4d;
+  --hilight: #fcf5f6;
+  --light: #f8e6ea;
+  --shadow: #9e6d7a;
+  --title: #701038;
+  --title-text: #ffffff;
+  --accent-ink: #701038;
+}
+
+/* 12. Tangerine */
+html[data-color="12"] {
+  --face: #f3d8ca;
+  --face-muted: #764123;
+  --hilight: #fcf5f2;
+  --light: #f8e7df;
+  --shadow: #9d715a;
+  --title: #ff7a1a;
+  --title-text: #000000;
+  --accent-ink: #883c02;
+}
+
+/* 13. Umber */
+html[data-color="13"] {
+  --face: #efdac5;
+  --face-muted: #704714;
+  --hilight: #fbf6f1;
+  --light: #f5e9dd;
+  --shadow: #977552;
+  --title: #634016;
+  --title-text: #ffffff;
+  --accent-ink: #634016;
+}
+
+/* 14. Olive */
+html[data-color="14"] {
+  --face: #dbe2c7;
+  --face-muted: #4d571a;
+  --hilight: #f6f8f2;
+  --light: #e9edde;
+  --shadow: #788154;
+  --title: #5d6a12;
+  --title-text: #ffffff;
+  --accent-ink: #505c02;
+}
+
+/* 15. Turquoise */
+html[data-color="15"] {
+  --face: #c5e6e1;
+  --face-muted: #055e57;
+  --hilight: #f1f9f7;
+  --light: #ddf0ed;
+  --shadow: #4a877f;
+  --title: #40e0d0;
+  --title-text: #000000;
+  --accent-ink: #05635b;
+}
+
+/* 16. Teal */
+html[data-color="16"] {
+  --face: #c4e6e5;
+  --face-muted: #045d5d;
+  --hilight: #f1f9f8;
+  --light: #dcf0ef;
+  --shadow: #488787;
+  --title: #00a3a3;
+  --title-text: #000000;
+  --accent-ink: #036262;
+}
+
+/* 17. Ultraviolet */
+html[data-color="17"] {
+  --face: #dfdaf4;
+  --face-muted: #55477b;
+  --hilight: #f7f6fc;
+  --light: #ece9f8;
+  --shadow: #7f75a0;
+  --title: #6a22c8;
+  --title-text: #ffffff;
+  --accent-ink: #6a22c8;
+}
+
+/* 18. Hot Pink */
+html[data-color="18"] {
+  --face: #efd5e6;
+  --face-muted: #6f3d60;
+  --hilight: #fbf5f8;
+  --light: #f5e6f0;
+  --shadow: #986e8a;
+  --title: #ff3fd2;
+  --title-text: #000000;
+  --accent-ink: #8d1e73;
+}
+
+/* 19. Porcelain */
+html[data-color="19"] {
+  --face: #e2ded4;
+  --face-muted: #59503c;
+  --hilight: #f8f7f4;
+  --light: #edebe5;
+  --shadow: #837b6b;
+  --title: #ece6d8;
+  --title-text: #000000;
+  --accent-ink: #1f48a6;
+}
+
+/* 20. Raku */
+html[data-color="20"] {
+  --face: #e4dcda;
+  --face-muted: #5c4d49;
+  --hilight: #f8f6f6;
+  --light: #eeeae8;
+  --shadow: #857975;
+  --title: #1e1b1a;
+  --title-text: #ffffff;
+  --accent-ink: #8c3a12;
 }
 
 /* ---------- The window ----------

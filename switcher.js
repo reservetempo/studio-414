@@ -1,7 +1,7 @@
 /*
   Style switcher for Studio 414.
 
-  Lets friends try twenty display faces (fonts.css) and ten colours (switcher.css)
+  Lets friends try twenty display faces (fonts.css) and twenty colours (switcher.css)
   independently, and say which they like in a comment by number ("colour 1 and
   font 6").
   Option 0 of each is the default design (Terminal Grotesque, the Classic grey and
@@ -29,7 +29,7 @@
   index.html's <head> sets those before first paint, from the URL (?font=6&color=1,
   which wins) or else from localStorage; this file builds the panel and keeps the
   attributes, localStorage and the URL in step as the choice changes. Values that are
-  not a whole number from 0 to the last option (20 for the font, 10 for the colour)
+  not a whole number from 0 to the last option (20 for the font and for the colour)
   count as 0.
 
   To remove the switcher: delete switcher.js, switcher.css, fonts.css and fonts/,
@@ -84,19 +84,31 @@
         'Klein Blue',
         'Wisteria',
         'Fuchsia',
-        'Flamingo'
+        'Flamingo',
+        'Oxblood',
+        'Tangerine',
+        'Umber',
+        'Olive',
+        'Turquoise',
+        'Teal',
+        'Ultraviolet',
+        'Hot Pink',
+        'Porcelain',
+        'Raku'
       ],
       // The title bar of each colour, for the swatch in the panel (as in switcher.css).
       swatches: [
         '#0a246a', '#b5301a', '#f5b83d', '#cdea3c', '#35c27a', '#0f5e52',
-        '#4db5f2', '#1a33d1', '#b59dff', '#9c1f86', '#ff88b1'
+        '#4db5f2', '#1a33d1', '#b59dff', '#9c1f86', '#ff88b1', '#701038',
+        '#ff7a1a', '#634016', '#5d6a12', '#40e0d0', '#00a3a3', '#6a22c8',
+        '#ff3fd2', '#ece6d8', '#1e1b1a'
       ]
     }
   };
 
   /* ---------- Values, storage and the URL ---------- */
 
-  // The number of the last option of a kind: 20 for the font, 10 for the colour.
+  // The number of the last option of a kind: 20 for the font and for the colour.
   function last(kind) {
     return OPTIONS[kind].names.length - 1;
   }
