@@ -1,19 +1,18 @@
 /* "Opening soon!": a line of plain italic text in the top-left corner, the counterpart
-   of the Workshops link at the top right (workshop.css), in the same face, size and
-   colours: the switcher's display face, and the page's text colour edged in the page
-   colour, so it reads on the band of page colour and on the photo alike. Nothing
-   moves or flashes.
+   of the Workshops button at the top right (workshop.css): the switcher's display
+   face, and the page's text colour edged in the page colour, so it reads on the band
+   of page colour and on the photo alike. Nothing moves or flashes.
 
    It stands in the hero (index.html), under the big 414 and the windows (it comes
    before the 414 in the page, on the same layer, and the boxes are above that layer),
    so it never covers them, wherever they are dragged; it scrolls away with the photo
    rather than staying over the page. The 414 keeps out of its corner (styles.css), as
-   it does the Workshops link's. */
+   it does the Workshops button's. */
 
 /* The corner the words take, with room to spare: their gutter, the words (126px at
    most, in the widest face) and down to their foot (20px); the big 414 keeps 8px
-   clear of that. It reaches further in than the Workshops link's corner
-   (workshop.css); the 414 keeps the wider of the two clear on both sides. */
+   clear of that. The Workshops button's corner (workshop.css) reaches further in;
+   the 414 keeps the wider of the two clear on both sides. */
 :root {
   --opening-reach: calc(max(16px, env(safe-area-inset-left)) + 136px);
   --opening-drop: calc(max(16px, env(safe-area-inset-top)) + 28px);
@@ -50,7 +49,7 @@
   pointer-events: none;
 }
 
-/* Phones: the same gutters as the Workshops link. */
+/* Phones: the same gutters as the Workshops button. */
 @media (max-width: 480px) {
   .opening-soon {
     top: max(12px, env(safe-area-inset-top));
