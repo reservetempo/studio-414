@@ -10,8 +10,8 @@
    top right is taken (short screens, where the Display window starts at the top, see
    switcher.css; roughly square ones, where the 414 reaches into the corner) it moves
    to the bottom-right corner, beside or below the card. Where the comments box floats
-   on the wall right of the window (comments.css), the box starts lower to leave the
-   corner to the button. */
+   on the wall right of the window, comments.css starts it lower to leave the corner to
+   the button. */
 
 /* ---------- The button ---------- */
 
@@ -232,18 +232,6 @@
 @media (max-height: 620px) and (min-width: 481px) and (max-width: 699px) {
   .workshop-button {
     right: max(8px, env(safe-area-inset-right));
-  }
-}
-
-/* Where the comments box floats on the wall right of the window (comments.css), it is
-   centred in the hero 16px from the top at the least, which on screens under about
-   800px tall brings it up under the button. There it starts 64px down instead (clear
-   of the button and its starburst) and keeps 16px at the bottom. Once moved or
-   resized (boxes.js) it keeps its own place and size. */
-@media (min-width: 1100px) and (min-height: 640px) {
-  .comments__inner {
-    --h: min(100% - 80px, 680px);
-    top: max(64px, (100% - var(--h)) / 2);
   }
 }
 
