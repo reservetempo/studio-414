@@ -1,19 +1,56 @@
 /*
-  Workshop sign-ups for Studio 414: spots left, and paying through Stripe Checkout.
+  Workshop sign-ups for Studio 414: the workshops, spots left, and paying through
+  Stripe Checkout.
 
     GET  /functions/v1/workshop-checkout
-         200 { "capacity": 10, "taken": 3, "remaining": 7 }
+         200 { "workshops": [
+               { "id": "paint-a-piece", "name": "Paint a piece", "date": "2026-11-07",
+                 "price": 5999, "currency": "cad",
+                 "capacity": 10, "taken": 3, "remaining": 7 },
+               ...
+             ] }
 
-    POST /functions/v1/workshop-checkout   body { "email": "someone@example.com" }
-         200 { "url": "https://checkout.stripe.com/..." }   send the visitor there
+         Upcoming workshops only, soonest first (an empty list when there are none).
+         "date" is the workshop's day (YYYY-MM-DD, studio time); it stays listed
+         until that day has ended in STUDIO_TIME_ZONE. "price" is per spot, in cents.
+
+    POST /functions/v1/workshop-checkout
+         body { "workshop": "paint-a-piece", "email": "someone@example.com",
+                "name": "Sam Lee", "quantity": 2, "friendName": "Alex Kim" }
+
+           workshop    an id from the GET list
+           email       up to 254 characters; stored trimmed and lower-cased
+           name        required; up to 100 characters (runs of spaces become one)
+           quantity    a whole number (a JSON number) of spots, 1 to "remaining"
+           friendName  optional, up to 100 characters; leave it out, or send null or
+                       "", when there's no friend
+
+         200 { "url": "https://checkout.stripe.com/..." }   send the visitor there;
+                                                           Stripe charges price × quantity
+         400 { "error": "unknown_workshop" }      missing, or not an id in the list
+         409 { "error": "workshop_past" }         its day has ended
          400 { "error": "invalid_email" }
-         409 { "error": "already_signed_up" }   this email has already paid
-         409 { "error": "full" }
-         500 { "error": "server_error" }        details go to the function's logs
+         400 { "error": "invalid_name" }          missing, blank, not text or too long
+         400 { "error": "invalid_friend_name" }   not text, or too long
+         400 { "error": "invalid_quantity" }      not a whole number from 1 to "capacity"
+         409 { "error": "already_signed_up" }     this email has already paid for this workshop
+         409 { "error": "full" }                  no spots left
+         409 { "error": "not_enough_spots", "remaining": 2 }   fewer spots left than asked for
+         405 { "error": "method_not_allowed" }    not GET, POST or OPTIONS
+         500 { "error": "server_error" }          details go to the function's logs
 
-  "taken" counts paid sign-ups plus checkouts still in progress (their spot is held
-  until the Stripe session expires), so the last spot can't be sold twice. The
-  stripe-webhook function marks sign-ups paid or expired when Stripe reports back.
+         Checks run in the order listed; the first that fails is the answer. After
+         paying, Stripe sends the visitor to SITE_URL/?workshop=success; leaving the
+         checkout sends them to SITE_URL/?workshop=cancelled.
+
+  "taken" counts spots, not orders: those of paid sign-ups plus those of checkouts
+  still in progress (their spots are held until the Stripe session expires), so the
+  last spots can't be sold twice. The stripe-webhook function marks sign-ups paid or
+  expired when Stripe reports back.
+
+  One order per email per workshop: a new checkout closes the same email's unfinished
+  one for that workshop, and once an email has paid for a workshop it gets
+  already_signed_up there (it can still book the other workshops).
 
   Runs with JWT verification off (see supabase/config.toml): the site calls it with
   its publishable key, which is not a JWT. It reads and writes the sign-ups table
@@ -25,25 +62,38 @@
 import Stripe from "npm:stripe@17";
 import { createClient } from "npm:@supabase/supabase-js@2";
 
-/* ---------- The workshop ---------- */
+/* ---------- The workshops ---------- */
 
-const WORKSHOP_SLUG = "paint-a-piece-2026-11-07";
-const WORKSHOP_TITLE = "Paint a piece";
-const WORKSHOP_DATE = "2026-11-07";
-const WORKSHOP_DATE_LABEL = "7 November 2026";
-const CAPACITY = 10;
-const PRICE_CENTS = 5999; // $59.99 CAD (Stripe amounts are in cents)
+type Workshop = {
+  id: string; // stored with each sign-up; spots are counted by it
+  name: string;
+  date: string; // YYYY-MM-DD, the day of the workshop in STUDIO_TIME_ZONE
+  capacity: number; // spots
+  priceCents: number; // per spot (Stripe amounts are in cents)
+};
+
+// Every workshop people can sign up for. The front end (workshop.js) keeps a
+// matching list of ids, names and dates, so change both together. Past workshops
+// drop off on their own. Never reuse an id for a later date: its old sign-ups would
+// count against the new one's spots.
+const WORKSHOPS: readonly Workshop[] = [
+  { id: "paint-a-piece", name: "Paint a piece", date: "2026-11-07", capacity: 10, priceCents: 5999 },
+  { id: "hand-building", name: "Hand building", date: "2026-12-05", capacity: 10, priceCents: 5999 },
+];
+
 const CURRENCY = "cad"; // Canadian dollars
 
-const PRODUCT_NAME = `${WORKSHOP_TITLE} workshop: ${WORKSHOP_DATE_LABEL}`;
+// The studio's time zone: a workshop's day ends at midnight here.
+const STUDIO_TIME_ZONE = "America/Toronto";
 
-// How long a spot is held while someone is in Stripe Checkout. Stripe's minimum
+// How long spots are held while someone is in Stripe Checkout. Stripe's minimum
 // session length is 30 minutes from when the session is created; the extra minute
 // keeps network delay and clock drift from tripping that limit.
 const CHECKOUT_SECONDS = 30 * 60 + 60;
 
 const EMAIL_MAX = 254;
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const NAME_MAX = 100;
 
 /* ---------- Clients ---------- */
 
@@ -100,11 +150,51 @@ function stripeError(error: unknown): StripeLikeError {
   return error && typeof error === "object" ? (error as StripeLikeError) : {};
 }
 
+/** Today's date in the studio's time zone, as YYYY-MM-DD. */
+function studioToday(): string {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: STUDIO_TIME_ZONE,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(new Date());
+  const part = (type: string) => parts.find((p) => p.type === type)?.value ?? "";
+  return `${part("year")}-${part("month")}-${part("day")}`;
+}
+
+/** Workshops whose day hasn't ended yet in the studio's time zone, soonest first. */
+function upcomingWorkshops(): Workshop[] {
+  const today = studioToday();
+  return WORKSHOPS.filter((w) => w.date >= today).sort((a, b) => a.date.localeCompare(b.date));
+}
+
+/** "2026-11-07" -> "7 November 2026" */
+function dateLabel(date: string): string {
+  return new Intl.DateTimeFormat("en-GB", {
+    timeZone: "UTC",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  }).format(new Date(`${date}T12:00:00Z`));
+}
+
 function normalizeEmail(value: unknown): string | null {
   if (typeof value !== "string") return null;
   const email = value.trim().toLowerCase();
   if (email.length > EMAIL_MAX || !EMAIL_PATTERN.test(email)) return null;
   return email;
+}
+
+/** Trimmed, with runs of whitespace made one space; null if empty, too long or odd. */
+function normalizeName(value: unknown): string | null {
+  if (typeof value !== "string") return null;
+  const name = value.replace(/\s+/g, " ").trim();
+  if (!name || name.length > NAME_MAX || /\p{Cc}/u.test(name)) return null;
+  return name;
+}
+
+function isBlank(value: unknown): boolean {
+  return value === undefined || value === null || (typeof value === "string" && value.trim() === "");
 }
 
 function siteUrl(): string {
@@ -113,11 +203,22 @@ function siteUrl(): string {
   return url;
 }
 
-async function countTaken(): Promise<number> {
-  const { data, error } = await supabase.rpc("workshop_taken", { p_workshop: WORKSHOP_SLUG });
+/** Spots taken in each of these workshops (0 when nothing is taken). */
+async function countTaken(ids: string[]): Promise<Map<string, number>> {
+  const taken = new Map<string, number>(ids.map((id) => [id, 0]));
+  if (!ids.length) return taken;
+
+  const { data, error } = await supabase.rpc("workshop_taken", { p_workshops: ids });
   if (error) throw new Error(`workshop_taken failed: ${error.message}`);
-  const taken = Number(data);
-  if (!Number.isFinite(taken)) throw new Error(`workshop_taken returned ${JSON.stringify(data)}`);
+  if (!Array.isArray(data)) throw new Error(`workshop_taken returned ${JSON.stringify(data)}`);
+
+  for (const row of data as { workshop?: unknown; taken?: unknown }[]) {
+    const count = Number(row.taken);
+    if (typeof row.workshop !== "string" || !Number.isFinite(count)) {
+      throw new Error(`workshop_taken returned ${JSON.stringify(data)}`);
+    }
+    taken.set(row.workshop, count);
+  }
   return taken;
 }
 
@@ -142,7 +243,7 @@ async function markRow(id: string, values: Record<string, unknown>): Promise<voi
 /**
  * Brings a pending row in line with its Stripe session: marks it paid or expired
  * when Stripe says so. With close set, an open session is expired first, so the
- * visitor can't pay for it any more and its spot is released.
+ * visitor can't pay for it any more and its spots are released.
  */
 async function settle(row: PendingRow, close: boolean): Promise<"paid" | "expired" | "open"> {
   let session: Stripe.Checkout.Session;
@@ -179,19 +280,19 @@ async function settle(row: PendingRow, close: boolean): Promise<"paid" | "expire
 }
 
 /**
- * Before reserving a spot:
- * - this email's own checkouts still in progress (say they went back and tried again)
- *   are closed, so one person doesn't hold several spots, and if one of them was
- *   paid in the meantime the visitor is told they're already signed up;
+ * Before reserving spots in a workshop:
+ * - this email's own checkouts for it still in progress (say they went back and tried
+ *   again) are closed, so one person doesn't hold several orders, and if one of them
+ *   was paid in the meantime the visitor is told they're already signed up;
  * - checkouts whose hold has run out but that were never marked paid or expired
  *   (the webhook missed them or hasn't arrived yet) are checked with Stripe, so a
  *   payment the webhook hasn't recorded still counts.
  */
-async function settlePending(email: string): Promise<void> {
+async function settlePending(workshopId: string, email: string): Promise<void> {
   const { data, error } = await supabase
     .from("workshop_signups")
     .select("id, email, stripe_session_id, expires_at")
-    .eq("workshop", WORKSHOP_SLUG)
+    .eq("workshop", workshopId)
     .eq("status", "pending")
     .not("stripe_session_id", "is", null);
   if (error) throw new Error(`Listing pending sign-ups failed: ${error.message}`);
@@ -214,11 +315,22 @@ async function settlePending(email: string): Promise<void> {
 /* ---------- Handlers ---------- */
 
 async function handleGet(): Promise<Response> {
-  const taken = await countTaken();
+  const workshops = upcomingWorkshops();
+  const taken = await countTaken(workshops.map((w) => w.id));
   return json(200, {
-    capacity: CAPACITY,
-    taken,
-    remaining: Math.max(0, CAPACITY - taken),
+    workshops: workshops.map((w) => {
+      const spotsTaken = taken.get(w.id) ?? 0;
+      return {
+        id: w.id,
+        name: w.name,
+        date: w.date,
+        price: w.priceCents,
+        currency: CURRENCY,
+        capacity: w.capacity,
+        taken: spotsTaken,
+        remaining: Math.max(0, w.capacity - spotsTaken),
+      };
+    }),
   });
 }
 
@@ -227,32 +339,58 @@ async function handlePost(req: Request): Promise<Response> {
   try {
     body = await req.json();
   } catch {
-    // Not JSON: treated as a missing email below.
+    // Not JSON: treated as an empty body below.
   }
-  const email = normalizeEmail(
-    body && typeof body === "object" ? (body as { email?: unknown }).email : undefined,
-  );
+  const input: Record<string, unknown> =
+    body && typeof body === "object" && !Array.isArray(body) ? (body as Record<string, unknown>) : {};
+
+  const workshop = WORKSHOPS.find((w) => w.id === input.workshop);
+  if (!workshop) return json(400, { error: "unknown_workshop" });
+  if (workshop.date < studioToday()) return json(409, { error: "workshop_past" });
+
+  const email = normalizeEmail(input.email);
   if (!email) return json(400, { error: "invalid_email" });
+
+  const name = normalizeName(input.name);
+  if (!name) return json(400, { error: "invalid_name" });
+
+  const hasFriend = !isBlank(input.friendName);
+  const friendName = hasFriend ? normalizeName(input.friendName) : null;
+  if (hasFriend && !friendName) return json(400, { error: "invalid_friend_name" });
+
+  const quantity = input.quantity;
+  if (
+    typeof quantity !== "number" || !Number.isInteger(quantity) || quantity < 1 ||
+    quantity > workshop.capacity
+  ) {
+    return json(400, { error: "invalid_quantity" });
+  }
 
   const success = `${siteUrl()}/?workshop=success`;
   const cancel = `${siteUrl()}/?workshop=cancelled`;
 
-  await settlePending(email);
+  await settlePending(workshop.id, email);
 
-  // Hold a spot. The row's expires_at matches the Stripe session's, so the spot is
+  // Hold the spots. The row's expires_at matches the Stripe session's, so they are
   // held for exactly as long as the visitor can pay.
   const expiresAt = Math.floor(Date.now() / 1000) + CHECKOUT_SECONDS;
   const { data: reservation, error: reserveError } = await supabase.rpc("workshop_reserve", {
-    p_workshop: WORKSHOP_SLUG,
+    p_workshop: workshop.id,
     p_email: email,
-    p_capacity: CAPACITY,
+    p_name: name,
+    p_friend_name: friendName,
+    p_quantity: quantity,
+    p_capacity: workshop.capacity,
     p_expires_at: new Date(expiresAt * 1000).toISOString(),
   });
   if (reserveError) throw new Error(`workshop_reserve failed: ${reserveError.message}`);
 
-  const result = (reservation ?? {}) as { result?: string; id?: string };
+  const result = (reservation ?? {}) as { result?: string; id?: string; remaining?: number };
   if (result.result === "already_signed_up") return json(409, { error: "already_signed_up" });
   if (result.result === "full") return json(409, { error: "full" });
+  if (result.result === "not_enough_spots" && Number.isInteger(result.remaining)) {
+    return json(409, { error: "not_enough_spots", remaining: result.remaining });
+  }
   if (result.result !== "reserved" || !result.id) {
     throw new Error(`workshop_reserve returned ${JSON.stringify(reservation)}`);
   }
@@ -263,21 +401,29 @@ async function handlePost(req: Request): Promise<Response> {
     if (error) console.error(`Could not release reservation ${signupId}:`, error.message);
   };
 
+  const productName = `${workshop.name} workshop: ${dateLabel(workshop.date)}`;
+  const metadata = {
+    workshop: workshop.id,
+    workshop_date: workshop.date,
+    quantity: String(quantity),
+    signup_id: signupId,
+  };
+
   let session: Stripe.Checkout.Session;
   try {
     session = await stripe().checkout.sessions.create(
       {
         mode: "payment",
         // Cards only (Apple Pay and Google Pay included): bank debits settle days
-        // later, long after the spot's hold has run out.
+        // later, long after the spots' hold has run out.
         payment_method_types: ["card"],
         line_items: [
           {
-            quantity: 1,
+            quantity,
             price_data: {
               currency: CURRENCY,
-              unit_amount: PRICE_CENTS,
-              product_data: { name: PRODUCT_NAME },
+              unit_amount: workshop.priceCents,
+              product_data: { name: productName },
             },
           },
         ],
@@ -286,10 +432,10 @@ async function handlePost(req: Request): Promise<Response> {
         expires_at: expiresAt,
         success_url: success,
         cancel_url: cancel,
-        metadata: { workshop: WORKSHOP_SLUG, workshop_date: WORKSHOP_DATE, signup_id: signupId },
+        metadata,
         payment_intent_data: {
-          description: PRODUCT_NAME,
-          metadata: { workshop: WORKSHOP_SLUG, signup_id: signupId },
+          description: `${productName} (${quantity === 1 ? "1 spot" : `${quantity} spots`})`,
+          metadata,
         },
       },
       { idempotencyKey: `workshop-checkout-${signupId}` },

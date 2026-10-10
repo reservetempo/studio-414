@@ -4,7 +4,10 @@
   Stripe calls this when a Checkout session made by workshop-checkout finishes:
     checkout.session.completed (and paid)  ->  the sign-up becomes "paid"
     checkout.session.expired               ->  a pending sign-up becomes "expired",
-                                               which frees its spot
+                                               which frees its spots
+
+  A sign-up is one order, however many spots it has, and has one Checkout session,
+  so the workshop and the number of spots don't matter here.
 
   Every request's signature is checked against STRIPE_WEBHOOK_SECRET (the endpoint's
   "Signing secret", whsec_...); anything that fails gets a 400. Sign-ups are found by
