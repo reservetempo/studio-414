@@ -187,33 +187,6 @@
     return 'something went wrong';
   }
 
-  /* ---------- Dates ---------- */
-
-  var relativeFormat = window.Intl && Intl.RelativeTimeFormat
-    ? new Intl.RelativeTimeFormat('en', { numeric: 'auto' })
-    : null;
-
-  function formatWhen(date, now) {
-    var seconds = (now - date) / 1000;
-    if (relativeFormat && seconds < 7 * 86400) {
-      if (seconds < 60) return 'just now';
-      if (seconds < 3600) return relativeFormat.format(-Math.floor(seconds / 60), 'minute');
-      if (seconds < 86400) return relativeFormat.format(-Math.floor(seconds / 3600), 'hour');
-      return relativeFormat.format(-Math.floor(seconds / 86400), 'day');
-    }
-    var options = { day: 'numeric', month: 'short' };
-    if (date.getFullYear() !== now.getFullYear()) options.year = 'numeric';
-    return date.toLocaleDateString('en-GB', options);
-  }
-
-  function updateTimes() {
-    var now = new Date();
-    listEl.querySelectorAll('time[datetime]').forEach(function (time) {
-      var date = new Date(time.dateTime);
-      if (!isNaN(date)) time.textContent = formatWhen(date, now);
-    });
-  }
-
   /* ---------- Rendering ---------- */
 
   var comments = [];
@@ -226,28 +199,16 @@
     return node;
   }
 
-  function renderComment(comment, now) {
+  function renderComment(comment) {
     var item = element('li', 'comment');
-    var meta = element('p', 'comment__meta');
-    meta.appendChild(element('span', 'comment__name', comment.name));
-
-    var date = new Date(comment.created_at);
-    if (!isNaN(date)) {
-      var time = element('time', 'comment__time', formatWhen(date, now));
-      time.dateTime = date.toISOString();
-      time.title = date.toLocaleString('en-GB', { dateStyle: 'long', timeStyle: 'short' });
-      meta.appendChild(time);
-    }
-
-    item.appendChild(meta);
+    item.appendChild(element('p', 'comment__name', comment.name));
     // white-space: pre-wrap in comments.css keeps the line breaks.
     item.appendChild(element('p', 'comment__body', comment.body));
     return item;
   }
 
   function renderList() {
-    var now = new Date();
-    var items = comments.map(function (comment) { return renderComment(comment, now); });
+    var items = comments.map(renderComment);
     listEl.replaceChildren.apply(listEl, items);
     listEl.hidden = items.length === 0;
     // The list scrolls inside its box; show the newest, which are last, by the form.
@@ -421,5 +382,4 @@
   else showNameField();
 
   loadComments();
-  setInterval(updateTimes, 60 * 1000);
 })();

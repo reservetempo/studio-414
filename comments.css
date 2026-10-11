@@ -151,24 +151,11 @@
   border-bottom: 0;
 }
 
-.comment__meta {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 0 10px;
-  margin: 0 0 2px;
-}
-
 .comment__name {
+  margin: 0 0 2px;
   font-size: 1.0625rem;
   font-weight: 500;
   overflow-wrap: anywhere;
-}
-
-.comment__time {
-  font-size: 0.875rem;
-  font-style: italic;
-  color: var(--page-text-muted);
 }
 
 .comment__body {
