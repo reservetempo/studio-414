@@ -6,11 +6,11 @@
    data-font="1" is EB Garamond, the original face, whose tokens are the ones in
    styles.css (declared there for :root and [data-font="1"]); data-font="2" to
    data-font="20" pick the others. On <html> it sets the page and every window. On a
-   window (#signup, #comments-box, the Workshops dialogs #workshops and #workshop,
-   #switcher and .switcher-toggle) it sets that window alone, over the page's face: a
-   window inherits these tokens from <html> unless it carries its own data-font. The
-   big 414, "Opening soon!" and the Workshops link sit on the page, so they follow
-   <html> alone.
+   window (#signup, the Workshops dialogs #workshops and #workshop, #switcher and
+   .switcher-toggle) it sets that window alone, over the page's face: a window
+   inherits these tokens from <html> unless it carries its own data-font. The big
+   414, "Opening soon!", the Workshops link and the comment section sit on the page,
+   so they follow <html> alone.
    Unlike the bevels (see switcher.css), nothing here needs declaring again on a
    window: the tokens the windows use are plain values, and the one built from
    another, --big-weight, is worked out on the element carrying data-font anyway and

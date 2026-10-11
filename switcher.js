@@ -24,8 +24,9 @@
   only while there is something to reset (Styles and Layout).
 
   Part picks what the Font and Colour rows show and change: "Everything" (the page
-  and every window) or one window (PARTS below: the mailing list, the comments, the
-  Workshops dialogs or Display itself with its paint roller).
+  and every window) or one window (PARTS below: the mailing list, the Workshops
+  dialogs or Display itself with its paint roller). The comment section is not a
+  window and follows Everything.
 
   Everything lives on <html data-font="N" data-color="N">. A small inline script in
   index.html's <head> sets those before first paint, from the URL (?font=6&color=1,
@@ -39,7 +40,7 @@
   window's own elements, over Everything (switcher.css, fonts.css), and keeps it there
   when Everything changes; "Same as everything" removes the attribute again. Each is
   kept in localStorage under "studio414.style.<part>.font" and ".color" (the part's
-  key in PARTS, e.g. "studio414.style.comments.color"); a missing or invalid key means
+  key in PARTS, e.g. "studio414.style.mailing.color"); a missing or invalid key means
   "Same as everything". They are not put in the URL, which carries Everything alone.
   A second inline script, in index.html's <body> just after the windows (before the
   deferred scripts), sets them on the windows in the page before first paint; this
@@ -139,7 +140,6 @@
   var PARTS = [
     { key: null, label: 'Everything' },
     { key: 'mailing', label: 'Mailing list', selector: '#signup' },
-    { key: 'comments', label: 'Comments', selector: '#comments-box' },
     { key: 'workshops', label: 'Workshops', selector: '#workshops, #workshop' },
     { key: 'display', label: 'Display', selector: '#switcher, .switcher-toggle' }
   ];

@@ -3,10 +3,11 @@
 
    data-color="1" to data-color="20" picks a colour; 0 (or no attribute) keeps
    "Classic", the palette in styles.css. On <html> it colours the page and every
-   window. On a window (the mailing list #signup, the comments #comments-box, the
-   Workshops dialogs #workshops and #workshop, Display #switcher and its paint roller
-   .switcher-toggle) it colours that window alone, over the page's colour: a window
-   inherits the colour tokens from <html> unless it carries its own data-color.
+   window. On a window (the mailing list #signup, the Workshops dialogs #workshops and
+   #workshop, Display #switcher and its paint roller .switcher-toggle) it colours that
+   window alone, over the page's colour: a window inherits the colour tokens from
+   <html> unless it carries its own data-color. The comment section is not a window
+   and follows <html> alone.
    That is why styles.css declares Classic for [data-color="0"] too (a window can be
    set back to it), and declares the button fill and the bevels again on every
    element carrying data-color: they are built from these colours, and a custom
