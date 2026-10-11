@@ -1,12 +1,12 @@
 /*
-  Draggable, resizable boxes for Studio 414: the mailing-list card (#signup), the
-  comments box (#comments-box) and the style switcher's "Display" window (#switcher,
-  built by switcher.js), drawn as 90s windows by boxes.css.
+  Draggable, resizable boxes for Studio 414: the mailing-list card (#signup) and the
+  style switcher's "Display" window (#switcher, built by switcher.js), drawn as 90s
+  windows by boxes.css. (The comment section stays put: it is not a window.)
 
-  - Drag a box by its title bar; resize the card and the comments box with the grip in
-    their bottom-right corner (Display has no grip: its rows have one size). Pointer
-    events, so a mouse, a finger and a pen all work. Only the title bar and the grip
-    take touch-action: none, so a finger anywhere else still scrolls the page.
+  - Drag a box by its title bar; resize the card with the grip in its bottom-right
+    corner (Display has no grip: its rows have one size). Pointer events, so a mouse,
+    a finger and a pen all work. Only the title bar and the grip take touch-action:
+    none, so a finger anywhere else still scrolls the page.
   - Keyboard: the title bar and the grip are buttons. On the title bar the arrow keys
     move the box and Shift+arrow keys resize it (or, without a grip, move it too); on
     the grip the arrow keys resize it. Escape during a drag puts the box back.
@@ -14,11 +14,11 @@
   - Until a box is moved or resized it keeps the default, responsive layout from the
     CSS. From then on it is "placed", and remembered in localStorage under
     "studio414.layout", with the order the boxes are stacked in. Without localStorage
-    it all still works for the visit. The card and the comments box are then
-    absolutely positioned at page coordinates (px from the top-left corner of the
-    page, so they scroll with the page as the photo does). Display is fixed to the
-    screen (box--fixed), so its coordinates are px from the top-left corner of the
-    viewport and it stays put as the page scrolls.
+    it all still works for the visit. The card is then absolutely positioned at
+    page coordinates (px from the top-left corner of the page, so it scrolls with
+    the page as the photo does). Display is fixed to the screen (box--fixed), so its
+    coordinates are px from the top-left corner of the viewport and it stays put as
+    the page scrolls.
   - Stored coordinates are kept as the visitor left them and fitted to the screen
     whenever they are applied (on load, and when the window is resized or rotated):
     no wider than the viewport and wholly inside it across, never smaller than the
@@ -69,7 +69,6 @@
   // screen (box--fixed in the CSS) rather than the page. grip: resizable.
   var boxes = [
     { id: 'signup', el: document.getElementById('signup'), grip: true },
-    { id: 'comments', el: document.getElementById('comments-box'), grip: true },
     { id: 'switcher', el: document.getElementById('switcher'), grip: false }
   ].filter(function (box) {
     return box.el && box.el.querySelector('.box__titlebar');
@@ -111,6 +110,8 @@
       data = null;
     }
     if (!data || typeof data !== 'object') return;
+    // Only what still moves is read back: anything else stored (the comment section,
+    // from when it was a window) is left out, and so dropped at the next save.
     if (data.boxes && typeof data.boxes === 'object') {
       items.forEach(function (item) {
         if (isRect(data.boxes[item.id])) placed[item.id] = roundRect(data.boxes[item.id]);
@@ -186,7 +187,7 @@
   }
 
   // Where left: 0; top: 0 puts a placed box: the corner of the hero for the card and
-  // the 414, of the page for the comments box.
+  // the 414, of the screen for Display (fixed, so it has no offset parent).
   function origin(el) {
     var parent = el.offsetParent;
     if (!parent || parent === document.body || parent === root) return { x: 0, y: 0 };

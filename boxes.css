@@ -1,12 +1,12 @@
-/* Window chrome for the boxes: the mailing-list card (.signup), the comments box
-   (.comments__inner) and the style switcher, "Display" (.switcher). Each is a 90s
-   dialog window: a black frame with a 2px bevel, a solid fill, a title bar and, on
-   the first two, a resize grip in the bottom-right corner; Display, which can be
-   closed, has a close button in its title bar instead.
+/* Window chrome for the boxes: the mailing-list card (.signup) and the style
+   switcher, "Display" (.switcher). Each is a 90s dialog window: a black frame with a
+   2px bevel, a solid fill, a title bar and, on the card, a resize grip in the
+   bottom-right corner; Display, which can be closed, has a close button in its title
+   bar instead. (The comment section is not a window: comments.css.)
    boxes.js adds the drag handle over the title bar and the grip, and moves and sizes
    the boxes; the colours are the tokens in styles.css, swapped per colour in
-   switcher.css. Where each box sits by default is in styles.css (the card),
-   comments.css (the comments box) and switcher.css (Display). */
+   switcher.css. Where each box sits by default is in styles.css (the card) and
+   switcher.css (Display). */
 
 .box {
   /* Above the hero's shading; boxes.js restacks the boxes as they are used. */

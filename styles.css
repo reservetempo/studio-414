@@ -16,9 +16,10 @@
   --dip: 0.236;
 }
 
-/* The boxes (the mailing-list card and the comments box) are 90s dialog windows:
-   solid fills, a title bar and 2px bevels. These are colour 0, "Classic": a warm
-   Windows-grey face and a navy title bar. switcher.css swaps them per colour.
+/* The boxes (the mailing-list card, Display and the Workshops dialogs) are 90s
+   dialog windows: solid fills, a title bar and 2px bevels. These are colour 0,
+   "Classic": a warm Windows-grey face and a navy title bar. switcher.css swaps them
+   per colour.
    Contrast: text 4.5:1 or more on the face and on the white fields, and --shadow
    3:1 or more against the face, so every bevelled edge reads as a border.
    They are declared for [data-color="0"] as well as :root, so a window carrying
@@ -27,17 +28,17 @@
 [data-color="0"] {
   --face: #d4d0c8;          /* window fill, and the buttons on it */
   --face-text: #000000;
-  --face-muted: #4a4742;    /* times, notes and messages */
+  --face-muted: #4a4742;    /* notes and messages */
   --hilight: #ffffff;       /* bevel: the lit outer edge (top and left of raised things) */
   --light: #e5e3de;         /* bevel: the lit inner edge */
   --shadow: #77746e;        /* bevel: the shaded inner edge */
   --dk-shadow: #000000;     /* bevel: the shaded outer edge, and the window frame */
-  --field: #ffffff;         /* text fields and the comment list */
+  --field: #ffffff;         /* text fields */
   --field-text: #000000;
   --placeholder: #686868;
   --title: #0a246a;         /* title bars */
   --title-text: #ffffff;
-  --accent-ink: #0a246a;    /* comment names and links */
+  --accent-ink: #0a246a;    /* names and links */
   --error: #9c0000;
   --focus: #000000;
 }
@@ -59,9 +60,8 @@
 }
 
 /* The button fill and the bevels. Raised and pressed (buttons) are stacks of inset
-   1px lines, outer pair first. Sunken (fields, the comment list) is a 1px border for
-   the inner pair and a 1px outside shadow for the outer one, so scrolled text never
-   runs over it.
+   1px lines, outer pair first. Sunken (fields) is a 1px border for the inner pair
+   and a 1px outside shadow for the outer one, so scrolled text never runs over it.
    They are built from the palette, and a custom property built from others is worked
    out where it is declared and inherited as the finished value. So they are declared
    again on every element carrying data-color (a window with its own colour): declared
@@ -229,8 +229,8 @@ body {
      keeps that size and the photo slides down under it as the band grows, until the
      figures only dip by that share.
    It is fitted to the room it has, so it scales with the screen:
-   - its width: the window's own width where the comments box floats beside the
-     window (which keeps clear of the box), otherwise up to 80% of the photo;
+   - its width: the window's own width where the comment section floats beside the
+     window (which keeps clear of it), otherwise up to 80% of the photo;
    - its height: whichever is more of what the band leaves it from 16px down at that
      dip, and the ceiling over the window less 16px (the ceiling that shows: from
      the photo's top edge, or from the top of the page where the photo runs past it).
@@ -319,8 +319,8 @@ body {
   pointer-events: none;
 }
 
-/* Where the comments box floats on the wall right of the window (comments.css), keep
-   to the window's width, which keeps clear of the box. */
+/* Where the comment section floats on the wall right of the window (comments.css),
+   keep to the window's width, which keeps clear of it. */
 @media (min-width: 1100px) and (min-height: 640px) {
   .big-414 {
     --room-w: calc(var(--photo-w) * var(--window-w));

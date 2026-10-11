@@ -1,22 +1,23 @@
-/* Comment section: a 90s window like the mailing-list card (the frame, title bar and
-   grip are in boxes.css; the colours are the tokens in styles.css). The comments
-   scroll in a sunken list inside the box, with the form at the bottom.
+/* Comment section: plain text in the body font and the page's text colour, inside one
+   thin line in that colour round the heading, the list and the form; no fill of its
+   own (the colours are the tokens in styles.css). The comments scroll inside it, with
+   the form at the bottom. It stays where it is: nothing drags or resizes it.
 
-   Where it sits by default:
+   Where it sits:
    - on wide, tall enough screens it floats over the hero, centred on the white wall
      to the right of the photo's window, clear of the window and the sign-up card;
+     there the wall behind it is blurred and toned away from the text colour, so the
+     text reads on the photo without a fill or an edge round the letters;
    - otherwise it sits in the page under the hero, full width less 16px gutters (at
-     most 432px).
-   boxes.js lets visitors move and resize it; it then keeps their position. */
+     most 432px). */
 
 .comments {
-  /* The box's height when it sits in the page. */
+  /* The section's height when it sits in the page. */
   --comments-h: min(480px, 100svh - 32px);
 
-  /* The section keeps the box's place in the page even after the box has been
-     dragged out of it, so the page never shifts under the visitor's finger. */
-  min-height: calc(var(--comments-h) + 56px);
   padding: 24px 16px 32px;
+  color: var(--page-text);
+  font-family: var(--body-font);
   /* No background of its own: the hero ends in the page colour (its bottom fade, see
      .hero::before), and the section carries straight on in it. */
 }
@@ -25,15 +26,20 @@
   display: none !important;
 }
 
-/* The box. */
+/* The line box. */
 .comments__inner {
-  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
   width: 100%;
   max-width: 432px;
-  /* The narrowest it can be resized to (boxes.js reads this). */
-  min-width: min(280px, 100vw - 16px);
   height: var(--comments-h);
+  /* Never shorter than its content (and so whatever font is picked): nothing inside
+     is ever clipped. */
+  min-height: min-content;
   margin: 0 auto;
+  padding: 12px 14px 14px;
+  border: 1px solid var(--page-text);
 }
 
 /* Floating over the hero, on the wall right of the window. Positioned in the page
@@ -47,12 +53,12 @@
   }
 
   /* This selector (.comments > .comments__inner) and the 64px top clearance below
-     keep the box under the Workshop button fixed at the top right. Nothing in
+     keep the section under the Workshop button fixed at the top right. Nothing in
      workshop.css overrides it any more. */
   .comments > .comments__inner {
     /* The free width right of the window, then a box centred in it: two thirds of
-       that width less margins (never under the box's min-width, so it stays
-       centred), and at most 456px tall. */
+       that width less margins (never under 280px, and centred all the same), and at
+       most 456px tall. */
     --free: 100% * (1 - var(--window-cx) - var(--window-w) / 2);
     --w: clamp(280px, (var(--free) - 48px) * 2 / 3, 308px);
     --h: min(100% - 80px, 456px);
@@ -66,16 +72,42 @@
     max-width: none;
     height: var(--h);
     margin: 0;
+    /* The photo shows through, blurred so the wall's beams and edges don't run
+       through the letters. */
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
+  }
+
+  /* And toned away from the text: darker under white text, lighter under black (the
+     page text is one or the other for every colour). The darkened wall comes to
+     about the middle of the two, too little for either. Lightening alone leaves the
+     dark things on the wall dark, so under black the contrast is lowered first.
+     Toned, every part of the wall behind the text is 5.5:1 or more against it
+     (checked on the photo at 1100x640, 1400x900, 1920x1080 and 2000x660). Without
+     style queries it is only blurred. */
+  @container style(--page-text: #ffffff) {
+    .comments > .comments__inner {
+      -webkit-backdrop-filter: blur(6px) brightness(0.6);
+      backdrop-filter: blur(6px) brightness(0.6);
+    }
+  }
+
+  @container style(--page-text: #000000) {
+    .comments > .comments__inner {
+      -webkit-backdrop-filter: blur(6px) contrast(0.4) brightness(1.7);
+      backdrop-filter: blur(6px) contrast(0.4) brightness(1.7);
+    }
   }
 }
 
-.comments__body {
-  flex: 1 1 auto;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  /* The bottom clears the resize grip. */
-  padding: 10px 12px 24px;
+/* A plain heading, in the body font like everything else here. */
+.comments__title {
+  flex: none;
+  margin: 0;
+  font: inherit;
+  font-size: 1.25rem;
+  font-weight: 500;
+  line-height: 1.2;
 }
 
 .comments__note {
@@ -84,25 +116,20 @@
   font-size: 0.9375rem;
   font-style: italic;
   line-height: 1.3;
-  color: var(--face-muted);
+  color: var(--page-text-muted);
 }
 
 /* ---------- The list ---------- */
 
-/* A sunken white list that takes the height left over and scrolls. contain: size
-   keeps the comments out of the box's own minimum height: the list can always shrink
-   to its min-height (room for a couple of comments), never less. */
+/* Takes the height left over and scrolls. contain: size keeps the comments out of
+   the section's own minimum height: the list can always shrink to its min-height
+   (room for a couple of comments), never less. */
 .comments__pane {
   flex: 1 1 0;
   min-height: 9rem;
   contain: size;
   overflow-y: auto;
-  padding: 0 12px;
-  border: 1px solid;
-  border-color: var(--sunken-border);
-  background: var(--field);
-  color: var(--field-text);
-  box-shadow: var(--sunken-edge);
+  scrollbar-color: var(--page-text-muted) transparent;
 }
 
 .comments__list {
@@ -113,7 +140,11 @@
 
 .comment {
   padding: 8px 0 9px;
-  border-bottom: 1px dotted var(--shadow);
+  border-bottom: 1px dotted var(--page-text-muted);
+}
+
+.comment:first-child {
+  padding-top: 0;
 }
 
 .comment:last-child {
@@ -129,17 +160,15 @@
 }
 
 .comment__name {
-  color: var(--accent-ink);
-  font-family: var(--display-font);
-  font-size: calc(1.0625rem * var(--display-name-size));
-  font-weight: var(--display-weight);
+  font-size: 1.0625rem;
+  font-weight: 500;
   overflow-wrap: anywhere;
 }
 
 .comment__time {
   font-size: 0.875rem;
   font-style: italic;
-  color: var(--face-muted);
+  color: var(--page-text-muted);
 }
 
 .comment__body {
@@ -156,11 +185,7 @@
   font-size: 1rem;
   font-style: italic;
   line-height: 1.4;
-  color: var(--face-muted);
-}
-
-.comments__state.is-active {
-  padding: 10px 0;
+  color: var(--page-text-muted);
 }
 
 .comments__status {
@@ -183,47 +208,39 @@
   margin: 0 0 8px;
 }
 
-/* Small spaced capitals, as on the card. */
 .comments__label {
   display: block;
   margin-bottom: 4px;
-  font-family: var(--display-font);
-  font-size: calc(0.75rem * var(--display-size));
-  font-weight: var(--display-weight);
+  font-size: 1rem;
   line-height: 1.2;
-  letter-spacing: calc(0.22em * var(--display-tracking));
-  text-transform: uppercase;
 }
 
 .comments__identity {
   margin: 0 0 8px;
-  font-family: var(--display-font);
-  font-size: calc(1.0625rem * var(--display-name-size));
-  /* Italic in EB Garamond; the switcher's display faces have no italic, so they set it upright. */
-  font-style: var(--display-italic, italic);
-  color: var(--face-muted);
+  font-size: 1.0625rem;
+  font-style: italic;
+  color: var(--page-text-muted);
   overflow-wrap: anywhere;
 }
 
 .comments__identity-name {
   font-style: normal;
-  font-weight: var(--display-weight);
-  color: var(--accent-ink);
+  font-weight: 500;
+  color: var(--page-text);
 }
 
-/* Sunken white fields, as on the card; 17px text, so iOS does not zoom in on focus. */
+/* A thin line round each field, and nothing behind it; 17px text, so iOS does not
+   zoom in on focus. */
 .comments__input,
 .comments__textarea {
   display: block;
   width: 100%;
   margin: 0;
   padding: 4px 8px;
-  border: 1px solid;
-  border-color: var(--sunken-border);
+  border: 1px solid var(--page-text);
   border-radius: 0;
-  background: var(--field);
-  color: var(--field-text);
-  box-shadow: var(--sunken-edge);
+  background: transparent;
+  color: inherit;
   font: inherit;
   font-size: max(16px, 1.0625rem);
   line-height: 1.4;
@@ -234,7 +251,7 @@
   padding-block: 0;
 }
 
-/* Three lines; the box is what gets resized, so the field itself is not. */
+/* Three lines; the section has a set height, so the field is not resized. */
 .comments__textarea {
   height: calc(3 * 1.4em + 10px);
   resize: none;
@@ -242,54 +259,21 @@
 
 .comments__input::placeholder,
 .comments__textarea::placeholder {
-  color: var(--placeholder);
+  color: var(--page-text-muted);
   opacity: 1;
 }
 
+/* Invalid: the line doubles. */
 .comments__input[aria-invalid="true"],
 .comments__textarea[aria-invalid="true"] {
-  box-shadow: var(--sunken-edge), inset 0 0 0 2px var(--error);
+  box-shadow: inset 0 0 0 1px var(--page-text);
 }
 
 .comments__actions {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
+  align-items: baseline;
   gap: 8px 14px;
-}
-
-/* The default button, as on the card: raised, framed in black, spaced capitals. The
-   start padding is wider by the trailing tracking, to keep the label centred. */
-.comments__submit {
-  --pad: 16px;
-  flex: none;
-  height: 36px;
-  margin: 0;
-  padding: 0 var(--pad) 0 calc(var(--pad) + 0.2em * var(--display-tracking));
-  border: 1px solid var(--dk-shadow);
-  border-radius: 0;
-  background: var(--button);
-  color: var(--button-text);
-  box-shadow: var(--bevel-raised);
-  font: inherit;
-  font-family: var(--display-font);
-  font-size: calc(0.8125rem * var(--display-size));
-  font-weight: var(--display-weight);
-  letter-spacing: calc(0.2em * var(--display-tracking));
-  text-transform: uppercase;
-  cursor: pointer;
-}
-
-.comments__submit:active:not(:disabled) {
-  padding: 2px calc(var(--pad) - 1px) 0 calc(var(--pad) + 1px + 0.2em * var(--display-tracking));
-  box-shadow: var(--bevel-pressed);
-}
-
-/* Greyed and embossed, as disabled controls were. */
-.comments__submit:disabled {
-  color: var(--shadow);
-  text-shadow: 1px 1px 0 var(--hilight);
-  cursor: progress;
 }
 
 .comments__message {
@@ -298,20 +282,25 @@
   font-size: 0.9375rem;
   font-style: italic;
   line-height: 1.3;
-  color: var(--face-muted);
+  color: var(--page-text-muted);
 }
 
+/* An error stands upright in the full text colour (the red of the windows would not
+   read on the page or the photo). */
 .comments__message[data-state="error"] {
-  color: var(--error);
+  font-style: normal;
+  color: var(--page-text);
 }
 
-/* Text buttons: "change" (the name) and "Try again" (loading). */
-.comments__link {
+/* Text buttons: "Post comment", "change" (the name) and "Try again" (loading). */
+.comments__link,
+.comments__submit {
   margin: 0;
   padding: 2px 1px;
   border: 0;
+  border-radius: 0;
   background: none;
-  color: var(--accent-ink);
+  color: var(--page-text);
   font: inherit;
   font-style: normal;
   text-decoration: underline;
@@ -320,15 +309,22 @@
   cursor: pointer;
 }
 
-.comments__input:focus-visible,
-.comments__textarea:focus-visible,
-.comments__link:focus-visible {
-  outline: 2px solid var(--focus);
-  outline-offset: 1px;
+.comments__submit {
+  flex: none;
+  font-size: 1.0625rem;
 }
 
-/* The dotted focus rectangle inside the button. */
+.comments__submit:disabled {
+  color: var(--page-text-muted);
+  text-decoration-style: dotted;
+  cursor: progress;
+}
+
+.comments__pane:focus-visible,
+.comments__input:focus-visible,
+.comments__textarea:focus-visible,
+.comments__link:focus-visible,
 .comments__submit:focus-visible {
-  outline: 1px dotted var(--focus);
-  outline-offset: -5px;
+  outline: 2px solid var(--page-text);
+  outline-offset: 2px;
 }

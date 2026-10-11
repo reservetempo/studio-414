@@ -72,43 +72,39 @@
   </main>
 
   <section class="comments" id="comments" aria-labelledby="comments-title">
-    <div class="comments__inner box" id="comments-box">
-      <div class="box__titlebar">
-        <svg class="box__icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false" shape-rendering="crispEdges"><path fill="currentColor" d="M2 2h12v1H2zM1 3h1v7H1zM14 3h1v7h-1zM2 10h12v1H2zM3 11h1v3H3zM4 12h1v1H4zM5 11h1v1H5zM4 5h8v1H4zM4 7h6v1H4z"/></svg>
-        <h2 class="box__title" id="comments-title">Comments</h2>
-      </div>
-      <div class="comments__body">
-        <p class="comments__note" id="comments-note" hidden></p>
+    <div class="comments__inner" id="comments-box">
+      <h2 class="comments__title" id="comments-title">Comments</h2>
 
-        <!-- The comments scroll in here; focusable so the keyboard can scroll it too. -->
-        <div class="comments__pane" tabindex="0" role="region" aria-label="Comment list">
-          <ol class="comments__list" id="comments-list" hidden></ol>
-          <div class="comments__state">
-            <p class="comments__status" id="comments-status" role="status" aria-live="polite"></p>
-            <button class="comments__link" id="comments-retry" type="button" hidden>Try again</button>
-          </div>
+      <p class="comments__note" id="comments-note" hidden></p>
+
+      <!-- The comments scroll in here; focusable so the keyboard can scroll it too. -->
+      <div class="comments__pane" tabindex="0" role="region" aria-label="Comment list">
+        <ol class="comments__list" id="comments-list" hidden></ol>
+        <div class="comments__state">
+          <p class="comments__status" id="comments-status" role="status" aria-live="polite"></p>
+          <button class="comments__link" id="comments-retry" type="button" hidden>Try again</button>
         </div>
-
-        <form class="comments__form" id="comments-form" novalidate>
-          <div class="comments__field" id="comments-name-field">
-            <label class="comments__label" for="comments-name">Your name</label>
-            <input class="comments__input" id="comments-name" name="name" type="text"
-                   maxlength="40" autocomplete="nickname" autocapitalize="words" spellcheck="false" required>
-          </div>
-          <p class="comments__identity" id="comments-identity" hidden>
-            Commenting as <span class="comments__identity-name" id="comments-identity-name"></span>
-            <button class="comments__link" id="comments-change" type="button" aria-label="Change your name">change</button>
-          </p>
-          <div class="comments__field">
-            <label class="comments__label" for="comments-body">Comment</label>
-            <textarea class="comments__textarea" id="comments-body" name="body" rows="3" required></textarea>
-          </div>
-          <div class="comments__actions">
-            <button class="comments__submit" id="comments-submit" type="submit">Post comment</button>
-            <p class="comments__message" id="comments-message" role="status" aria-live="polite"></p>
-          </div>
-        </form>
       </div>
+
+      <form class="comments__form" id="comments-form" novalidate>
+        <div class="comments__field" id="comments-name-field">
+          <label class="comments__label" for="comments-name">Your name</label>
+          <input class="comments__input" id="comments-name" name="name" type="text"
+                 maxlength="40" autocomplete="nickname" autocapitalize="words" spellcheck="false" required>
+        </div>
+        <p class="comments__identity" id="comments-identity" hidden>
+          Commenting as <span class="comments__identity-name" id="comments-identity-name"></span>
+          <button class="comments__link" id="comments-change" type="button" aria-label="Change your name">change</button>
+        </p>
+        <div class="comments__field">
+          <label class="comments__label" for="comments-body">Comment</label>
+          <textarea class="comments__textarea" id="comments-body" name="body" rows="3" required></textarea>
+        </div>
+        <div class="comments__actions">
+          <button class="comments__submit" id="comments-submit" type="submit">Post comment</button>
+          <p class="comments__message" id="comments-message" role="status" aria-live="polite"></p>
+        </div>
+      </form>
     </div>
   </section>
 
