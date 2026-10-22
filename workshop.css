@@ -1,4 +1,4 @@
-/* Workshops (workshop.js): "WORKSHOPS" on a raised grey button like "Sign up", fixed at
+/* Workshops (workshop.js): "WORKSHOPS" on a glossy Aqua pill like "Sign up", fixed at
    the top right of the screen, that opens the windows, 90s dialogs like the boxes: the
    Workshops window (.workshop--list), the month calendar (calendar.css) over a list of
    links, and a workshop's sign-up window. boxes.css gives the windows their frame,
@@ -14,8 +14,8 @@
    bottom left (switcher.css). Where the comments box floats on the wall right of the
    window, comments.css starts it lower to leave the corner to the button. */
 
-/* The corner the button takes, with room to spare: its gutter, the button (160px wide
-   at most, "WORKSHOPS" in the widest face, Ouroboros) and down to its foot (36px); the
+/* The corner the button takes, with room to spare: its gutter, the button (about 130px
+   wide, "WORKSHOPS" in Lucida Grande or its stand-ins) and down to its foot (36px); the
    big 414 keeps 8px clear of that, which also clears the focus ring round it. */
 :root {
   --workshop-reach: calc(max(16px, env(safe-area-inset-right)) + 168px);
@@ -31,12 +31,10 @@
 
 /* ---------- The button ---------- */
 
-/* A raised grey button like "Sign up" (styles.css): framed in black as a dialog's
-   default button is, with the switcher's display face in the same spaced capitals.
-   The start padding is wider by the trailing tracking, to keep the word centred;
-   pressed, the bevel flips and the word moves 1px. */
+/* A glossy Aqua pill in the colour (.aqua-pill--tint, boxes.css), like "Sign up", in
+   Lucida Grande capitals, lightly spaced (the start padding is wider by the trailing
+   tracking, to keep the word centred). */
 .workshop-button {
-  --pad: 16px;
   position: fixed;
   top: max(16px, env(safe-area-inset-top));
   right: max(16px, env(safe-area-inset-right));
@@ -44,21 +42,11 @@
   z-index: 10;
   height: 36px;
   margin: 0;
-  padding: 0 var(--pad) 0 calc(var(--pad) + 0.2em * var(--display-tracking));
-  border: 1px solid var(--dk-shadow);
-  border-radius: 0;
-  background: var(--button);
-  color: var(--button-text);
-  box-shadow: var(--bevel-raised);
-  font-family: var(--display-font);
-  font-size: calc(0.875rem * var(--display-size));
-  font-weight: var(--display-weight);
-  line-height: 1;
-  letter-spacing: calc(0.2em * var(--display-tracking));
+  padding: 0 20px 0 calc(20px + 0.08em);
+  font-size: 13px;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   white-space: nowrap;
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
 }
 
 /* A bigger target for a finger than the button itself. */
@@ -72,25 +60,12 @@
   display: none;
 }
 
-.workshop-button:active {
-  padding: 2px calc(var(--pad) - 1px) 0 calc(var(--pad) + 1px + 0.2em * var(--display-tracking));
-  box-shadow: var(--bevel-pressed);
-}
-
-/* The dotted focus rectangle inside, as on "Sign up", and since the button stands
-   straight on the photo or the page rather than in a window, a ring round the
-   outside in the page's text colour, as round the paint roller (switcher.css). */
+/* Since the button stands straight on the photo or the page rather than in a window,
+   its focus ring is in the page's text colour, as round the paint roller
+   (switcher.css). */
 .workshop-button:focus-visible {
-  outline: 1px dotted var(--focus);
-  outline-offset: -5px;
-}
-
-.workshop-button:focus-visible::after {
-  content: "";
-  position: absolute;
-  inset: -6px;
-  border: 2px solid var(--page-text);
-  pointer-events: none;
+  outline: 2px solid var(--page-text);
+  outline-offset: 3px;
 }
 
 /* Phones: the same 8px gutter as the Display window at the side. */

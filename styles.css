@@ -16,9 +16,10 @@
   --dip: 0.236;
 }
 
-/* The boxes (the mailing-list card, Display and the Workshops dialogs) are 90s
-   dialog windows: solid fills, a title bar and 2px bevels. These are colour 0,
-   "Classic": a warm Windows-grey face and a navy title bar. switcher.css swaps them
+/* The palette. The boxes (the mailing-list card and Display) are Mac OS X Aqua
+   windows built from it (the --aqua-* tokens below, used by boxes.css); the
+   Workshops dialogs and calendar still use the older bevel tokens. These are colour
+   0, "Classic": a warm grey face and a navy title colour. switcher.css swaps them
    per colour.
    Contrast: text 4.5:1 or more on the face and on the white fields, and --shadow
    3:1 or more against the face, so every bevelled edge reads as a border.
@@ -77,6 +78,83 @@
     inset -2px -2px var(--light), inset 2px 2px var(--shadow);
   --sunken-border: var(--dk-shadow) var(--light) var(--light) var(--dk-shadow);
   --sunken-edge: -1px -1px var(--shadow), 1px 1px var(--hilight);
+}
+
+/* ---------- Mac OS X Aqua (2001-2005) ----------
+   The tokens the Aqua pieces in boxes.css are drawn with (.box windows, their title
+   bar and gumdrops, .aqua-pill buttons, .aqua-field text fields, .aqua-popup menus).
+   Fixed ones first: the face the chrome is set in (title bars and buttons are always
+   Lucida Grande, whatever font is picked; text inside the windows keeps it), the
+   corner radius, the soft drop shadow (no black frame) and the three gumdrops, which
+   stay red, yellow and green in every colour. */
+:root {
+  --aqua-font: "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", Geneva, Verdana, sans-serif;
+  --aqua-radius: 7px;
+  --aqua-window-shadow: 0 16px 36px rgb(0 0 0 / 0.42), 0 3px 10px rgb(0 0 0 / 0.3);
+  --aqua-light-size: 13px;
+  --aqua-light-gap: 7px;
+  --aqua-red: #e2463f;
+  --aqua-red-rim: #a4241d;
+  --aqua-red-glow: #ffb0a3;
+  --aqua-yellow: #f2b22a;
+  --aqua-yellow-rim: #b07408;
+  --aqua-yellow-glow: #ffeb98;
+  --aqua-green: #4fb336;
+  --aqua-green-rim: #287718;
+  --aqua-green-glow: #c5f5a6;
+}
+
+/* The tinted ones, built from the colour's tokens, so declared again on every element
+   carrying data-color (as the bevels above), and a window with its own colour gets
+   its own Aqua tint.
+   - Window body: fine horizontal pinstripes of the face and a lighter face.
+   - Title bar: the colour's title colour washed into the face, light at the top and
+     deeper at the bottom, with faint 1px stripes; its text is the face text (black),
+     7:1 or more on every colour.
+   - Tinted pills (the default button, the Workshops button): the title colour itself
+     with its own text colour (4.5:1 or more, the glosses keep clear of the words), a
+     darker rim and a lighter glow. Plain pills (other buttons) are the face lifted
+     towards white, with black text.
+   - Fields: white, with a grey edge (3:1 or more on the face) and an inner shadow.
+   - Focus: a solid edge of the title colour darkened (3:1 or more on the face and the
+     fields in every colour) inside a soft halo of the colour. */
+:root,
+[data-color] {
+  --aqua-stripe: color-mix(in srgb, var(--face) 55%, #ffffff);
+  --aqua-pinstripes: repeating-linear-gradient(to bottom,
+    var(--face) 0 2px, var(--aqua-stripe) 2px 4px);
+  --aqua-edge: color-mix(in srgb, var(--face-text) 40%, transparent);
+
+  --aqua-title-top: color-mix(in srgb, var(--title) 10%, #ffffff);
+  --aqua-title-mid: color-mix(in srgb, var(--title) 26%, var(--face));
+  --aqua-title-bottom: color-mix(in srgb, var(--title) 40%, var(--face));
+  --aqua-title-line: color-mix(in srgb, var(--aqua-title-bottom) 62%, #000000);
+  --aqua-title-text: var(--face-text);
+  --aqua-titlebar:
+    repeating-linear-gradient(to bottom, rgb(255 255 255 / 0.3) 0 1px, transparent 1px 2px),
+    linear-gradient(to bottom, var(--aqua-title-top), var(--aqua-title-mid) 55%, var(--aqua-title-bottom));
+
+  --aqua-tint: var(--title);
+  --aqua-tint-text: var(--title-text);
+  --aqua-tint-deep: color-mix(in srgb, var(--title) 84%, #000000);
+  --aqua-tint-rim: color-mix(in srgb, var(--title) 58%, #000000);
+  --aqua-tint-glow: color-mix(in srgb, var(--title) 45%, #ffffff);
+  --aqua-tint-pressed: color-mix(in srgb, var(--title) 85%, #000000);
+
+  --aqua-plain: color-mix(in srgb, var(--face) 35%, #ffffff);
+  --aqua-plain-text: var(--face-text);
+  --aqua-plain-deep: color-mix(in srgb, var(--face) 70%, #ffffff);
+  --aqua-plain-rim: color-mix(in srgb, var(--face-text) 50%, var(--face));
+  --aqua-plain-glow: #ffffff;
+  --aqua-plain-pressed: color-mix(in srgb, var(--face) 88%, var(--title));
+
+  --aqua-field-edge: color-mix(in srgb, var(--face-text) 55%, var(--field));
+  --aqua-field-edge-top: color-mix(in srgb, var(--face-text) 66%, var(--field));
+  --aqua-field-shadow: inset 0 1px 2px rgb(0 0 0 / 0.2);
+
+  --aqua-focus: color-mix(in srgb, var(--title) 50%, #000000);
+  --aqua-halo: color-mix(in srgb, var(--title) 60%, transparent);
+  --aqua-focus-ring: 0 0 0 1px var(--aqua-focus), 0 0 0 4px var(--aqua-halo);
 }
 
 :root,
@@ -346,9 +424,9 @@ html.is-moving-414 * {
 }
 
 /* "Move 414" (boxes.js): beside the heading, not in it, so the heading still reads
-   "Studio 414". Out of sight until the keyboard reaches it; then a small 90s button
-   under the figures, which get a dotted frame. The arrow keys move the 414, as on the
-   windows' title bars. */
+   "Studio 414". Out of sight until the keyboard reaches it; then a small Aqua pill
+   (.aqua-pill, boxes.css) under the figures, which get a dotted frame. The arrow keys
+   move the 414, as on the windows' title bars. */
 .big-414__handle {
   position: absolute;
   top: calc(100% + 14px);
@@ -356,13 +434,7 @@ html.is-moving-414 * {
   translate: -50% 0;
   height: 32px;
   margin: 0;
-  padding: 0 12px;
-  border: 1px solid var(--dk-shadow);
-  border-radius: 0;
-  background: var(--face);
-  color: var(--face-text);
-  box-shadow: var(--bevel-raised);
-  font: italic 0.9375rem/1 var(--body-font);
+  padding: 0 16px;
   -webkit-text-stroke: 0;
   white-space: nowrap;
   cursor: grab;
@@ -469,63 +541,25 @@ html.is-moving-414 * {
 .signup__button {
   height: clamp(36px, 9.5cqw, 40px);
   margin: 0;
-  border-radius: 0;
-  font: inherit;
 }
 
-/* A sunken white field; 17px text at least, so iOS does not zoom in on focus. */
+/* An Aqua text field (.aqua-field, boxes.css) in the body face; 17px text at least,
+   so iOS does not zoom in on focus. */
 .signup__input {
   flex: 1 1 11em;
   min-width: 0;
   padding: 0 8px;
-  border: 1px solid;
-  border-color: var(--sunken-border);
-  background: var(--field);
-  color: var(--field-text);
-  box-shadow: var(--sunken-edge);
+  font: inherit;
   font-size: clamp(1.0625rem, 4.5cqw, 1.1875rem);
 }
 
-.signup__input::placeholder {
-  color: var(--placeholder);
-  /* Firefox dims placeholders further by default. */
-  opacity: 1;
-}
-
-.signup__input:focus-visible {
-  outline: 2px solid var(--focus);
-  outline-offset: 1px;
-}
-
-/* A raised button, framed in black as a dialog's default button is, with the same
-   spaced capitals as the label. The start padding is wider by the trailing tracking,
-   to keep the word centred; pressed, the bevel flips and the word moves 1px. */
+/* The default button, a glossy pill in the colour that pulses gently
+   (.aqua-pill--tint and --pulse, boxes.css). */
 .signup__button {
-  --pad: 16px;
   flex: none;
   min-width: 96px;
-  padding: 0 var(--pad) 0 calc(var(--pad) + 0.2em * var(--display-tracking));
-  border: 1px solid var(--dk-shadow);
-  background: var(--button);
-  color: var(--button-text);
-  box-shadow: var(--bevel-raised);
-  font-family: var(--display-font);
-  font-size: calc(clamp(0.8125rem, 3.4cqw, 0.9375rem) * var(--display-size));
-  font-weight: var(--display-weight);
-  letter-spacing: calc(0.2em * var(--display-tracking));
-  text-transform: uppercase;
-  cursor: pointer;
-}
-
-.signup__button:active {
-  padding: 2px calc(var(--pad) - 1px) 0 calc(var(--pad) + 1px + 0.2em * var(--display-tracking));
-  box-shadow: var(--bevel-pressed);
-}
-
-/* The dotted focus rectangle inside the button. */
-.signup__button:focus-visible {
-  outline: 1px dotted var(--focus);
-  outline-offset: -5px;
+  padding: 0 20px;
+  font-size: clamp(0.8125rem, 3.4cqw, 0.9375rem);
 }
 
 .signup__message {

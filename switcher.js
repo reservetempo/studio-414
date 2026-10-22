@@ -7,15 +7,15 @@
   Option 0 of each is the default design (Terminal Grotesque, the Classic grey and
   navy); font 1 is EB Garamond, the original face.
 
-  The panel is a third 90s window, "Display" (#switcher, styled by boxes.css and
-  switcher.css), fixed to the screen. boxes.js lets it be dragged by its title bar
-  like the other boxes.
+  The panel is a second Mac OS X Aqua window, "Display" (#switcher, styled by
+  boxes.css and switcher.css), fixed to the screen. boxes.js lets it be dragged by
+  its title bar like the other boxes.
 
   Display starts closed. A paint roller button fixed in the bottom-left corner
-  (.switcher-toggle, a toolbar button that stays pressed in while Display is open)
-  opens it and, pressed again, closes it; so do the "x" in its title bar and Escape
-  anywhere inside it. Opening moves the focus to its title bar and closing gives it
-  back to the button. Closed is just the hidden attribute: boxes.js leaves a hidden box
+  (.switcher-toggle, a glossy button that stays pressed in while Display is open)
+  opens it and, pressed again, closes it; so do the red gumdrop in its title bar and
+  Escape anywhere inside it. Opening moves the focus to its title bar and closing
+  gives it back to the button. Closed is just the hidden attribute: boxes.js leaves a hidden box
   alone and fits it to the screen again, where it was left, when it opens. Whether it
   was left open is kept in localStorage under "studio414.display" ("open" or
   "closed"), so a first visit starts closed.
@@ -302,28 +302,33 @@
   // The part the Font and Colour rows show and change.
   var shown = PARTS[0];
 
-  // A window like the boxes: a title bar with a pixel icon (a display showing three
-  // swatches and a line of text), then the rows. box--fixed tells boxes.js and
-  // boxes.css that it is fixed to the screen rather than placed in the page.
+  // An Aqua window like the card: a title bar with the three gumdrops and the title,
+  // then the rows. box--fixed tells boxes.js and boxes.css that it is fixed to the
+  // screen rather than placed in the page.
   var panel = element('aside', 'switcher box box--fixed');
   panel.id = 'switcher';
   panel.setAttribute('aria-label', 'Font and colour switcher');
 
   var titlebar = element('div', 'box__titlebar');
-  titlebar.innerHTML =
-    '<svg class="box__icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false" shape-rendering="crispEdges">' +
-    '<path fill="currentColor" fill-rule="evenodd" d="M1 1h14v10H1zM2 2v8h12V2zM4 4h2v2H4zM7 4h2v2H7zM10 4h2v2h-2zM4 7h8v1H4zM7 11h2v2H7zM4 13h8v2H4z"/></svg>';
-  titlebar.appendChild(element('span', 'box__title', 'Display'));
+  var lights = element('span', 'box__lights');
 
-  // The "x" at the right of the title bar (boxes.css), over the drag handle.
-  var closeButton = element('button', 'box__close');
+  // The red gumdrop is the close button (boxes.css), over the drag handle; the yellow
+  // and green ones are only decoration.
+  var closeButton = element('button', 'box__light box__light--close box__close');
   closeButton.type = 'button';
   closeButton.setAttribute('aria-label', 'Close Display');
   closeButton.title = 'Close';
   closeButton.innerHTML =
-    '<svg viewBox="0 0 8 7" aria-hidden="true" focusable="false" shape-rendering="crispEdges">' +
-    '<path fill="currentColor" d="M0 0h2v1H0zM6 0h2v1H6zM1 1h2v1H1zM5 1h2v1H5zM2 2h4v1H2zM3 3h2v1H3zM2 4h4v1H2zM1 5h2v1H1zM5 5h2v1H5zM0 6h2v1H0zM6 6h2v1H6z"/></svg>';
-  titlebar.appendChild(closeButton);
+    '<svg viewBox="0 0 7 7" aria-hidden="true" focusable="false">' +
+    '<path d="M1 1l5 5M6 1L1 6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" fill="none"/></svg>';
+  lights.appendChild(closeButton);
+  ['min', 'zoom'].forEach(function (kind) {
+    var light = element('span', 'box__light box__light--' + kind);
+    light.setAttribute('aria-hidden', 'true');
+    lights.appendChild(light);
+  });
+  titlebar.appendChild(lights);
+  titlebar.appendChild(element('span', 'box__title', 'Display'));
   panel.appendChild(titlebar);
 
   var body = element('div', 'switcher__body');
@@ -343,10 +348,10 @@
     var label = element('span', 'switcher__label', name);
     label.setAttribute('aria-hidden', 'true');
 
-    var prev = element('button', 'switcher__step', '‹');
+    var prev = element('button', 'switcher__step aqua-pill', '‹');
     prev.type = 'button';
-    var select = element('select', 'switcher__select ' + selectClass);
-    var next = element('button', 'switcher__step', '›');
+    var select = element('select', 'switcher__select aqua-popup ' + selectClass);
+    var next = element('button', 'switcher__step aqua-pill', '›');
     next.type = 'button';
 
     row.appendChild(label);
@@ -435,7 +440,7 @@
   var stylesLabel = element('span', 'switcher__label', 'Styles');
   stylesLabel.setAttribute('aria-hidden', 'true');
 
-  var stylesReset = element('button', 'switcher__reset', 'Reset');
+  var stylesReset = element('button', 'switcher__reset aqua-pill', 'Reset');
   stylesReset.type = 'button';
   stylesReset.setAttribute('aria-label', 'Reset styles');
   stylesReset.title = 'Give every window the same font and colour as everything';
@@ -466,7 +471,7 @@
   var layoutLabel = element('span', 'switcher__label', 'Layout');
   layoutLabel.setAttribute('aria-hidden', 'true');
 
-  var resetButton = element('button', 'switcher__reset', 'Reset');
+  var resetButton = element('button', 'switcher__reset aqua-pill', 'Reset');
   resetButton.type = 'button';
   resetButton.setAttribute('aria-label', 'Reset layout');
   resetButton.title = 'Put the windows back where they were, at their original size';
@@ -498,10 +503,10 @@
 
   /* ---------- Opening and closing: the paint roller ---------- */
 
-  // A 90s toolbar button with a pixel paint roller (16 x 16, drawn at twice the size):
+  // A glossy Aqua button (aqua-pill) with a pixel paint roller (16 x 16, drawn at twice the size):
   // a black outline and handle, and a roller covered in the colour's own title-bar
   // colour, with a lit top and a shaded bottom row (switcher.css).
-  var toggle = element('button', 'switcher-toggle');
+  var toggle = element('button', 'switcher-toggle aqua-pill');
   toggle.type = 'button';
   toggle.setAttribute('aria-label', 'Display: fonts and colours');
   toggle.setAttribute('aria-controls', panel.id);
@@ -525,7 +530,7 @@
     writeStorage(OPEN_KEY, open ? 'open' : 'closed');
     if (!focus) return;
     if (open) {
-      // The drag handle over the title bar (boxes.js), or else the "x" beside it.
+      // The drag handle over the title bar (boxes.js), or else the red gumdrop.
       (panel.querySelector('.box__handle') || closeButton).focus();
     } else {
       toggle.focus();

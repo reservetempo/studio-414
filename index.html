@@ -50,20 +50,21 @@
       <h1 class="big-414__name"><span class="visually-hidden">Studio </span>414</h1>
     </div>
 
-    <!-- The two boxes are 90s-style windows (boxes.css); boxes.js adds a drag handle
-         to each title bar and a resize grip. The style switcher (switcher.js) adds a
-         third window. The card sits across the photo's bottom edge (styles.css). -->
+    <!-- The box is a Mac OS X Aqua window (boxes.css): its three gumdrops are only
+         decoration, as it cannot be closed. boxes.js adds a drag handle to its title
+         bar and a resize grip. The style switcher (switcher.js) adds a second window.
+         The card sits across the photo's bottom edge (styles.css). -->
     <form class="signup box" id="signup" aria-labelledby="signup-title" novalidate>
       <div class="box__titlebar">
-        <svg class="box__icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false" shape-rendering="crispEdges"><path fill="currentColor" fill-rule="evenodd" d="M1 3h14v10H1zM2 4v8h12V4zM2 4h1v1H2zM3 5h1v1H3zM4 6h1v1H4zM5 7h1v1H5zM6 8h1v1H6zM7 9h2v1H7zM9 8h1v1H9zM10 7h1v1h-1zM11 6h1v1h-1zM12 5h1v1h-1zM13 4h1v1h-1z"/></svg>
+        <span class="box__lights" aria-hidden="true"><span class="box__light box__light--close"></span><span class="box__light box__light--min"></span><span class="box__light box__light--zoom"></span></span>
         <span class="box__title" id="signup-title">Mailing list</span>
       </div>
       <div class="signup__body">
         <label class="signup__label" for="email">Join the mailing list</label>
         <div class="signup__row">
-          <input class="signup__input" id="email" name="email" type="email"
+          <input class="signup__input aqua-field" id="email" name="email" type="email"
                  placeholder="you@example.com" autocomplete="email" required>
-          <button class="signup__button" type="submit">Sign up</button>
+          <button class="signup__button aqua-pill aqua-pill--tint aqua-pill--pulse" type="submit">Sign up</button>
         </div>
         <p class="signup__message" id="signup-message" role="status" aria-live="polite"></p>
         <a class="signup__email" href="mailto:plazastudioceramique@gmail.com">Or email us at plazastudioceramique@gmail.com.</a>
@@ -108,13 +109,13 @@
     </div>
   </section>
 
-  <!-- Workshops (workshop.js, workshop.css): a raised grey "WORKSHOPS" button like "Sign
-       up", fixed at the top right, that opens the Workshops window, a month calendar of
+  <!-- Workshops (workshop.js, workshop.css): a glossy Aqua "WORKSHOPS" pill in the
+       colour like "Sign up", fixed at the top right, that opens the Workshops window, a month calendar of
        the workshops coming up with a link to each under it; each one opens its own
        sign-up window. Both are modal 90s dialogs like the boxes. The button stays hidden
        until workshop.js runs, as it does nothing without it, and again once no workshops
        are left. -->
-  <button class="workshop-button" id="workshop-button" type="button"
+  <button class="workshop-button aqua-pill aqua-pill--tint" id="workshop-button" type="button"
           aria-label="Workshops" aria-haspopup="dialog" aria-controls="workshops" hidden>
     <span class="workshop-button__label" id="workshop-button-label">Workshops</span>
   </button>

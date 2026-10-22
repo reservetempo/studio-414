@@ -1,7 +1,7 @@
 /*
   Draggable, resizable boxes for Studio 414: the mailing-list card (#signup) and the
-  style switcher's "Display" window (#switcher, built by switcher.js), drawn as 90s
-  windows by boxes.css. (The comment section stays put: it is not a window.)
+  style switcher's "Display" window (#switcher, built by switcher.js), drawn as Mac
+  OS X Aqua windows by boxes.css. (The comment section stays put: it is not a window.)
 
   - Drag a box by its title bar; resize the card with the grip in its bottom-right
     corner (Display has no grip: its rows have one size). Pointer events, so a mouse,
@@ -470,10 +470,10 @@
     var handle = button('box__handle', 'Move the ' + name + ' box', box.grip
       ? 'Drag to move. Arrow keys move it, Shift+arrow keys resize it.'
       : 'Drag to move. Arrow keys move it.');
-    // At the end of the title bar, or before a close button there (Display's "x"), so
-    // Tab reaches the bar first.
+    // First in the title bar, before the gumdrops (Display's red one is its close
+    // button), so Tab reaches the bar first.
     var bar = el.querySelector('.box__titlebar');
-    bar.insertBefore(handle, bar.querySelector('.box__close'));
+    bar.insertBefore(handle, bar.firstChild);
     handle.addEventListener('pointerdown', function (event) { begin(box, 'move', event); });
     handle.addEventListener('keydown', function (event) { nudge(box, 'move', event); });
     var controls = [handle];
@@ -541,7 +541,7 @@
     // For the keyboard: beside the heading, not in it (styles.css shows it on focus).
     var signHandle = document.createElement('button');
     signHandle.type = 'button';
-    signHandle.className = 'big-414__handle';
+    signHandle.className = 'big-414__handle aqua-pill';
     signHandle.textContent = 'Move 414 with the arrow keys';
     signEl.appendChild(signHandle);
     signHandle.addEventListener('keydown', function (event) { nudge(sign, 'move', event); });

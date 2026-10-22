@@ -17,9 +17,11 @@
    on :root only, so it follows <html> alone.
    These rules have the same specificity as styles.css's :root and win by coming
    after it (switcher.css loads later).
-   Each colour is a 90s window scheme for the windows: a tinted face (with its own
-   bevel highlight, light and shadow), a title bar and its text, and an ink for
-   comment names and links. On <html>, the title-bar colour
+   Each colour is a window scheme: a tinted face (with its own bevel highlight, light
+   and shadow, still used by the Workshops dialogs), a title colour and its text, and
+   an ink for comment names and links. styles.css builds the Aqua look from them
+   (--aqua-*): the pinstripes from the face, the title bars, glossy buttons and focus
+   rings from the title colour. On <html>, the title-bar colour
    is also the colour of the page itself and of the big 414 (--page-bg in styles.css),
    and the title text is the text on the page and the edge of the 414 (--page-text).
    Black text and frames, white fields, the error red and the focus rings stay the same
@@ -32,9 +34,8 @@
    Contrast was checked for every colour: text 4.5:1 or more (title text on the title
    bar, and so on the page; text, secondary text, names, links and errors on the face
    and on the white fields), and 3:1 or more for the bevel shadow against the face and
-   the fields, the black frame against the brightest part of the photo, and the
-   window against the page (the face, or else the black frame round it: 4.3:1 or
-   more either way). */
+   the fields. The Aqua windows have no black frame: a thin grey edge and a big soft
+   drop shadow set them off the page and the photo. */
 
 /* ---------- The twenty colours ---------- */
 
@@ -279,20 +280,21 @@
 }
 
 /* ---------- The window ----------
-   "Display", a third 90s window like the boxes: the frame, the title bar with its
-   pixel icon and the colours all come from boxes.css and the palette, so it follows
-   the selected colour like the others (black text on the face and white fields keep
-   every control at 4.5:1 or more on all of them). Its title bar is in the display
-   font like the others; the rows stay in EB Garamond, so the controls keep their
-   shape while the fonts are browsed.
-   Its rows: Part (Everything or one window), Font and Colour for that part, then the
-   Styles and Layout "Reset" buttons, each shown only while there is something to reset.
+   "Display", a second Aqua window like the card: the window, the title bar with its
+   gumdrops and the colours all come from boxes.css and the palette, so it follows
+   the selected colour like the others (black text on the face, the white menus and
+   the plain pills keep every control at 4.5:1 or more on all of them). All of it is
+   in Lucida Grande, as Aqua's controls are, so the controls keep their shape while
+   the fonts are browsed.
+   Its rows: Part (Everything or one window), Font and Colour for that part, each a
+   pop-up menu (.aqua-popup) between round ‹ and › buttons (.aqua-pill), then the
+   Styles and Layout "Reset" pills, each shown only while there is something to reset.
    It is fixed to the screen, so it is at hand wherever the page is scrolled to.
    boxes.js moves it by its title bar (it has no resize grip: its rows have one size),
    keeps it on screen and stacks it with the other windows.
    It starts closed (hidden); the paint roller button in the bottom-left corner
-   (.switcher-toggle, below) opens it, and the "x" in its title bar (.box__close in
-   boxes.css) closes it.
+   (.switcher-toggle, below) opens it, and the red gumdrop in its title bar (.box__close
+   in boxes.css) closes it.
    Where it opens: bottom-left, over its paint roller; top-left on short screens, out of
    the way of the card at the bottom of the hero (see below); on phones a compact
    window along the bottom, or along the top on the shortest ones. Once moved, where it
@@ -303,21 +305,22 @@
   left: 16px;
   bottom: max(16px, env(safe-area-inset-bottom));
   width: min(360px, 100vw - 32px);
-  font-size: 1rem;
+  font-family: var(--aqua-font);
+  font-size: 13px;
   line-height: 1.2;
 }
 
 .switcher__body {
   display: grid;
-  gap: 4px;
-  padding: 4px 3px 3px;
+  gap: 6px;
+  padding: 9px 8px 10px;
 }
 
 .switcher__row {
   display: grid;
-  grid-template-columns: 4.3em 32px minmax(0, 1fr) 32px;
+  grid-template-columns: 4.6em 32px minmax(0, 1fr) 32px;
   align-items: center;
-  gap: 4px;
+  gap: 5px;
 }
 
 .switcher__row[hidden] {
@@ -325,10 +328,9 @@
 }
 
 .switcher__label {
-  padding-inline-start: 4px;
-  font-size: 0.6875rem;
-  font-weight: 500;
-  letter-spacing: 0.14em;
+  padding-inline-start: 2px;
+  font-size: 10px;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
 }
 
@@ -337,87 +339,45 @@
 .switcher__reset {
   height: 32px;
   margin: 0;
-  border-radius: 0;
-  color: var(--face-text);
   font: inherit;
 }
 
-/* Raised square buttons that press in. */
-.switcher__step,
-.switcher__reset {
-  border: 0;
-  background: var(--face);
-  box-shadow: var(--bevel-raised);
-  cursor: pointer;
-}
-
+/* Round glossy buttons. */
 .switcher__step {
   width: 32px;
-  padding: 0 0 3px;
-  font-size: 1.375rem;
-  line-height: 1;
-}
-
-.switcher__step:active {
-  padding: 1px 0 0 1px;
-  box-shadow: var(--bevel-pressed);
+  padding: 0 0 2px;
+  font-size: 20px;
 }
 
 /* "Reset", on the Styles row (shown while a window has its own font or colour) and on
    the Layout row (shown once a box has been moved or resized, boxes.js). */
 .switcher__reset {
   grid-column: 2 / -1;
-  padding: 0 12px;
-  font-size: 0.9375rem;
+  justify-self: start;
+  min-width: 96px;
+  padding: 0 18px;
 }
 
-.switcher__reset:active {
-  padding: 2px 11px 0 13px;
-  box-shadow: var(--bevel-pressed);
-}
-
-/* "6 — Façade" in a sunken white field with a black arrow: 16px, so iOS does not
-   zoom in when it opens. Lining, even figures make the number easy to read off. */
+/* "6 — Façade" in an Aqua pop-up menu: 16px, so iOS does not zoom in when it opens.
+   Lining, even figures make the number easy to read off. */
 .switcher__select {
   min-width: 0;
-  padding: 0 26px 0 8px;
-  border: 1px solid;
-  border-color: var(--sunken-border);
-  background-color: var(--field);
-  color: var(--field-text);
-  box-shadow: var(--sunken-edge);
-  font-size: 1rem;
+  padding: 0 30px 0 10px;
+  font-size: 16px;
   font-variant-numeric: lining-nums tabular-nums;
   text-overflow: ellipsis;
-  cursor: pointer;
-  -webkit-appearance: none;
-  appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='5' viewBox='0 0 9 5'%3E%3Cpath d='M0 0h9L4.5 5z' fill='%23000'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 9px center;
-  background-size: 9px 5px;
 }
 
-/* A framed square of the colour's title bar before its name. */
+/* A framed square of the colour's title colour before its name, as two more layers
+   in front of the menu's own (boxes.css). */
 .switcher__select--color {
-  padding-left: 28px;
+  padding-left: 30px;
   background-image:
     linear-gradient(var(--swatch, #0a246a), var(--swatch, #0a246a)),
     linear-gradient(#000, #000),
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='5' viewBox='0 0 9 5'%3E%3Cpath d='M0 0h9L4.5 5z' fill='%23000'/%3E%3C/svg%3E");
-  background-position: 9px center, 8px center, right 9px center;
-  background-size: 12px 12px, 14px 14px, 9px 5px;
-}
-
-.switcher__step:focus-visible,
-.switcher__reset:focus-visible {
-  outline: 1px dotted var(--focus);
-  outline-offset: -5px;
-}
-
-.switcher__select:focus-visible {
-  outline: 2px solid var(--focus);
-  outline-offset: 1px;
+    var(--popup-arrows), var(--popup-gloss), var(--popup-cap), var(--popup-body);
+  background-position: 10px center, 9px center, var(--popup-position);
+  background-size: 12px 12px, 14px 14px, var(--popup-size);
 }
 
 .switcher__live {
@@ -432,8 +392,8 @@
   border: 0;
 }
 
-/* Phones: the full width less 8px gutters, and compact: a slimmer title bar (as a 90s
-   tool palette has) and 28px rows, so it covers as little of the page as it can.
+/* Phones: the full width less 8px gutters, and compact: a slimmer title bar (as an
+   Aqua utility window has) and 28px rows, so it covers as little of the page as it can.
    Along the bottom it clears the card on tall phones (390 x 844, say), where the card
    sits across the photo's bottom edge well above it; on shorter ones (375 x 667 and
    down) the card comes down to its gutter (styles.css) and the window opens over the
@@ -449,22 +409,9 @@
     min-height: 24px;
   }
 
-  /* The "x" keeps to the slim title bar; for a finger, its hit area reaches 4px further
-     out each side (32 x 24px). */
-  .switcher .box__close {
-    width: 24px;
-    height: 20px;
-  }
-
-  .switcher .box__close::after {
-    content: "";
-    position: absolute;
-    inset: -2px -4px;
-  }
-
   .switcher__body {
-    gap: 3px;
-    padding: 3px 1px 0;
+    gap: 4px;
+    padding: 5px 6px 6px;
   }
 
   .switcher__step,
@@ -485,14 +432,13 @@
 /* The narrowest phones: tighter columns, so the names still fit after the numbers. */
 @media (max-width: 400px) {
   .switcher__row {
-    grid-template-columns: 3.5em 28px minmax(0, 1fr) 28px;
+    grid-template-columns: 3.9em 28px minmax(0, 1fr) 28px;
     gap: 3px;
   }
 
   .switcher__label {
-    padding-inline-start: 2px;
-    font-size: 0.625rem;
-    letter-spacing: 0.1em;
+    padding-inline-start: 1px;
+    letter-spacing: 0.05em;
   }
 
   .switcher__step {
@@ -500,13 +446,12 @@
   }
 
   .switcher__select {
-    padding: 0 20px 0 7px;
-    background-position: right 6px center;
+    padding: 0 26px 0 7px;
   }
 
   .switcher__select--color {
-    padding-left: 24px;
-    background-position: 7px center, 6px center, right 6px center;
+    padding-left: 26px;
+    background-position: 7px center, 6px center, var(--popup-position);
   }
 }
 
@@ -533,13 +478,13 @@
 }
 
 /* ---------- The paint roller: opens and closes Display ----------
-   A square 90s toolbar button fixed in the bottom-left corner, clear of the workshop
-   button (top right), the 414, the card and, on wide screens, the comments box; on
-   phones the comments box in the page passes under it as the page scrolls, as under
-   Display. Display opens over it there, so: framed in black, on the face colour (the
-   black roller and handle keep 4.5:1 or more on every colour's face, and the frame
-   stands out against the page and the photo), with the roller in the colour's
-   title-bar colour.
+   A rounded-square glossy Aqua button (.aqua-pill, boxes.css) fixed in the bottom-left
+   corner, clear of the workshop button (top right), the 414, the card and, on wide
+   screens, the comments box; on phones the comments box in the page passes under it
+   as the page scrolls, as under Display. Display opens over it there, so: a plain
+   pill (the black roller and handle keep 4.5:1 or more on it in every colour, and its
+   rim and shadow stand out against the page and the photo), with the roller in the
+   colour's title colour.
    Above the windows while Display is closed, so it is always at hand; pressed in and
    under them while it is open, so Display covers it (and comes back on top of it when
    it has the keyboard focus). */
@@ -551,21 +496,12 @@
   /* Over the boxes (boxes.js stacks them from z-index 1 up), under the workshop
      button (10). */
   z-index: 9;
-  display: grid;
-  place-items: center;
-  /* The black frame is a border, inside the 44px, so Display opening over the button
-     covers it completely. */
+  /* Inside the 44px, so Display opening over the button covers it completely. */
   width: 44px;
   height: 44px;
   margin: 0;
   padding: 0;
-  border: 1px solid var(--dk-shadow);
-  border-radius: 0;
-  background: var(--face);
-  color: var(--face-text);
-  box-shadow: var(--bevel-raised);
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
+  border-radius: 11px;
 }
 
 /* The 16 x 16 pixel drawing at exactly twice its size, so every pixel stays crisp. */
@@ -589,44 +525,23 @@
   opacity: 0.22;
 }
 
-/* Pressed while held, and stays pressed in while Display is open. */
-.switcher-toggle:active,
-.switcher-toggle[aria-expanded="true"] {
-  padding: 2px 0 0 2px;
-  box-shadow: var(--bevel-pressed);
-}
-
+/* Pressed in while Display is open (boxes.css), and under it. */
 .switcher-toggle[aria-expanded="true"] {
   z-index: 0;
 }
 
-/* The dotted focus rectangle inside the button, and a ring outside it, as it sits
-   straight on the page or the photo. */
+/* A ring outside it in the page's text colour, as it sits straight on the page or the
+   photo. */
 .switcher-toggle:focus-visible {
   z-index: 9;
-  outline: 1px dotted var(--focus);
-  outline-offset: -6px;
-}
-
-.switcher-toggle:focus-visible::after {
-  content: "";
-  position: absolute;
-  inset: -6px;
-  border: 2px solid var(--page-text);
-  pointer-events: none;
+  outline: 2px solid var(--page-text);
+  outline-offset: 3px;
 }
 
 @media (max-width: 480px) {
   .switcher-toggle {
     left: max(8px, env(safe-area-inset-left));
     bottom: max(8px, env(safe-area-inset-bottom));
-  }
-}
-
-/* High-contrast modes drop the bevels; the border keeps a frame round the button. */
-@media (forced-colors: active) {
-  .switcher-toggle {
-    border-color: ButtonText;
   }
 }
 
