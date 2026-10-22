@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Studio 414 owners</title>
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+  <!--
+    The owners' page (not linked from the public site). Owners sign in with Google;
+    admin.js asks Supabase (is_owner(), see supabase/owners.sql) whether the account is
+    an owner and then shows one of the views below. Setup: README, "Set up the owner page".
+  -->
+  <main class="admin">
+    <header class="admin-header">
+      <h1 class="admin-title">Studio 414 owners</h1>
+    </header>
+
+    <!-- Shown while the page loads or checks the account. -->
+    <section class="admin-view" id="admin-loading" aria-live="polite">
+      <p class="admin-status" id="admin-loading-text">Loading…</p>
+    </section>
+
+    <section class="admin-view" id="admin-signin" hidden>
+      <p>Sign in with your Google account to change the website.</p>
+      <p class="admin-message admin-message-error" id="admin-signin-error" role="alert" hidden></p>
+      <button type="button" class="admin-button admin-button-primary" id="admin-signin-google">Sign in with Google</button>
+    </section>
+
+    <section class="admin-view" id="admin-denied" hidden>
+      <p><strong class="admin-email" data-admin-email></strong> isn't an owner account.</p>
+      <p class="admin-hint">Sign out and sign in with an owner's Google account.</p>
+      <button type="button" class="admin-button" data-admin-signout>Sign out</button>
+    </section>
+
+    <section class="admin-view" id="admin-error" hidden>
+      <p class="admin-message admin-message-error" id="admin-error-text" role="alert"></p>
+      <div class="admin-actions">
+        <button type="button" class="admin-button admin-button-primary" id="admin-retry">Try again</button>
+        <button type="button" class="admin-button" data-admin-signout>Sign out</button>
+      </div>
+    </section>
+
+    <div class="admin-view" id="admin-owner" hidden>
+      <div class="admin-account">
+        <p class="admin-account-text">Signed in as <strong class="admin-email" data-admin-email></strong></p>
+        <button type="button" class="admin-button" data-admin-signout>Sign out</button>
+      </div>
+
+      <!--
+        Owner sections. A section module (admin-wallpaper.js, admin-workshops.js) calls
+        studioAdmin.registerSection('<data-section>', render); see admin.js. Until one
+        does, the section keeps its "Coming soon" placeholder.
+      -->
+      <section class="admin-section" data-section="wallpaper" aria-labelledby="admin-wallpaper-title">
+        <h2 class="admin-section-title" id="admin-wallpaper-title">Wallpaper</h2>
+        <div class="admin-section-body" data-section-body>
+          <p class="admin-soon">Coming soon</p>
+        </div>
+      </section>
+
+      <section class="admin-section" data-section="workshops" aria-labelledby="admin-workshops-title">
+        <h2 class="admin-section-title" id="admin-workshops-title">Workshops</h2>
+        <div class="admin-section-body" data-section-body>
+          <p class="admin-soon">Coming soon</p>
+        </div>
+      </section>
+    </div>
+
+    <p class="admin-message admin-message-error" id="admin-signout-error" role="alert" hidden></p>
+  </main>
+
+  <script src="comments-config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.js"
+          integrity="sha384-sLWJsCmP+Z4Qn+HgF7Hi64Djta4fZMu0fcgi3uUL3GFV/ubx2G86LPOuMf7+ZIyX"
+          crossorigin="anonymous"></script>
+  <script src="admin.js"></script>
+  <!-- Section modules go here, after admin.js. -->
+</body>
+</html>

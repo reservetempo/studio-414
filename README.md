@@ -65,6 +65,31 @@ The code is written but not deployed. Do everything in Stripe **test mode** firs
 
 **Who signed up:** Supabase **Table Editor → workshop_signups**, filtered to `status` = `paid` and the workshop's id in `workshop`. Each row is one order: `name`, `email`, `quantity` (spots paid for) and `friend_name` (if they gave one).
 
+## Set up the owner page
+
+The owners' page is at `/admin.html` (for example `https://your-site-address/admin.html`). Nothing on the site links to it, and search engines are asked not to list it. Owners sign in with their Google account; anyone else who signs in is told their account isn't an owner account. The Wallpaper and Workshops sections are still to come.
+
+1. In the [Google Cloud console](https://console.cloud.google.com/), pick or create a project. Set up the OAuth consent screen (**Google Auth Platform**, or **APIs & Services → OAuth consent screen**): app name "Studio 414", audience **External**, and your email as the contact. Then publish the app (**Audience → Publish app**), or add each owner's Google email there as a test user.
+2. Create the OAuth client (**Clients**, or **APIs & Services → Credentials → Create credentials → OAuth client ID**): type **Web application**, with this under **Authorised redirect URIs**:
+
+   ```
+   https://cgbqzdhjhquprjgtcmwh.supabase.co/auth/v1/callback
+   ```
+
+   Copy the client ID and client secret.
+3. In the Supabase dashboard, **Authentication → Sign In / Providers → Google**: turn it on, paste in the client ID and client secret, and save. The secret only goes here, never into the site's files.
+4. **Authentication → URL Configuration**: under **Redirect URLs**, add the live page's address (`https://your-site-address/admin.html`) and `http://localhost:8000/admin.html`.
+5. **SQL Editor**: paste in [`supabase/owners.sql`](supabase/owners.sql) and click **Run**.
+6. Still in the SQL Editor, add each owner's Google email, in lower case, one line per owner:
+
+   ```sql
+   insert into public.site_owners (email) values ('owner@gmail.com');
+   ```
+
+7. Test: open `/admin.html` and click **Sign in with Google**. If you land on another page afterwards, the address isn't in the Redirect URLs from step 4 exactly as it appears in the browser.
+
+Leave **Authentication → Sign In / Providers → Email → Confirm email** on (it is by default): owners are recognised by email, so nobody should be able to sign in with an address whose inbox they don't have.
+
 ## Still to do
 
 - The "Join the mailing list" form isn't connected to any service yet: it only shows a thank-you message.
