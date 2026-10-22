@@ -11,3 +11,8 @@ verify_jwt = false
 
 [functions.stripe-webhook]
 verify_jwt = false
+
+# cloudinary-sign checks the owner's Supabase token itself (and is_owner()), so the
+# browser's CORS preflight, which carries no token, isn't turned away first.
+[functions.cloudinary-sign]
+verify_jwt = false

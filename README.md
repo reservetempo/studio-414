@@ -90,6 +90,27 @@ The owners' page is at `/admin.html` (for example `https://your-site-address/adm
 
 Leave **Authentication → Sign In / Providers → Email → Confirm email** on (it is by default): owners are recognised by email, so nobody should be able to sign in with an address whose inbox they don't have.
 
+## Set up the wallpaper upload
+
+Owners will upload a new wallpaper photo for the site from the owner page and mark where the mailing-list card sits on it (that part of the page is still to come). The photo goes to Cloudinary; the site reads which photo to show from Supabase ([`supabase/wallpaper.sql`](supabase/wallpaper.sql) describes the setting). Set up the owner page first.
+
+1. Create a free account at [Cloudinary](https://cloudinary.com/).
+2. In the Cloudinary Console, copy the **cloud name** (on the dashboard), then the **API key** and **API secret** (**Settings → API Keys**).
+3. From this folder (with the Supabase CLI from "Set up workshop sign-ups", step 2), save all three as Supabase secrets. The API secret only ever goes here, never into the site's files.
+
+   ```sh
+   supabase secrets set CLOUDINARY_CLOUD_NAME=... CLOUDINARY_API_KEY=... CLOUDINARY_API_SECRET=...
+   ```
+
+4. **SQL Editor**: paste in [`supabase/wallpaper.sql`](supabase/wallpaper.sql) and click **Run** (after `owners.sql`).
+5. Deploy the function that signs the uploads (it checks the owner's sign-in itself):
+
+   ```sh
+   supabase functions deploy cloudinary-sign --no-verify-jwt
+   ```
+
+   Afterwards, `curl -X POST https://cgbqzdhjhquprjgtcmwh.supabase.co/functions/v1/cloudinary-sign` should answer `{"error":"not_signed_in",...}`.
+
 ## Still to do
 
 - The "Join the mailing list" form isn't connected to any service yet: it only shows a thank-you message.
