@@ -1,10 +1,15 @@
 :root {
   /* Leveled, web-sized copy of photos/IMG_9135.jpeg, cropped on the left so the
-     window is horizontally centred (2462 x 1920, about 1.28 : 1). */
+     window is horizontally centred, and its size in pixels (about 1.28 : 1; only the
+     shape matters). The owners can swap in another photo from the owner page:
+     wallpaper.js then sets all of these, and the spot below, on <html>. */
   --bg-image: url("photos/IMG_9135-centered.jpg");
+  --bg-width: 2462;
+  --bg-height: 1920;
 
   /* The window frame in that photo (x 839-1623, y 695-880), as fractions
-     of the photo's width and height. It is 784 x 185, almost exactly phi^3 : 1. */
+     of the photo's width and height. It is 784 x 185, almost exactly phi^3 : 1.
+     The big 414 stands on it and the mailing-list card lines up with it. */
   --window-cx: 0.5;
   --window-bottom: 0.4583;
   --window-w: 0.3184;
@@ -224,7 +229,7 @@ body {
   /* Size and offset of the photo in the hero. They are in cqw / cqh of the hero,
      so they only mean anything inside it (.hero::before, .big-414 and .signup). */
   --photo-w: 100cqw;
-  --photo-h: 100cqw * 1920 / 2462;
+  --photo-h: 100cqw * var(--bg-height) / var(--bg-width);
   --photo-x: (100cqw - var(--photo-w)) / 2;
   --photo-y: (100cqh - var(--photo-h)) / 2;
 
@@ -237,7 +242,7 @@ body {
      photo in it. */
   container-type: size;
   /* The photo always spans the full width at its own aspect ratio, centred vertically.
-     On screens at least as wide as the photo (2462 : 1920) that is exactly what
+     On screens at least as wide as the photo (in proportion) that is exactly what
      background-size: cover did: it overflows the top and bottom and is cropped there.
      On narrower screens it keeps shrinking with the width instead of being cropped
      at the sides, and the page background shows above and below it. */

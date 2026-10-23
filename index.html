@@ -22,6 +22,49 @@
       document.documentElement.setAttribute('data-color', pick('color', 20));
     })();
   </script>
+  <script>
+    // Wallpaper (wallpaper.js): the photo and card spot the owners saved on the owner
+    // page, applied before first paint from the copy wallpaper.js keeps in localStorage
+    // ("studio414.wallpaper"), as custom properties on <html> that override the ones at
+    // the top of styles.css. wallpaper.js uses valid(), src(), apply() and clear() too.
+    (function () {
+      var html = document.documentElement;
+      var NAMES = ['--bg-image', '--bg-width', '--bg-height', '--window-cx', '--window-bottom', '--window-w', '--window-h'];
+      function pos(n, max) { return typeof n === 'number' && isFinite(n) && n > 0 && n <= max; }
+      function frac(n) { return typeof n === 'number' && n >= 0 && n <= 1; }
+      var wp = window.studio414Wallpaper = {
+        KEY: 'studio414.wallpaper',
+        // The same rule as the database (supabase/wallpaper.sql), so the URL is safe in CSS.
+        URL_RULE: /^https:\/\/res\.cloudinary\.com\/[A-Za-z0-9_-]+\/image\/upload\/[A-Za-z0-9_.,\/-]+$/,
+        current: '',
+        // The value as saved: { url, width, height, spot: { cx, bottom, w, h } }.
+        valid: function (v) {
+          var s = v && v.spot;
+          return !!s && typeof v.url === 'string' && v.url.length <= 500 && wp.URL_RULE.test(v.url) &&
+            pos(v.width, Infinity) && pos(v.height, Infinity) &&
+            frac(s.cx) && frac(s.bottom) && pos(s.w, 1) && pos(s.h, 1);
+        },
+        // The photo from Cloudinary in a modern format, about as wide as this screen's
+        // pixels (in steps of 640, up to 2560), and never wider than the original.
+        src: function (v) {
+          var w = Math.min(2560, Math.max(640, Math.ceil(innerWidth * (devicePixelRatio || 1) / 640) * 640));
+          return v.url.replace('/image/upload/', '/image/upload/f_auto,q_auto,c_limit,w_' + w + '/');
+        },
+        apply: function (v) {
+          if (!wp.valid(v)) return false;
+          wp.current = wp.src(v);
+          var values = ['url("' + wp.current + '")', v.width, v.height, v.spot.cx, v.spot.bottom, v.spot.w, v.spot.h];
+          for (var i = 0; i < NAMES.length; i++) html.style.setProperty(NAMES[i], String(values[i]));
+          return true;
+        },
+        clear: function () {
+          wp.current = '';
+          for (var i = 0; i < NAMES.length; i++) html.style.removeProperty(NAMES[i]);
+        }
+      };
+      try { wp.apply(JSON.parse(localStorage.getItem(wp.KEY))); } catch (e) { /* no copy yet */ }
+    })();
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <!-- 800 is only for the big 414; Google serves all three upright weights from one file. -->
@@ -263,6 +306,7 @@
   </script>
 
   <script defer src="comments-config.js"></script>
+  <script defer src="wallpaper.js"></script>
   <script defer src="comments.js"></script>
   <script defer src="switcher.js"></script>
   <script defer src="boxes.js"></script>
