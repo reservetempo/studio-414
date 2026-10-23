@@ -192,7 +192,7 @@ it is truly inert.
 | Menu bar | `header.admin-header` | sticky; `background` (stripes + white gradient), `border-bottom`, `box-shadow`, `backdrop-filter: blur`; `.admin-title` (`<b>` app name), `#admin-account.admin-account` (`[hidden]` until signed in), `.admin-account-text`, `.admin-email`, Sign out `.admin-header .admin-button` (22px, 12px text). |
 | Alerts | `section.admin-view.admin-dialog.box`: `#admin-loading`, `#admin-signin`, `#admin-denied`, `#admin-error` | decorative gumdrops; `.admin-dialog-body` (88px left padding for the icon) whose `::before` is the "414" icon (tinted square: gradients, `border-radius: 11px`, `box-shadow`, `text-shadow`); `.admin-dialog-lead` (bold), `.admin-status`, `.admin-hint` (muted), `.admin-message.admin-message-error` (`#admin-signin-error`, `#admin-error-text`; fixed `--admin-error` / `--admin-error-bg`, radius 6px), `.admin-actions` (right-aligned pills). Sign-in: `#admin-signin-google.admin-button.admin-button-primary.aqua-pill--tint.aqua-pill--pulse.admin-google` with `.admin-google-mark` (white disc, Google's own colours: keep). Loading: `.admin-barber` (barber pole: `::before` stripes with `animation: admin-barber 0.8s`, `::after` gloss + inset shadow, radius 6px). `#admin-signout-error` sits outside the windows. |
 | Section windows | `#admin-owner > section.admin-section.box[data-section]` | decorative gumdrops; `.admin-section-body[data-section-body]`; `.admin-soon` placeholder. Buttons: `.admin-button.aqua-pill` (+ `.admin-button-primary.aqua-pill--tint`); bigger on `pointer: coarse`. |
-| Notices (both sections) | `.wallpaper .admin-message`, `.workshops .admin-message` + `-error` / `-ok` | small panel: gradient `background`, `border`, `border-radius: 4px`, `box-shadow`; `::before` icon: caution = yellow gel triangle with "!" (`clip-path`, gradient), ok = green gumdrop with "✓" (radial gradient, inset rim). In the form and list rows an error is a bare red line (`.workshops-form .admin-message-error`, `.workshops-item .admin-message-error`). |
+| Notices (every section) | `.look .admin-message`, `.wallpaper .admin-message`, `.workshops .admin-message` + `-error` / `-ok` | small panel: gradient `background`, `border`, `border-radius: 4px`, `box-shadow`; `::before` icon: caution = yellow gel triangle with "!" (`clip-path`, gradient), ok = green gumdrop with "✓" (radial gradient, inset rim). In the form and list rows an error is a bare red line (`.workshops-form .admin-message-error`, `.workshops-item .admin-message-error`). |
 | Wallpaper | `.wallpaper` (admin-wallpaper.js builds all of it) | `.wallpaper-loading`, `.wallpaper-current`; image well `figure.wallpaper-figure` (`--field` fill, `box-shadow` edge; `::after` inset shadow overlay) with `img.wallpaper-photo`; `.wallpaper-spot` (selection rectangle: tint border, glow wash, `--wallpaper-lines` white box-shadows); `.wallpaper-caption`, `.wallpaper-readout`, `.wallpaper-note`, `.wallpaper-hint`; progress `.wallpaper-progress` > `.wallpaper-progress-text` + `progress.wallpaper-progress-bar` (`appearance: none`; `--progress-track`, `-gloss`, `-stripes`, `-dark`, `-light`; `::-webkit-progress-bar`, `::-webkit-progress-value`, `::-moz-progress-bar`, `:indeterminate`; `animation: wallpaper-progress 0.8s`); hidden `input.wallpaper-file` ("Choose photo" is a pill); editor `.wallpaper-editor`, `h3.wallpaper-editor-title`, `.wallpaper-editor-intro`, `figure.wallpaper-figure.wallpaper-figure-editor` > `.wallpaper-box` (draggable spot box; `:focus-visible` ring + lines; `.is-dragging` stronger wash) > `span.wallpaper-handle.wallpaper-handle-nw/-ne/-sw/-se` (JS adds; tinted glossy dots: radial gradient, border, shadow; `::before` hit area; bigger on coarse pointers). |
 | Workshops: list view | `.workshops` (admin-workshops.js builds all of it; sets `--workshops-row`, the alternate-row tint) | `.workshops-loading`, `.workshops-top` ("Add workshop"), `.workshops-list-panel`, `.workshops-list-retry`, `.workshops-empty`; `ul.workshops-list` (white well, field edge, white under-line `box-shadow`) > `li.workshops-item` (grid; even rows `--workshops-row`; `.is-past` greyed): `.workshops-item-head`, `.workshops-item-name`, `.workshops-item-when`, `.workshops-item-meta` (`-spots`, `-price`, `-sep`), `.workshops-item-actions` (smaller pills on `pointer: fine`; `.admin-button[aria-disabled="true"]` at opacity .6), `.workshops-reason`. |
 | Workshops: capsules | `span.workshops-badge` ("Hidden"), `.workshops-badge.workshops-badge-past` ("Past") | `border-radius: 999px`, grey gradient, inset highlight `box-shadow`, 10px bold. |
@@ -200,13 +200,26 @@ it is truly inert.
 | Workshops: sign-ups | `.workshops-signups` (`#workshops-signups-N`), `.workshops-signups-title`, `-status`, `.workshops-signups-wrap` (well), `table.workshops-signups-table` | `th` header gradient; even rows `--workshops-row`; `.workshops-signups-number`, `-date`, `.workshops-signups-email`, `.workshops-signups-total`. Under 560px rows become blocks with `td::before { content: attr(data-label) }`. |
 | Workshops: form | `.workshops-form` (group box: `border`, `border-radius: 5px`, dark rgba fill, inset `box-shadow`) | `.workshops-form-title`, `.workshops-field`, `.workshops-label` (right-aligned, `::after ":"`), `.workshops-field-hint`, `input.workshops-input.aqua-field` (text, date, time, number), `textarea.workshops-textarea`, `[aria-invalid="true"]` red edge + ring, `.workshops-form-row`, `.workshops-price` + `.workshops-price-symbol` ("$"), `.workshops-form-note`, `#workshops-form-error`; Save / Cancel pills (`:disabled` while saving). |
 
-### Look section (to come)
+### Look section
 
-Added by the owner page "Look" task (`admin-look.js`, a block at the end of admin.css,
-the first section): a window "Look" with a radio list of the six themes, a radio grid of
-the 21 colour swatches (each with `data-color="N"`, hence the `[data-color]` rule in
-section 1), "Preview the site", "Save" and "Undo changes" pills and ✓ / ⚠ notices.
-Fill in its selectors here when it lands.
+The first section window (`data-section="look"`); `admin-look.js` builds all of it and
+the "Look section" block at the end of admin.css styles it. What the JS adds: `checked`
+on the radios, `hidden` on the loading line, the form and the notices, `disabled` on
+Save (while saving) and Undo (while the picks are the saved look), and a pick switches
+`data-theme` / `data-color` on `<html>` at once (`studio414Look.apply`), so theme files
+load and drop while the page is open.
+
+| Component | Selectors | Notes |
+|---|---|---|
+| Section | `.look` > `p.look-loading.admin-status`, `.look-form` > `p.look-intro.admin-hint` | `.look` sets `--look-label-width`, `--look-selection` / `--look-selection-text` (the picked name: the page's `--title` / `--title-text`), `--look-selection-ring` and `--look-focus-ring` (the page's `--aqua-focus-ring`). They are declared on `.look` so the swatches, which carry their own `data-color`, show the page's selection and focus colours: redeclare them there, not on the swatches. |
+| Groups | `.look-field` > `span.look-label` (`#look-theme-label`, `#look-color-label`) + `[role="radiogroup"]` | grid: label column `--look-label-width`, right-aligned 13px label with `::after ":"`; under 560px a flex column with the label above, left-aligned. The notices (`.look .admin-message`) and buttons (`.admin-actions.look-actions`) have a `margin-left` to line up with the groups (0 under 560px). |
+| Themes | `.look-themes` (flex column) > `label.look-theme` > `input[type="radio"].look-theme-input[name="look-theme"]` + `span.look-theme-name` | the radio is drawn in CSS (`appearance: none`): 15px (18px on coarse pointers), `border` (`--aqua-plain-rim`), `border-radius: 50%`, gel `background` gradients, `box-shadow`. `:checked` is a `--aqua-tint` bead with a `--aqua-tint-text` dot, all in `background`. `:focus-visible`: `--aqua-focus-ring` + transparent outline. `appearance: auto` under `forced-colors`. |
+| Colours | `.look-colors` (grid, `repeat(auto-fill, minmax(5rem, 1fr))`, wraps) > `label.look-color` > `input[type="radio"].look-color-input[name="look-color"]` + `span.look-color-chip[data-color="N"][aria-hidden]` + `span.look-color-name` | the radio is invisible (`opacity: 0`) and laid over the whole swatch (`label` `position: relative`; input `position: absolute; inset: 0; z-index: 1`): keep that, or the swatches stop taking clicks. Chip: 44 × 32px, `border-radius: 4px`, `background` a white gloss over `--title` with a `--face` band (keep those two tokens: they are the colour), edge and drop `box-shadow`. Picked (`.look-color-input:checked ~ …`): a grey `box-shadow` ring on the chip, the name a capsule (`border-radius: 999px`) in `--look-selection`. Focus (`.look-color-input:focus-visible ~ .look-color-chip`): `--look-focus-ring` + transparent outline. Under `forced-colors` the chip keeps its colours and the picked name is `Highlight`. |
+| Buttons and notices | `.look-actions` > Save (`.admin-button-primary.aqua-pill--tint`, "Saving…" while saving), "Undo changes", "Preview the site" (opens `index.html?theme=&color=` in a new tab); `.look .admin-message-error` (the saved look didn't load, or not saved), `.look .admin-message-ok` (saved; focused) | pills and notices as in the other sections. |
+
+Aqua to undo in a theme: the radio bead (`background` gradients, `border-radius: 50%`,
+`box-shadow`, and the `:checked` bead), the chip's gloss gradient, rounding and shadow,
+the grey ring and the name capsule's rounding, and the focus rings (`box-shadow`).
 
 ## 5. Previewing
 
@@ -232,7 +245,9 @@ previews only, use a stubbed copy: copy `admin.html` to an untracked
 (the three lines) with the script below, open `zz-admin-preview.html?theme=<id>`, and
 delete the copy when done. Never commit it. (Checked on 23 Oct 2026: both sections
 render, with the list, the past toggle, the sign-ups table and the form. Set
-`is_owner: false` to see "Not an owner".)
+`is_owner: false` to see "Not an owner".) The Look section keeps a `?theme=` / `?color=`
+preview: its picks start from it and it doesn't switch the page to the saved look (the
+stub has none, so Aqua in Classic, which "Undo changes" goes back to).
 
 ```html
 <script>

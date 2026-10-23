@@ -91,10 +91,20 @@
 
     <div class="admin-view" id="admin-owner" hidden>
       <!--
-        Owner sections, each an Aqua window. A section module (admin-wallpaper.js,
-        admin-workshops.js) calls studioAdmin.registerSection('<data-section>', render);
+        Owner sections, each an Aqua window. A section module (admin-look.js,
+        admin-wallpaper.js, admin-workshops.js) calls studioAdmin.registerSection('<data-section>', render);
         see admin.js. Until one does, the section keeps its "Coming soon" placeholder.
       -->
+      <section class="admin-section box" data-section="look" aria-labelledby="admin-look-title">
+        <div class="box__titlebar">
+          <span class="box__lights" aria-hidden="true"><span class="box__light box__light--close"></span><span class="box__light box__light--min"></span><span class="box__light box__light--zoom"></span></span>
+          <h2 class="box__title" id="admin-look-title">Look</h2>
+        </div>
+        <div class="admin-section-body" data-section-body>
+          <p class="admin-soon">Coming soon</p>
+        </div>
+      </section>
+
       <section class="admin-section box" data-section="wallpaper" aria-labelledby="admin-wallpaper-title">
         <div class="box__titlebar">
           <span class="box__lights" aria-hidden="true"><span class="box__light box__light--close"></span><span class="box__light box__light--min"></span><span class="box__light box__light--zoom"></span></span>
@@ -125,6 +135,7 @@
           crossorigin="anonymous"></script>
   <script src="admin.js"></script>
   <!-- Section modules go here, after admin.js. -->
+  <script src="admin-look.js"></script>
   <script src="admin-wallpaper.js"></script>
   <script src="admin-workshops.js"></script>
 </body>
