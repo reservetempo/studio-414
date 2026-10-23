@@ -19,7 +19,8 @@
                  A window without a close button has three decorative ones, all in
                  <span class="box__lights" aria-hidden="true">.
    - buttons:    .aqua-pill (plain), plus .aqua-pill--tint (in the colour) and
-                 .aqua-pill--pulse (the default button's gentle pulse).
+                 .aqua-pill--pulse (the default button's gentle pulse); disabled, any
+                 of them turns plain and faded.
    - fields:     .aqua-field (text inputs), .aqua-popup (selects).
    Each colour token for these is --aqua-* in styles.css. */
 
@@ -96,12 +97,6 @@
   content: "";
   flex: none;
   width: calc(3 * var(--aqua-light-size) + 2 * var(--aqua-light-gap));
-}
-
-/* Aqua title bars carry no icon; the Workshops dialogs still have one in their
-   markup until they are restyled. */
-.box__icon {
-  display: none;
 }
 
 .box__title {
@@ -411,6 +406,23 @@ html.is-sizing-box * {
   .aqua-pill--pulse::before {
     animation: none;
   }
+}
+
+/* Disabled: a plain pill, even a tinted one, faded, its words greyed; it neither
+   presses nor pulses. */
+.aqua-pill:disabled {
+  --pill: var(--aqua-plain);
+  --pill-deep: var(--aqua-plain-deep);
+  --pill-rim: color-mix(in srgb, var(--aqua-plain-rim) 60%, var(--face));
+  --pill-glow: var(--aqua-plain-glow);
+  --pill-pressed: var(--aqua-plain);
+  color: color-mix(in srgb, var(--aqua-plain-text) 45%, var(--aqua-plain));
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.16), inset 0 1px 2px rgb(0 0 0 / 0.12);
+  cursor: default;
+}
+
+.aqua-pill:disabled::before {
+  animation: none;
 }
 
 /* ---------- Fields ---------- */

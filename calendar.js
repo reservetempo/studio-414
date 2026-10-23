@@ -9,13 +9,13 @@
     next workshop's day, unless the window opens onto a workshop's link (back from its
     sign-up window).
   - The month is a table, Sunday first, always six weeks tall so the window keeps its
-    size from month to month. Each workshop's day is marked: a raised button that opens
-    its sign-up window, with the workshop's name in a tooltip under the pointer or the
-    keyboard focus, and its full date and name for screen readers ("Saturday 7
-    November 2026: Paint a piece"). One workshop a day: a second one on the same day
-    would only show in the list. Days gone by (in the studio's time zone, as
-    workshop.js counts them) and workshops that are over are greyed out, and today is
-    outlined.
+    size from month to month. Each workshop's day is marked: a glossy Aqua pill in the
+    colour (.aqua-pill--tint, boxes.css) that opens its sign-up window, with the
+    workshop's name in a tooltip under the pointer or the keyboard focus, and its full
+    date and name for screen readers ("Saturday 7 November 2026: Paint a piece"). One
+    workshop a day: a second one on the same day would only show in the list. Days gone
+    by (in the studio's time zone, as workshop.js counts them) and workshops that are
+    over are greyed out, and today is ringed in the colour.
   - It needs workshop.js, which hands it what it uses as window.studioWorkshops. Without
     that, the calendar (#workshops-calendar) stays hidden and nothing here runs; the
     list still works.
@@ -85,6 +85,7 @@
     el.appendChild(number);
     if (w) {
       el.classList.add('calendar__day--workshop');
+      if (!past) el.classList.add('aqua-pill', 'aqua-pill--tint');
       if (past) {
         hiddenText(el, ': ' + w.name + ', over');
       } else {

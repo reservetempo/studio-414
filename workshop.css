@@ -1,10 +1,13 @@
 /* Workshops (workshop.js): "WORKSHOPS" on a glossy Aqua pill like "Sign up", fixed at
-   the top right of the screen, that opens the windows, 90s dialogs like the boxes: the
-   Workshops window (.workshop--list), the month calendar (calendar.css) over a list of
-   links, and a workshop's sign-up window. boxes.css gives the windows their frame,
-   title bar and drag handle, and the colours and fonts are the tokens in styles.css,
-   so all of it follows the style switcher like everything else, but for the links,
-   which keep the early web's blue and purple. With reduced motion nothing moves.
+   the top right of the screen, that opens the windows, Mac OS X Aqua windows like the
+   boxes: the Workshops window (.workshop--list), the month calendar (calendar.css)
+   over a list of links, and a workshop's sign-up window. boxes.css gives the windows
+   their frame, pinstripes, title bar with its gumdrops (the red one closes it) and
+   drag handle, and the pills and fields; the colours and fonts are the tokens in
+   styles.css, so all of it follows the style switcher like everything else, but for
+   the links, which keep the early web's blue and purple. The title bars and the
+   buttons are always in Lucida Grande; the rest takes the Display font. With reduced
+   motion nothing moves.
 
    Where the button sits: the top-right corner, 16px in (8px on phones), over the
    ceiling or the band of page colour above the photo, on every screen. The corner is
@@ -104,57 +107,17 @@
   bottom: auto;
 }
 
-/* The page behind it, dimmed by a fine dither, as 90s screens were behind a system
-   dialog. */
+/* The page behind it, softly dimmed. */
 .workshop::backdrop {
-  background: repeating-conic-gradient(rgba(0, 0, 0, 0.45) 0% 25%, transparent 0% 50%) 0 0 / 2px 2px;
+  background: rgb(0 0 0 / 0.32);
 }
 
 .workshop [hidden] {
   display: none !important;
 }
 
-/* The close button, the "x" at the right of the title bar, over the drag handle. */
-.workshop__close {
-  position: relative;
-  z-index: 1;
-  flex: none;
-  display: grid;
-  place-items: center;
-  width: 22px;
-  height: 20px;
-  margin: 0 -3px 0 auto;
-  padding: 0;
-  border: 0;
-  border-radius: 0;
-  background: var(--face);
-  color: var(--face-text);
-  box-shadow: var(--bevel-raised);
-  cursor: pointer;
-}
-
-.workshop__close svg {
-  display: block;
-  width: 8px;
-  height: 7px;
-}
-
-.workshop__close:active {
-  padding: 2px 0 0 2px;
-  box-shadow: var(--bevel-pressed);
-}
-
-.workshop__close:focus-visible {
-  outline: 1px dotted var(--focus);
-  outline-offset: -4px;
-}
-
-@media (pointer: coarse) {
-  .workshop__close {
-    width: 30px;
-    height: 28px;
-  }
-}
+/* The red gumdrop at the left of the title bar is the close button (.box__close,
+   boxes.css), over the drag handle. */
 
 .workshop__body {
   display: flex;
@@ -206,8 +169,9 @@
 }
 
 .workshop__link:focus-visible {
-  outline: 1px dotted currentColor;
-  outline-offset: 1px;
+  border-radius: 2px;
+  outline: 2px solid var(--aqua-focus);
+  outline-offset: 2px;
 }
 
 .workshop__none {
@@ -219,53 +183,31 @@
 
 /* ---------- The sign-up window ---------- */
 
-/* "All workshops", back to the Workshops window: a small raised button with a pixel
-   arrow. */
+/* "‹ All workshops", back to the Workshops window: a small plain Aqua pill
+   (.aqua-pill, boxes.css). */
 .workshop__back {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
   align-self: flex-start;
-  min-height: 26px;
-  margin: -4px 0 0;
-  padding: 3px 9px 3px 8px;
-  border: 0;
-  border-radius: 0;
-  background: var(--face);
-  color: var(--face-text);
-  box-shadow: var(--bevel-raised);
-  font-family: var(--display-font);
-  font-size: calc(0.75rem * var(--display-size));
-  font-weight: var(--display-weight);
-  line-height: 1.2;
-  letter-spacing: calc(0.2em * var(--display-tracking));
-  text-transform: uppercase;
-  cursor: pointer;
+  height: 24px;
+  margin: -2px 0 0;
+  padding: 0 14px 1px 11px;
+  font-size: 12px;
 }
 
-.workshop__back svg {
-  flex: none;
-  width: 4px;
-  height: 7px;
-}
-
-.workshop__back:active {
-  padding: 4px 8px 2px 9px;
-  box-shadow: var(--bevel-pressed);
-}
-
-.workshop__back:focus-visible {
-  outline: 1px dotted var(--focus);
-  outline-offset: -4px;
+.workshop__back span {
+  font-size: 15px;
+  line-height: 0;
 }
 
 @media (pointer: coarse) {
   .workshop__back {
-    min-height: 34px;
+    height: 34px;
   }
 }
 
-/* "You're in!" or "Payment cancelled", as a 90s message box: an icon and the text. */
+/* "You're in!" or "Payment cancelled", as in a message box: an icon and the text. */
 .workshop__result {
   display: flex;
   align-items: flex-start;
@@ -348,51 +290,24 @@
   font-variant-numeric: lining-nums tabular-nums;
 }
 
-/* Small raised buttons, as on a 90s spin box, greyed and embossed at the limits. */
+/* Small round plain pills (.aqua-pill, boxes.css), faded at the limits. */
 .workshop__step {
-  display: grid;
-  place-items: center;
-  width: 26px;
+  width: 24px;
   height: 24px;
   margin: 0;
   padding: 0;
-  border: 0;
-  border-radius: 0;
-  background: var(--button);
-  color: var(--button-text);
-  box-shadow: var(--bevel-raised);
-  cursor: pointer;
 }
 
 .workshop__step svg {
   display: block;
-  width: 8px;
-  height: 8px;
-}
-
-.workshop__step:active:not(:disabled) {
-  padding: 2px 0 0 2px;
-  box-shadow: var(--bevel-pressed);
-}
-
-.workshop__step:focus-visible {
-  outline: 1px dotted var(--focus);
-  outline-offset: -4px;
-}
-
-.workshop__step:disabled {
-  color: var(--shadow);
-  cursor: not-allowed;
-}
-
-.workshop__step:disabled svg {
-  filter: drop-shadow(1px 1px 0 var(--hilight));
+  width: 9px;
+  height: 9px;
 }
 
 @media (pointer: coarse) {
   .workshop__step {
-    width: 36px;
-    height: 32px;
+    width: 34px;
+    height: 34px;
   }
 }
 
@@ -402,36 +317,40 @@
   font-variant-numeric: lining-nums tabular-nums;
 }
 
-/* Until then, a line in a sunken white panel with a small status light: amber while
-   checking the spots, grey before sign-ups open. It is hidden once the spots are in. */
+/* Until then, a line with a small glossy status light: amber while checking the
+   spots, grey before sign-ups open. It is hidden once the spots are in. */
 .workshop__spots {
   display: flex;
   align-items: center;
-  gap: 9px;
+  gap: 8px;
   margin: 0;
-  padding: 7px 10px;
-  border: 1px solid;
-  border-color: var(--sunken-border);
-  background: var(--field);
   color: var(--face-muted);
-  box-shadow: var(--sunken-edge);
   font-size: 1.0625rem;
   font-style: italic;
   line-height: 1.25;
 }
 
 .workshop__spots::before {
+  --drop: var(--aqua-yellow);
+  --drop-rim: var(--aqua-yellow-rim);
+  --drop-glow: var(--aqua-yellow-glow);
   content: "";
   flex: none;
-  width: 10px;
-  height: 10px;
-  border: 1px solid #000;
-  background: #ffb000;
-  box-shadow: inset 1px 1px rgba(255, 255, 255, 0.6), inset -1px -1px rgba(0, 0, 0, 0.3);
+  width: 11px;
+  height: 11px;
+  border: 1px solid var(--drop-rim);
+  border-radius: 50%;
+  background:
+    radial-gradient(ellipse 66% 44% at 50% 26%, rgb(255 255 255 / 0.95), rgb(255 255 255 / 0.3) 62%, rgb(255 255 255 / 0) 100%),
+    radial-gradient(circle at 50% 92%, var(--drop-glow), transparent 58%),
+    radial-gradient(circle at 50% 50%, var(--drop) 45%, var(--drop-rim) 100%);
+  box-shadow: 0 1px 1px rgb(0 0 0 / 0.25);
 }
 
 .workshop__spots[data-state="unavailable"]::before {
-  background: #8a8a8a;
+  --drop: #a3a3a3;
+  --drop-rim: #6b6b6b;
+  --drop-glow: #e6e6e6;
 }
 
 .workshop__form {
@@ -446,43 +365,36 @@
   margin-bottom: -4px;
 }
 
-/* A sunken white field, as on the card; 17px text, so iOS does not zoom in on focus. */
+/* An Aqua text field (.aqua-field, boxes.css), as on the card; 17px text, so iOS does
+   not zoom in on focus. */
 .workshop__input {
   display: block;
   width: 100%;
-  height: 36px;
+  height: 34px;
   margin: 0;
   padding: 0 8px;
-  border: 1px solid;
-  border-color: var(--sunken-border);
-  border-radius: 0;
-  background: var(--field);
-  color: var(--field-text);
-  box-shadow: var(--sunken-edge);
   font: inherit;
   font-size: max(16px, 1.0625rem);
 }
 
-.workshop__input::placeholder {
-  color: var(--placeholder);
-  opacity: 1;
-}
-
-.workshop__input:focus-visible {
-  outline: 2px solid var(--focus);
-  outline-offset: 1px;
-}
-
+/* Something wrong with it: a red edge inside the white, kept under the focus ring. */
 .workshop__input[aria-invalid="true"] {
-  box-shadow: var(--sunken-edge), inset 0 0 0 2px var(--error);
+  border-color: var(--error);
+  box-shadow: var(--aqua-field-shadow), inset 0 0 0 1px var(--error);
+}
+
+.workshop__input[aria-invalid="true"]:focus-visible {
+  box-shadow: var(--aqua-field-shadow), inset 0 0 0 1px var(--error), var(--aqua-focus-ring);
 }
 
 .workshop__input:disabled {
-  background: var(--face);
+  background: var(--aqua-plain);
   color: var(--face-muted);
 }
 
-/* "Buying for a friend": a sunken white box with a black tick, as 90s check boxes. */
+/* "Buying for a friend": an Aqua check box, a small white gel square with rounded
+   corners; ticked, the gel takes a light shade of the colour, so the black tick reads
+   on every colour. */
 .workshop__check {
   display: flex;
   align-items: center;
@@ -495,31 +407,45 @@
 }
 
 .workshop__check input {
+  --check-top: #ffffff;
+  --check-bottom: var(--aqua-plain-deep);
   -webkit-appearance: none;
   appearance: none;
   flex: none;
-  width: 16px;
-  height: 16px;
+  width: 15px;
+  height: 15px;
   margin: 0;
-  border: 1px solid;
-  border-color: var(--sunken-border);
-  border-radius: 0;
-  background: var(--field) no-repeat center / 7px 7px;
-  box-shadow: var(--sunken-edge);
+  border: 1px solid var(--aqua-plain-rim);
+  border-radius: 4px;
+  background:
+    no-repeat center / 9px 9px,
+    linear-gradient(to bottom, rgb(255 255 255 / 0.85), rgb(255 255 255 / 0.15) 50%, transparent 50%),
+    linear-gradient(to bottom, var(--check-top), var(--check-bottom));
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.25), inset 0 1px 1px rgb(0 0 0 / 0.15);
   cursor: pointer;
 }
 
 .workshop__check input:checked {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='7' height='7' viewBox='0 0 7 7' shape-rendering='crispEdges'%3E%3Cpath fill='%23000' d='M6 0h1v1H6zM5 1h2v1H5zM0 2h1v1H0zM4 2h3v1H4zM0 3h2v1H0zM3 3h3v1H3zM0 4h5v1H0zM1 5h3v1H1zM2 6h1v1H2z'/%3E%3C/svg%3E");
+  --check-top: color-mix(in srgb, var(--aqua-tint) 30%, #ffffff);
+  --check-bottom: color-mix(in srgb, var(--aqua-tint) 55%, #ffffff);
+  border-color: var(--aqua-tint-rim);
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='9' viewBox='0 0 9 9'%3E%3Cpath d='M1.2 4.6l2.3 2.5L7.9 1.4' stroke='%23000' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E"),
+    linear-gradient(to bottom, rgb(255 255 255 / 0.85), rgb(255 255 255 / 0.15) 50%, transparent 50%),
+    linear-gradient(to bottom, var(--check-top), var(--check-bottom));
+}
+
+.workshop__check input:active:not(:disabled) {
+  --check-bottom: color-mix(in srgb, var(--aqua-plain-pressed) 85%, #000000);
 }
 
 .workshop__check input:focus-visible {
-  outline: 2px solid var(--focus);
-  outline-offset: 1px;
+  outline: 2px solid transparent;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.25), var(--aqua-focus-ring);
 }
 
 .workshop__check input:disabled {
-  background-color: var(--face);
+  opacity: 0.55;
   cursor: not-allowed;
 }
 
@@ -535,44 +461,19 @@
   gap: 8px;
 }
 
-/* The default button, as on the card: raised, framed in black, spaced capitals. The
-   start padding is wider by the trailing tracking, to keep the label centred. */
+/* The default button, as on the card: a glossy pill in the colour that pulses gently
+   (.aqua-pill--tint and --pulse, boxes.css), on the right as in a Mac dialog; plain
+   and faded until the spots are in, or while Stripe opens. */
 .workshop__pay {
-  --pad: 16px;
-  align-self: stretch;
-  min-width: 96px;
-  min-height: 40px;
-  margin: 2px 0 0;
-  padding: 4px var(--pad) 4px calc(var(--pad) + 0.2em * var(--display-tracking));
-  border: 1px solid var(--dk-shadow);
-  border-radius: 0;
-  background: var(--button);
-  color: var(--button-text);
-  box-shadow: var(--bevel-raised);
-  font: inherit;
-  font-family: var(--display-font);
-  font-size: calc(0.8125rem * var(--display-size));
-  font-weight: var(--display-weight);
-  line-height: 1.2;
-  letter-spacing: calc(0.2em * var(--display-tracking));
-  text-transform: uppercase;
-  cursor: pointer;
+  align-self: flex-end;
+  min-width: 140px;
+  height: 32px;
+  margin: 4px 0 0;
+  padding: 0 22px 1px;
+  font-size: 14px;
 }
 
-.workshop__pay:active:not(:disabled) {
-  padding: 6px calc(var(--pad) - 1px) 2px calc(var(--pad) + 1px + 0.2em * var(--display-tracking));
-  box-shadow: var(--bevel-pressed);
-}
-
-.workshop__pay:focus-visible {
-  outline: 1px dotted var(--focus);
-  outline-offset: -5px;
-}
-
-/* Greyed and embossed, as disabled controls were. */
 .workshop__pay:disabled {
-  color: var(--shadow);
-  text-shadow: 1px 1px 0 var(--hilight);
   cursor: not-allowed;
 }
 
@@ -580,9 +481,15 @@
   cursor: progress;
 }
 
+@media (pointer: coarse) {
+  .workshop__pay {
+    height: 40px;
+  }
+}
+
 /* "OK" under the thank-you: a shorter button on the right, as a message box has. */
 .workshop__ok {
-  align-self: flex-end;
+  min-width: 96px;
 }
 
 .workshop__message,
@@ -621,9 +528,13 @@
     forced-color-adjust: none;
   }
 
-  /* The drawn tick is a background, which goes: the browser's own box instead. */
+  /* The drawn box and tick are backgrounds, which go: the browser's own box instead. */
   .workshop__check input {
     -webkit-appearance: auto;
     appearance: auto;
+  }
+
+  .workshop__input[aria-invalid="true"] {
+    border-width: 2px;
   }
 }

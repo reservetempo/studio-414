@@ -20,11 +20,12 @@
     sign-up window (#workshop): its name, date and price, a form, and an "All
     workshops" button back to the Workshops window, onto that workshop's link. The
     dialog is named after the workshop ("Paint a piece sign-up").
-  - Both windows are modal <dialog>s drawn as 90s windows like the boxes (boxes.css,
-    workshop.css), one open at a time. Each closes with its close button, Escape or a
-    click outside it. Its title bar drags it, and on the title bar the arrow keys move
-    it, as on the boxes (they aren't boxes.js's boxes: each opens fresh, centred, and
-    nothing about where it was is remembered). See makeWindow.
+  - Both windows are modal <dialog>s drawn as Aqua windows like the boxes (boxes.css,
+    workshop.css), one open at a time. Each closes with its close button (the red
+    gumdrop in its title bar), Escape or a click outside it. Its title bar drags it,
+    and on the title bar the arrow keys move it, as on the boxes (they aren't
+    boxes.js's boxes: each opens fresh, centred, and nothing about where it was is
+    remembered). See makeWindow.
   - The spots come from the workshop-checkout Edge Function of the Supabase project
     set in comments-config.js (the same URL and anon / publishable key). Its API is
     described at the top of supabase/functions/workshop-checkout/index.ts:
@@ -397,13 +398,15 @@
     var titlebar = win.querySelector('.box__titlebar');
     var drag = null;
 
-    // A drag handle over the title bar, as boxes.js gives the boxes (boxes.css).
+    // A drag handle over the title bar, as boxes.js gives the boxes (boxes.css): first
+    // in the bar, before the gumdrops (the red one is the close button), so Tab reaches
+    // the bar first.
     var handle = document.createElement('button');
     handle.type = 'button';
     handle.className = 'box__handle';
     handle.setAttribute('aria-label', moveLabel);
     handle.title = 'Drag to move. Arrow keys move it.';
-    titlebar.insertBefore(handle, closeBtn);
+    titlebar.insertBefore(handle, titlebar.firstChild);
 
     function close() {
       if (win.open) win.close();

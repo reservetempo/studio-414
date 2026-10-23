@@ -1,10 +1,13 @@
 /* The workshop calendar (calendar.js), at the top of the Workshops window (.workshop,
-   workshop.css; boxes.css for the title bar), over the list of links. The month's
-   name between two small raised arrow buttons, and the month as a sunken white
-   panel, Sunday first. A workshop's day is a raised button in the title-bar colours,
-   with the workshop's name in a tooltip over it under the pointer or the keyboard
-   focus. Days gone by are greyed out, a workshop that is over is a greyed-out button
-   that doesn't press, and today is outlined. The colours and fonts are the tokens in
+   workshop.css; boxes.css for the Aqua window), over the list of links. The month's
+   name between two small round plain pills, ‹ and › (.aqua-pill, as in Display), and
+   the month on a white panel with a thin grey edge, as Aqua's lists and fields have,
+   Sunday first. The weekdays and the days are in Lucida Grande, like Aqua's own
+   calendar; the month's name keeps the Display font. A workshop's day is a glossy pill
+   in the colour (.aqua-pill--tint, added by calendar.js), with the workshop's name in
+   a pale yellow Aqua tooltip over it under the pointer or the keyboard focus. Days
+   gone by are greyed out, a workshop that is over is a faded pill that doesn't press,
+   and today is ringed in the colour. The colours and fonts are the tokens in
    styles.css, so it follows the style switcher like everything else. */
 
 .calendar {
@@ -33,52 +36,20 @@
   text-align: center;
 }
 
+/* Round plain pills, as Display's ‹ and › (switcher.css); faded at either end. */
 .calendar__step {
   flex: none;
-  display: grid;
-  place-items: center;
   width: 28px;
-  height: 26px;
+  height: 28px;
   margin: 0;
-  padding: 0;
-  border: 0;
-  border-radius: 0;
-  background: var(--face);
-  color: var(--face-text);
-  box-shadow: var(--bevel-raised);
-  cursor: pointer;
-}
-
-.calendar__step svg {
-  display: block;
-  width: 4px;
-  height: 7px;
-}
-
-.calendar__step:active:not(:disabled) {
-  padding: 2px 0 0 2px;
-  box-shadow: var(--bevel-pressed);
-}
-
-.calendar__step:focus-visible {
-  outline: 1px dotted var(--focus);
-  outline-offset: -4px;
-}
-
-/* Off at either end: greyed out and embossed, as 90s buttons were. */
-.calendar__step:disabled {
-  color: var(--shadow);
-  cursor: default;
-}
-
-.calendar__step:disabled svg {
-  filter: drop-shadow(1px 1px 0 var(--hilight));
+  padding: 0 0 2px;
+  font-size: 18px;
 }
 
 @media (pointer: coarse) {
   .calendar__step {
     width: 36px;
-    height: 34px;
+    height: 36px;
   }
 }
 
@@ -87,27 +58,26 @@
 .calendar__grid {
   width: 100%;
   margin: 0;
-  padding: 2px;
-  border: 1px solid;
-  border-color: var(--sunken-border);
+  padding: 2px 3px 3px;
+  border: 1px solid var(--aqua-field-edge);
+  border-top-color: var(--aqua-field-edge-top);
   border-collapse: separate;
   border-spacing: 2px;
   background: var(--field);
   color: var(--field-text);
-  box-shadow: var(--sunken-edge);
+  box-shadow: var(--aqua-field-shadow);
+  font-family: var(--aqua-font);
   table-layout: fixed;
 }
 
 .calendar__grid th {
-  padding: 3px 0 4px;
-  border-bottom: 1px dotted var(--shadow);
-  font-family: var(--display-font);
-  font-size: calc(0.6875rem * var(--display-size));
-  font-weight: var(--display-weight);
+  padding: 4px 0 5px;
+  border-bottom: 1px solid color-mix(in srgb, var(--field-text) 16%, var(--field));
+  color: var(--face-muted);
+  font-size: 11px;
+  font-weight: bold;
   line-height: 1.2;
-  letter-spacing: calc(0.12em * var(--display-tracking));
   text-align: center;
-  text-transform: uppercase;
 }
 
 .calendar__grid td {
@@ -120,15 +90,21 @@
   display: grid;
   place-items: center;
   width: 100%;
-  height: 32px;
+  height: 30px;
   margin: 0;
   padding: 0;
+  font-family: var(--aqua-font);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+/* Any day but a workshop coming up (a pill, below). */
+.calendar__day:not(.aqua-pill) {
   border: 0;
-  border-radius: 0;
+  border-radius: 999px;
   background: none;
   color: inherit;
-  font: inherit;
-  font-variant-numeric: tabular-nums;
 }
 
 @media (pointer: coarse) {
@@ -141,63 +117,48 @@
   color: var(--placeholder);
 }
 
-/* Today: a thin frame inside the day. */
-.calendar__day[aria-current="date"]::before {
-  content: "";
-  position: absolute;
-  inset: 2px;
-  border: 1px solid currentColor;
-  pointer-events: none;
-}
-
-/* A workshop's day: a raised button in the title-bar colours. */
-.calendar__day--workshop {
-  background: var(--title);
-  color: var(--title-text);
-  box-shadow: var(--bevel-raised);
+/* Today: a light shade of the colour, ringed in a deeper one. */
+.calendar__day[aria-current="date"]:not(.aqua-pill) {
+  background: color-mix(in srgb, var(--aqua-tint) 22%, var(--field));
+  box-shadow: inset 0 0 0 1px var(--aqua-tint-rim);
   font-weight: bold;
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
 }
 
-.calendar__day--workshop:active {
-  padding: 2px 0 0 2px;
-  box-shadow: var(--bevel-pressed);
+/* A workshop's day: a glossy pill in the colour (.aqua-pill--tint, boxes.css, which
+   gives it its press and its focus ring). Today's ring then sits inside it. */
+.calendar__day--workshop {
+  font-weight: bold;
 }
 
-.calendar__day--workshop:focus-visible {
-  outline: 1px dotted var(--title-text);
-  outline-offset: -5px;
+.calendar__day--workshop.aqua-pill[aria-current="date"] {
+  box-shadow: 0 2px 3px rgb(0 0 0 / 0.28), inset 0 0 0 2px var(--aqua-tint-text);
 }
 
-/* A workshop that is over: a greyed-out button that doesn't press. */
+/* A workshop that is over: a faded plain pill that doesn't press. */
 .calendar__day--workshop.calendar__day--past {
-  background: var(--face);
-  color: var(--shadow);
-  text-shadow: 1px 1px 0 var(--hilight);
+  border: 1px solid color-mix(in srgb, var(--aqua-plain-rim) 50%, var(--field));
+  background: linear-gradient(to bottom, var(--aqua-plain-deep), var(--aqua-plain));
+  color: color-mix(in srgb, var(--field-text) 50%, var(--aqua-plain));
   cursor: default;
 }
 
-.calendar__day--workshop.calendar__day--past:active {
-  padding: 0;
-  box-shadow: var(--bevel-raised);
-}
-
-/* The workshop's name over its day, under the pointer or the keyboard focus. It sits
+/* The workshop's name over its day, under the pointer or the keyboard focus, in an
+   Aqua tooltip: pale yellow, a thin edge, a soft shadow, Lucida Grande. It sits
    centred over the day, or flush with it in the first and last columns, to stay in
    the window. */
 .calendar__tip {
   position: absolute;
   z-index: 2;
-  bottom: calc(100% + 3px);
+  bottom: calc(100% + 4px);
   left: 50%;
   display: none;
   padding: 2px 6px 3px;
-  border: 1px solid var(--dk-shadow);
-  background: var(--field);
-  color: var(--field-text);
-  box-shadow: 2px 2px 0 var(--dk-shadow);
-  font-size: 0.8125rem;
+  border: 1px solid rgb(0 0 0 / 0.35);
+  background: #ffffc7;
+  color: #000000;
+  box-shadow: 0 2px 6px rgb(0 0 0 / 0.3);
+  font-family: var(--aqua-font);
+  font-size: 11px;
   font-weight: normal;
   line-height: 1.2;
   text-shadow: none;
@@ -223,6 +184,10 @@
 }
 
 @media (forced-colors: active) {
+  .calendar__day[aria-current="date"] {
+    border: 1px solid CanvasText;
+  }
+
   .calendar__day--workshop {
     border: 1px solid ButtonText;
   }
