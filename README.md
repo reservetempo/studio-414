@@ -108,6 +108,14 @@ Owners will upload a new wallpaper photo for the site from the owner page and ma
 
    Afterwards, `curl -X POST https://cgbqzdhjhquprjgtcmwh.supabase.co/functions/v1/cloudinary-sign` should answer `{"error":"not_signed_in",...}`.
 
+## Set up the site look
+
+Owners will pick one theme and one colour for both the public site and the owner page, on the owner page (that part of the page is still to come). Both pages read it from Supabase in [`look.js`](look.js); [`supabase/look.sql`](supabase/look.sql) describes the setting, and [`themes/README.md`](themes/README.md) how a theme is written. Until a look is saved, the site stays Aqua in Classic. Set up the wallpaper upload first.
+
+1. **SQL Editor**: paste in [`supabase/look.sql`](supabase/look.sql) and click **Run** (after `wallpaper.sql`, which makes the settings table).
+
+To try a look without saving it, add `?theme=<id>&color=<n>` to either page's address, for example `index.html?theme=nes&color=6`.
+
 ## Still to do
 
 - The "Join the mailing list" form isn't connected to any service yet: it only shows a thank-you message.

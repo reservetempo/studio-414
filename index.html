@@ -5,14 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Studio 414</title>
   <script>
-    // Applies the font and the colour before first paint. The font is the one chosen in
-    // Display (switcher.js), from ?font= in the URL (which wins) or else from
-    // localStorage. The colour (colors.css) is not chosen in Display: it comes from
-    // ?color= in the URL alone, else Classic (0).
+    // Applies the font before first paint: the one chosen in Display (switcher.js), from
+    // ?font= in the URL (which wins) or else from localStorage. The theme and the colour
+    // are not chosen in Display: look.js (after the stylesheets) sets them.
     (function () {
       var params = new URLSearchParams(location.search);
-      // A whole number from 0 to max (the number of the last option: 20 for the font
-      // and for the colour), as a string, or else '0'.
+      // A whole number from 0 to max (the number of the last option: 20 for the font),
+      // as a string, or else '0'.
       function valid(value, max) {
         value = String(value).trim();
         return /^(0|[1-9][0-9]?)$/.test(value) && Number(value) <= max ? value : '0';
@@ -22,7 +21,6 @@
         try { font = localStorage.getItem('studio414.style.font'); } catch (e) { font = null; }
       }
       document.documentElement.setAttribute('data-font', valid(font, 20));
-      document.documentElement.setAttribute('data-color', valid(params.get('color'), 20));
     })();
   </script>
   <script>
@@ -82,6 +80,9 @@
   <link rel="stylesheet" href="workshop.css">
   <link rel="stylesheet" href="calendar.css">
   <link rel="stylesheet" href="opening-soon.css">
+  <!-- The owners' theme and colour (look.js), before first paint. It must stay after the
+       stylesheets and be loaded without defer: it writes in the theme's stylesheet. -->
+  <script src="look.js"></script>
 </head>
 <body>
   <main class="hero">
