@@ -174,11 +174,31 @@
   outline-offset: 2px;
 }
 
-.workshop__none {
-  margin-left: -1.25em;
+/* Over the list, while it is loading, if it couldn't be, or with none coming up
+   (workshop.js): a muted line, then "Try again" when it couldn't, a small plain Aqua
+   pill (.aqua-pill, boxes.css). The line takes the focus while it loads again. */
+.workshop__status {
+  margin: 0;
   color: var(--face-muted);
   font-style: italic;
-  list-style: none;
+}
+
+.workshop__status:focus {
+  outline: none;
+}
+
+.workshop__retry {
+  align-self: flex-start;
+  height: 24px;
+  margin: -4px 0 0;
+  padding: 0 14px 1px;
+  font-size: 12px;
+}
+
+@media (pointer: coarse) {
+  .workshop__retry {
+    height: 34px;
+  }
 }
 
 /* ---------- The sign-up window ---------- */
@@ -241,6 +261,16 @@
   font-size: calc(2.25rem * var(--display-name-size));
   font-weight: var(--display-weight);
   line-height: 1;
+}
+
+/* The workshop's description, as the owners typed it: plain text, its line breaks
+   kept, long words broken rather than widening the window. */
+.workshop__description {
+  margin: 0;
+  font-size: 0.9375rem;
+  line-height: 1.4;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
 }
 
 .workshop__facts {
@@ -318,7 +348,8 @@
 }
 
 /* Until then, a line with a small glossy status light: amber while checking the
-   spots, grey before sign-ups open. It is hidden once the spots are in. */
+   spots, grey when they couldn't be or the workshop is gone. It is hidden once the
+   spots are in. */
 .workshop__spots {
   display: flex;
   align-items: center;
@@ -347,7 +378,8 @@
   box-shadow: 0 1px 1px rgb(0 0 0 / 0.25);
 }
 
-.workshop__spots[data-state="unavailable"]::before {
+.workshop__spots[data-state="unavailable"]::before,
+.workshop__spots[data-state="gone"]::before {
   --drop: #a3a3a3;
   --drop-rim: #6b6b6b;
   --drop-glow: #e6e6e6;

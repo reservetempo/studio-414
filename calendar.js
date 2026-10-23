@@ -4,15 +4,18 @@
 
   - Each time the Workshops window opens, workshop.js runs draw (below, handed over
     through window.studioWorkshops.setCalendar). It starts on the month of the next
-    workshop (this month, once none are left), and its arrow buttons step a month back
-    or on, from this month to the month of the last workshop. The focus goes to the
-    next workshop's day, unless the window opens onto a workshop's link (back from its
-    sign-up window).
+    workshop (this month, until the list is in or with none coming up), and its arrow
+    buttons step a month back or on, from this month to the month of the last
+    workshop. The focus goes to the next workshop's day, unless the window opens onto a
+    workshop's link (back from its sign-up window). workshop.js runs draw again as the
+    list comes in from the sign-up server (onto the next workshop's month) or changes
+    (keeping the month shown, and the focus on a day that had it).
   - The month is a table, Sunday first, always six weeks tall so the window keeps its
     size from month to month. Each workshop's day is marked: a glossy Aqua pill in the
     colour (.aqua-pill--tint, boxes.css) that opens its sign-up window, with the
-    workshop's name in a tooltip under the pointer or the keyboard focus, and its full
-    date and name for screen readers ("Saturday 7 November 2026: Paint a piece"). One
+    workshop's name (and time, if it has one) in a tooltip under the pointer or the
+    keyboard focus, and its full date, name and time for screen readers ("Saturday 7
+    November 2026: Paint a piece, 1:00–4:00 pm"). One
     workshop a day: a second one on the same day would only show in the list. Days gone
     by (in the studio's time zone, as workshop.js counts them) and workshops that are
     over are greyed out, and today is ringed in the colour.
@@ -84,6 +87,9 @@
     number.textContent = n;
     el.appendChild(number);
     if (w) {
+      var time = api.time ? api.time(w) : '';
+      var named = time ? w.name + ', ' + time : w.name;
+      el.dataset.date = date;
       el.classList.add('calendar__day--workshop');
       if (!past) el.classList.add('aqua-pill', 'aqua-pill--tint');
       if (past) {
@@ -92,15 +98,15 @@
         el.type = 'button';
         el.dataset.id = w.id;
         el.setAttribute('aria-haspopup', 'dialog');
-        // "Saturday 7 November 2026: Paint a piece"
+        // "Saturday 7 November 2026: Paint a piece, 1:00–4:00 pm"
         el.setAttribute('aria-label', DAYS[new Date(Date.UTC(year, month, n)).getUTCDay()] +
-          ' ' + n + ' ' + MONTHS[month] + ' ' + year + ': ' + w.name);
+          ' ' + n + ' ' + MONTHS[month] + ' ' + year + ': ' + named);
       }
       // The tooltip, for the eye only: screen readers have the name already.
       var tip = document.createElement('span');
       tip.className = 'calendar__tip';
       tip.setAttribute('aria-hidden', 'true');
-      tip.textContent = past ? w.name + ' (over)' : w.name;
+      tip.textContent = past ? w.name + ' (over)' : named;
       el.appendChild(tip);
     }
     if (past) el.classList.add('calendar__day--past');
@@ -108,8 +114,11 @@
     return el;
   }
 
-  // Draws the month shown: its name, the arrows (off at either end) and its days.
+  // Draws the month shown: its name, the arrows (off at either end) and its days. A
+  // workshop's day that had the focus has it again.
   function render() {
+    var active = document.activeElement;
+    var focusedDate = active && daysEl.contains(active) ? active.dataset.date : null;
     var year = Math.floor(shown / 12);
     var month = shown % 12;
     monthEl.textContent = MONTHS[month] + ' ' + year;
@@ -140,6 +149,10 @@
       if (empty) row.setAttribute('aria-hidden', 'true');
       daysEl.appendChild(row);
     }
+    if (focusedDate) {
+      var again = daysEl.querySelector('button[data-date="' + focusedDate + '"]');
+      if (again) again.focus();
+    }
   }
 
   function step(by) {
@@ -152,16 +165,19 @@
     if (focused && focused.disabled) (focused === prevButton ? nextButton : prevButton).focus();
   }
 
-  // Draws the month of the next workshop, as the Workshops window opens, and returns
-  // that workshop's day (for workshop.js to focus), or null.
-  function draw() {
+  // Draws the month of the next workshop, as the Workshops window opens or the list
+  // comes in (or with keep, the month shown, as the list changes, within the months
+  // there are), and returns that workshop's day (for workshop.js to focus), or null.
+  function draw(keep) {
     today = api.today();
     var next = api.upcoming()[0] || null;
+    var kept = shown;
     first = monthOf(today);
     shown = next ? monthOf(next.date) : first;
     last = api.all().reduce(function (latest, w) {
       return Math.max(latest, monthOf(w.date));
     }, shown);
+    if (keep === true) shown = Math.min(last, Math.max(first, kept));
     render();
     var mark = null;
     if (next) {

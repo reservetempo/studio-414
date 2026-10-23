@@ -3,45 +3,52 @@
   sign-up window for each, paid with Stripe Checkout (Stripe charges it in CAD, which
   the windows leave unsaid).
 
-  - The workshops (ids, names, dates and prices) are in WORKSHOPS below, so their names
-    and dates show even when the sign-up server can't be reached. A workshop drops off
-    once its day has ended in the studio's time zone (STUDIO_TIME_ZONE), as on the
-    server. Once none are left, the button at the top right hides.
+  - The workshops (ids, names, dates, times, descriptions, prices and spots) come from
+    the sign-up server (below), which lists those the owners have put in its table on
+    the owner page (admin.html) and not hidden, until their day has ended in the
+    studio's time zone (STUDIO_TIME_ZONE). A page left open drops a workshop at the
+    same moment. Nothing is listed until the server has answered.
   - The plain underlined "Workshops" fixed at the top right of the screen (a button,
     #workshop-button) opens the Workshops window (#workshops): the month calendar
-    (calendar.js, drawn each time the window opens, through the function it hands
-    setCalendar in window.studioWorkshops, at the end), and under it the list, one
-    link per workshop, soonest first: its name and date ("Paint a piece, Sat 7 Nov")
-    in the classic web's underlined blue, purple once opened, whatever the switcher's
-    colours, then in plain text, once they are in, its spots left ("7 spots left",
-    "Sold out"). A sold-out workshop stays in the list. The links are buttons dressed
-    as links, as they open a window rather than a page.
+    (calendar.js, drawn each time the window opens and again when the list comes in,
+    through the function it hands setCalendar in window.studioWorkshops, at the end),
+    and under it the list, one link per workshop, soonest first: its name, date and
+    time if it has one ("Paint a piece, Sat 7 Nov, 1:00–4:00 pm") in the classic web's
+    underlined blue, purple once opened, whatever the switcher's colours, then in plain
+    text its spots left ("7 spots left", "Sold out"). A sold-out workshop stays in the
+    list. The links are buttons dressed as links, as they open a window rather than a
+    page. Until the list is in, the window says "Loading workshops…"; if it can't be
+    fetched, that it couldn't, with a "Try again" pill; with none coming up, so.
   - A workshop's link, or its day on the calendar, closes that window and opens its
-    sign-up window (#workshop): its name, date and price, a form, and an "All
-    workshops" button back to the Workshops window, onto that workshop's link. The
-    dialog is named after the workshop ("Paint a piece sign-up").
+    sign-up window (#workshop): its name, its description (plain text, its line breaks
+    kept) if it has one, its date, time and price, a form, and an "All workshops"
+    button back to the Workshops window, onto that workshop's link. The dialog is
+    named after the workshop ("Paint a piece sign-up").
   - Both windows are modal <dialog>s drawn as Aqua windows like the boxes (boxes.css,
     workshop.css), one open at a time. Each closes with its close button (the red
     gumdrop in its title bar), Escape or a click outside it. Its title bar drags it,
     and on the title bar the arrow keys move it, as on the boxes (they aren't
     boxes.js's boxes: each opens fresh, centred, and nothing about where it was is
     remembered). See makeWindow.
-  - The spots come from the workshop-checkout Edge Function of the Supabase project
+  - The sign-up server is the workshop-checkout Edge Function of the Supabase project
     set in comments-config.js (the same URL and anon / publishable key). Its API is
     described at the top of supabase/functions/workshop-checkout/index.ts:
-      GET  -> 200 { workshops: [{ id, capacity, taken, remaining, ... }] }
+      GET  -> 200 { workshops: [{ id, name, date, startTime, endTime, description,
+           price, currency, capacity, taken, remaining }] }, soonest first
       POST { workshop, email, name, quantity, friendName? } -> 200 { url }: Stripe
            Checkout, where the visitor is sent to pay for price × quantity; or an
-           { error } (invalid_name, invalid_email, already_signed_up, full,
-           not_enough_spots with { remaining }, ...)
-    They are fetched each time either window opens. Until they are in, the list shows
-    no counts and the sign-up window says "Checking spots…"; if they can't be fetched
-    (the function isn't deployed yet, or the network is down) it says sign-ups aren't
-    open yet and the pay button stays off. Once in, the sign-up window's title bar says
-    how many are left, ticking down quickly from the capacity to that number the first
-    time; until then it says "Workshop sign-up". Screen readers hear the count once,
-    from a live region of its own. Once a workshop is sold out its form is off, and
-    once every listed workshop is, the button at the top right says "Sold out".
+           { error } (unknown_workshop, workshop_past, invalid_name, invalid_email,
+           already_signed_up, full, not_enough_spots with { remaining }, ...)
+    The list is fetched when either window opens (again only once FRESH_MS have gone
+    by since the last answer, and never twice at once). While it is fetched again the
+    list and spots already in stand; if it can't be (the function isn't deployed yet,
+    or the network is down), they go, and the sign-up window says it couldn't check
+    the spots and the pay button stays off, as it does for a workshop that has
+    dropped off the list. Once in, the sign-up window's title bar says how many are
+    left, ticking down quickly from the capacity to that number the first time; until
+    then it says "Workshop sign-up". Screen readers hear the count once, from a live
+    region of its own. Once a workshop is sold out its form is off, and once every
+    listed workshop is, the button at the top right says "Sold out".
   - The form asks for your name and email, and has a "Buying for a friend" box that
     shows a "Friend's name" field, required while it's ticked (and not sent when it
     isn't). Beside the price, "× 1" with − and + sets how many spots the order is for:
@@ -57,25 +64,22 @@
     "nothing was charged" message, and the parameter is taken out of the address (any
     others, such as ?font= and ?color=, stay). The workshop's id is kept in
     sessionStorage on the way to Stripe, so the message shows in that workshop's
-    sign-up window; without it, it shows in the Workshops window.
+    sign-up window, once the list is in (RETURN_WAIT_MS at most). Without the id, or
+    if the list isn't in by then or no longer has the workshop, a message that names
+    no workshop shows in the Workshops window.
 */
 (function () {
   'use strict';
-
-  // The workshops, soonest first: id, name, date (YYYY-MM-DD, the day in the studio's
-  // time zone) and price per spot in cents. They match the WORKSHOPS list in
-  // supabase/functions/workshop-checkout/index.ts, which holds the spots and is what
-  // the sign-ups go by: change both together.
-  var WORKSHOPS = [
-    { id: 'paint-a-piece', name: 'Paint a piece', date: '2026-11-07', price: 5999 },
-    { id: 'hand-building', name: 'Hand building', date: '2026-12-05', price: 5999 }
-  ];
 
   // The studio's time zone: a workshop's day ends at midnight here (the same as
   // STUDIO_TIME_ZONE in workshop-checkout/index.ts).
   var STUDIO_TIME_ZONE = 'America/Toronto';
 
   var REQUEST_TIMEOUT_MS = 15000;
+  // A window opening within this long of the last answer doesn't fetch the list again.
+  var FRESH_MS = 5000;
+  // Back from Stripe, how long the message waits for the list (to name the workshop).
+  var RETURN_WAIT_MS = 4000;
   var EMAIL_MAX = 254;
   var NAME_MAX = 100;             // your name and your friend's, as on the server
   var QUANTITY_MAX = 10;          // spots in one order until the spots left are in
@@ -136,6 +140,8 @@
   var launcherLabel = document.getElementById('workshop-button-label');
   var listBody = document.getElementById('workshops-body');
   var listEl = document.getElementById('workshops-list');
+  var listStatus = document.getElementById('workshops-status');
+  var retryButton = document.getElementById('workshops-retry');
   var listClose = document.getElementById('workshops-close');
   var titleEl = document.getElementById('workshop-title');
   var countEl = document.getElementById('workshop-count');
@@ -146,7 +152,10 @@
   var resultTitle = document.getElementById('workshop-result-title');
   var resultText = document.getElementById('workshop-result-text');
   var nameEl = document.getElementById('workshop-name');
+  var descriptionEl = document.getElementById('workshop-description');
   var dateEl = document.getElementById('workshop-date');
+  var timeEl = document.getElementById('workshop-time');
+  var timeRow = [document.getElementById('workshop-time-term'), timeEl.parentNode];
   var priceEl = document.getElementById('workshop-price');
   var quantityNumber = document.getElementById('workshop-quantity-number');
   var quantityUnit = document.getElementById('workshop-quantity-unit');
@@ -194,11 +203,11 @@
     }
   }
 
-  // The workshops whose day hasn't ended yet, soonest first.
+  // The workshops from the last answer whose day hasn't ended yet, soonest first (as
+  // the server sends them), or none until the list is in.
   function upcoming() {
     var today = studioToday();
-    return WORKSHOPS.filter(function (w) { return w.date >= today; })
-      .sort(function (a, b) { return a.date < b.date ? -1 : a.date > b.date ? 1 : 0; });
+    return (workshops || []).filter(function (w) { return w.date >= today; });
   }
 
   function find(id, list) {
@@ -228,6 +237,22 @@
   function dayMonth(w) {
     var d = day(w);
     return d.getUTCDate() + ' ' + MONTHS[d.getUTCMonth()];
+  }
+
+  // "1:00 pm" from "13:00", and its half of the day.
+  function clock(hhmm) {
+    var p = hhmm.split(':');
+    var h = +p[0];
+    return { text: ((h + 11) % 12 + 1) + ':' + p[1], half: h < 12 ? 'am' : 'pm' };
+  }
+
+  // "1:00–4:00 pm", "11:00 am–1:00 pm", "1:00 pm" with no end, or '' with no start.
+  function timeText(w) {
+    if (!w || !w.startTime) return '';
+    var start = clock(w.startTime);
+    if (!w.endTime) return start.text + ' ' + start.half;
+    var end = clock(w.endTime);
+    return start.text + (start.half === end.half ? '' : ' ' + start.half) + '–' + end.text + ' ' + end.half;
   }
 
   // "$59.99" for one spot, or "$119.98" for two.
@@ -279,15 +304,46 @@
     return { capacity: capacity, remaining: Math.max(0, Math.min(capacity, Math.round(remaining))) };
   }
 
-  // { id: { capacity, remaining } } from the GET answer, or null if it has no list.
+  // "HH:MM" (24-hour clock) as sent, or null.
+  function readTime(value) {
+    return typeof value === 'string' && /^([01]\d|2[0-3]):[0-5]\d$/.test(value) ? value : null;
+  }
+
+  // A workshop from the GET answer, { id, name, date, startTime, endTime, description,
+  // price }, or null if it doesn't make sense. Only text ever goes on the page.
+  function readWorkshop(item) {
+    if (!item || typeof item !== 'object') return null;
+    var price = Number(item.price);
+    if (typeof item.id !== 'string' || !item.id || typeof item.name !== 'string' || !item.name.trim() ||
+        typeof item.date !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(item.date) ||
+        item.price == null || !isFinite(price) || price < 0) return null;
+    var startTime = readTime(item.startTime);
+    var description = typeof item.description === 'string' ? item.description.trim() : '';
+    return {
+      id: item.id,
+      name: item.name.trim(),
+      date: item.date,
+      startTime: startTime,
+      endTime: startTime ? readTime(item.endTime) : null,
+      description: description || null,
+      price: Math.round(price)
+    };
+  }
+
+  // { list, spots } from the GET answer: the workshops in its order, and their
+  // { id: { capacity, remaining } }; or null if it has no list.
   function readWorkshops(data) {
     if (!data || !Array.isArray(data.workshops)) return null;
+    var list = [];
     var byId = {};
     data.workshops.forEach(function (item) {
-      var spots = item && typeof item.id === 'string' ? readSpots(item) : null;
-      if (spots) byId[item.id] = spots;
+      var w = readWorkshop(item);
+      var spots = w && !Object.prototype.hasOwnProperty.call(byId, w.id) ? readSpots(item) : null;
+      if (!spots) return;
+      list.push(w);
+      byId[w.id] = spots;
     });
-    return byId;
+    return { list: list, spots: byId };
   }
 
   // Only ever go on to a web page: never a javascript: or data: address.
@@ -310,19 +366,23 @@
     return value.trim().replace(/\s+/g, ' ');
   }
 
-  /* ---------- The spots ---------- */
+  /* ---------- The list and its spots ---------- */
 
   var spotsState = 'loading';     // the last fetch: 'loading', 'ready' or 'unavailable'
+  var workshops = null;           // the workshops from the last fetch, or null until one answers (or once one fails)
   var spotsById = {};             // { id: { capacity, remaining } } from the last fetch
-  var loadId = 0;
+  var loading = null;             // the fetch on its way (a promise), or null
+  var loadedAt = 0;               // when the last fetch answered with the list (Date.now())
 
-  // A workshop's state: 'loading', 'open', 'soldout' or 'unavailable' (sign-ups can't
-  // be reached, or the server doesn't list it). Spots already in stand while they are
-  // fetched again.
+  // A workshop's state: 'loading', 'open', 'soldout', 'gone' (no longer on the list)
+  // or 'unavailable' (sign-ups can't be reached). Spots already in stand while they
+  // are fetched again.
   function availabilityOf(w) {
     var spots = w && spotsById[w.id];
     if (spots) return spots.remaining > 0 ? 'open' : 'soldout';
-    return w && spotsState === 'loading' ? 'loading' : 'unavailable';
+    if (!w) return 'unavailable';
+    if (spotsState === 'loading') return 'loading';
+    return spotsState === 'ready' ? 'gone' : 'unavailable';
   }
 
   // "7 spots left", "1 spot left" or "Sold out".
@@ -337,36 +397,46 @@
     render();
   }
 
-  // Fetched each time a window opens, for both windows and the button.
-  function loadSpots() {
-    var id = ++loadId;
+  // Fetched as a window opens, for both windows and the button: not while a fetch is
+  // on its way (that one's promise is handed back), nor within FRESH_MS of the last
+  // answer unless forced. The promise resolves once the answer (or none) is in.
+  function loadWorkshops(force) {
+    if (loading) return loading;
     if (!endpoint) {
-      spotsState = 'unavailable';
-      renderAll();
-      return;
+      noSpots();
+      return Promise.resolve();
     }
+    if (!force && spotsState === 'ready' && Date.now() - loadedAt < FRESH_MS) return Promise.resolve();
     spotsState = 'loading';
     renderAll();
-    request('GET').then(function (result) {
-      if (id !== loadId) return;
+    loading = request('GET').then(function (result) {
+      loading = null;
       var next = result.ok ? readWorkshops(result.data) : null;
-      if (next) {
-        spotsById = next;
-        spotsState = 'ready';
-        renderAll();
-        showCount();
-        keepFocus();
-      } else {
+      if (!next) {
         noSpots();
+        return;
       }
+      workshops = next.list;
+      spotsById = next.spots;
+      spotsState = 'ready';
+      loadedAt = Date.now();
+      // The sign-up window takes its workshop as it now is (a new time, say).
+      var fresh = current && find(current.id, workshops);
+      if (fresh) setWorkshop(fresh);
+      renderAll();
+      showCount();
+      keepFocus();
     }, function () {
-      // Not open yet, or offline: the sign-up window says so. The failed request
-      // itself is all the console needs.
-      if (id === loadId) noSpots();
+      // Not open yet, or offline: the windows say so. The failed request itself is
+      // all the console needs.
+      loading = null;
+      noSpots();
     });
+    return loading;
   }
 
   function noSpots() {
+    workshops = null;
     spotsById = {};
     spotsState = 'unavailable';
     stopCount();
@@ -376,13 +446,14 @@
 
   /* ---------- The button at the top right ---------- */
 
-  // "Workshops", or "Sold out" once every workshop listed is; hidden once none are left.
+  // "Workshops", or "Sold out" once every workshop listed is. It shows even with none
+  // coming up (or none in yet): the Workshops window says so.
   function renderLauncher() {
     var list = upcoming();
     var soldOut = list.length > 0 && list.every(function (w) {
       return availabilityOf(w) === 'soldout';
     });
-    launcher.hidden = !list.length;
+    launcher.hidden = false;
     launcherLabel.textContent = soldOut ? 'Sold out' : 'Workshops';
     launcher.setAttribute('aria-label', soldOut ? 'Workshops sold out' : 'Workshops');
     if (soldOut) launcher.dataset.state = 'soldout';
@@ -565,12 +636,36 @@
   // links are "visited" (purple).
   var visited = {};
   // The calendar's drawing (calendar.js hands it over through setCalendar): it draws
-  // the month and returns the next workshop's day, for the focus, or null.
+  // the month (the next workshop's, or the one shown if keep is true) and returns the
+  // next workshop's day, for the focus, or null.
   var drawCalendar = null;
+  // What the list was last built from (see listShape).
+  var builtShape = '';
+  // The window opened (or "Try again" was pressed) before the list was in: once it is,
+  // the focus goes to the workshop's link of this id, or as openList puts it.
+  var focusPending = false;
+  var focusPendingId = null;
 
-  // One link per workshop coming up, "Paint a piece, Sat 7 Nov" (a button, as it opens
-  // a window), then its spots left in plain text (once in).
+  // What the window shows: 'loading', 'unavailable', 'empty', or the workshops' ids,
+  // names, dates and times (what the links and the calendar show) as JSON.
+  function listShape() {
+    if (!workshops) return spotsState === 'loading' ? 'loading' : 'unavailable';
+    var list = upcoming();
+    if (!list.length) return 'empty';
+    return JSON.stringify(list.map(function (w) {
+      return [w.id, w.name, w.date, w.startTime, w.endTime];
+    }));
+  }
+
+  // One link per workshop coming up, "Paint a piece, Sat 7 Nov, 1:00–4:00 pm" (a
+  // button, as it opens a window), then its spots left in plain text; or the line
+  // saying the list is loading, couldn't be, or has none, with "Try again" if it
+  // couldn't. A link that had the focus has it again.
   function buildList() {
+    var active = document.activeElement;
+    var focusedId = active && listEl.contains(active) ? active.dataset.id : null;
+    var shape = listShape();
+    builtShape = shape;
     listEl.textContent = '';
     rows = upcoming().map(function (w) {
       var item = document.createElement('li');
@@ -581,27 +676,32 @@
       if (visited[w.id]) button.dataset.visited = '';
       button.setAttribute('aria-haspopup', 'dialog');
       button.appendChild(document.createTextNode(w.name + ', '));
-      var time = document.createElement('time');
-      time.dateTime = w.date;
-      time.textContent = shortDate(w);
-      button.appendChild(time);
+      var date = document.createElement('time');
+      date.dateTime = w.date;
+      date.textContent = shortDate(w);
+      button.appendChild(date);
+      var time = timeText(w);
+      if (time) button.appendChild(document.createTextNode(', ' + time));
       var spots = document.createElement('span');
       item.appendChild(button);
       item.appendChild(spots);
       listEl.appendChild(item);
       return { w: w, button: button, spots: spots };
     });
-    if (!rows.length) {
-      var none = document.createElement('li');
-      none.className = 'workshop__none';
-      none.textContent = 'No workshops coming up. Check back soon.';
-      listEl.appendChild(none);
-    }
-    renderList();
+    listEl.hidden = !rows.length;
+    var status = shape === 'loading' ? 'Loading workshops…'
+      : shape === 'unavailable' ? 'Couldn’t load the workshops. Try again later.'
+      : shape === 'empty' ? 'No workshops coming up — check back soon.' : '';
+    if (listStatus.textContent !== status) listStatus.textContent = status;
+    listStatus.hidden = !status;
+    retryButton.hidden = shape !== 'unavailable';
+    renderCounts();
+    var again = focusedId && rows.filter(function (r) { return r.w.id === focusedId; })[0];
+    if (again) again.button.focus();
   }
 
   // The counts, once they are in: " – 7 spots left".
-  function renderList() {
+  function renderCounts() {
     rows.forEach(function (row) {
       var spots = spotsById[row.w.id];
       var text = spots ? ' – ' + countText(spots.remaining) : '';
@@ -609,9 +709,46 @@
     });
   }
 
+  // The list as it now is: built again (and the month drawn again, in the open window)
+  // when what it shows has changed, else just its counts.
+  function renderList() {
+    var was = builtShape;
+    if (listShape() === was) {
+      renderCounts();
+      return;
+    }
+    var active = document.activeElement;
+    var hadFocus = listDialog.open && active && listDialog.contains(active);
+    buildList();
+    if (!listDialog.open) return;
+    // The first list in starts the calendar on the next workshop's month; a list that
+    // changed keeps the month shown.
+    var mark = drawCalendar ? drawCalendar(was.charAt(0) === '[') : null;
+    active = document.activeElement;
+    var lost = !active || active === document.body || !listDialog.contains(active);
+    if (focusPending && spotsState !== 'loading') {
+      focusPending = false;
+      // Unless the visitor has moved it on meanwhile.
+      if (lost || active === listClose || active === listStatus) focusList(focusPendingId, mark);
+    } else if (hadFocus && lost) {
+      // Its link or day went with the list.
+      focusList(null, mark);
+    }
+  }
+
+  // The focus in the Workshops window: on the workshop given, or else on the next
+  // workshop's day, the first link, "Try again", or the close button.
+  function focusList(focusId, mark) {
+    var row = rows.filter(function (r) { return r.w.id === focusId; })[0];
+    if (row) row.button.focus();
+    else if (mark) mark.focus();
+    else if (rows[0]) rows[0].button.focus();
+    else (retryButton.hidden ? listClose : retryButton).focus();
+  }
+
   // Opens the Workshops window, with the focus on the workshop given (coming back from
-  // its sign-up window), or else on the next workshop's day, or the first link; kind is
-  // a message after Stripe, or ''.
+  // its sign-up window), or as focusList puts it (once the list is in); kind is a
+  // message after Stripe, or ''.
   function openList(focusId, kind) {
     if (listDialog.open) return;
     signupWindow.close();
@@ -619,17 +756,30 @@
     var mark = drawCalendar ? drawCalendar() : null;
     showResult(kind || '', listDialog, null);
     listWindow.open();
-    loadSpots();
-    var row = rows.filter(function (r) { return r.w.id === focusId; })[0];
-    if (row) row.button.focus();
-    else if (mark) mark.focus();
-    else (rows[0] ? rows[0].button : listClose).focus();
+    loadWorkshops();
+    // The list may have come in (or gone) just now.
+    if (rows.length || !loading) focusList(focusId, rows.length ? mark : null);
+    else {
+      listClose.focus();
+      focusPending = true;
+      focusPendingId = focusId;
+    }
   }
 
   listEl.addEventListener('click', function (event) {
     var button = event.target.closest ? event.target.closest('.workshop__link') : null;
     var w = button ? find(button.dataset.id, upcoming()) : null;
     if (w) openSignup(w, '');
+  });
+
+  // "Try again": the line says "Loading workshops…" and takes the focus (the button
+  // goes) until the list is in.
+  retryButton.addEventListener('click', function () {
+    focusPending = true;
+    focusPendingId = null;
+    loadWorkshops(true);
+    if (loading) listStatus.focus();
+    else focusList(null, null);
   });
 
   listDialog.addEventListener('close', function () {
@@ -655,7 +805,8 @@
   // bar says how many are left and the line is hidden.
   function spotsText(availability) {
     if (availability === 'loading') return 'Checking spots…';
-    if (availability === 'unavailable') return 'Sign-ups aren’t open yet, check back soon.';
+    if (availability === 'unavailable') return 'Couldn’t check the spots. Try again later.';
+    if (availability === 'gone') return 'This workshop is no longer available.';
     return '';
   }
 
@@ -663,12 +814,19 @@
     if (titleEl.textContent !== text) titleEl.textContent = text;
   }
 
-  // Fills in the workshop.
+  // Fills in the workshop: its description (as text, its line breaks kept by the CSS)
+  // and time only if it has them.
   function setWorkshop(w) {
     current = w;
     nameEl.textContent = w.name;
+    descriptionEl.textContent = w.description || '';
+    descriptionEl.hidden = !w.description;
     dateEl.dateTime = w.date;
     dateEl.textContent = longDate(w);
+    var time = timeText(w);
+    timeEl.textContent = time;
+    timeEl.dateTime = time ? w.startTime : '';
+    timeRow.forEach(function (el) { el.hidden = !time; });
     priceEl.textContent = priceText(w);
     dialog.setAttribute('aria-label', w.name + ' sign-up');
   }
@@ -825,7 +983,7 @@
   function openSignup(w, next) {
     listWindow.close();
     visited[w.id] = true;
-    if (current !== w) {
+    if (!current || current.id !== w.id) {
       setMessage('');
       clearInvalid();
       quantity = 1;
@@ -837,7 +995,7 @@
     heard = null;
     announce('');
     showCount();
-    if (mode !== 'success') loadSpots();
+    if (mode !== 'success') loadWorkshops();
     // Into the form with a keyboard or a mouse; on a touch screen, where that would
     // bring up the keyboard over the window, onto the close button instead.
     var coarse = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
@@ -1002,7 +1160,7 @@
         setMessage('Sorry, only ' + countText(left) + ', so the order is now for × ' + left +
           '. Nothing was charged.', 'error');
       } else if (data.error === 'not_enough_spots' && !leftKnown) {
-        loadSpots();
+        loadWorkshops(true);
         setMessage('Fewer spots are left than that. Please choose fewer; nothing was charged.', 'error');
       } else if (data.error === 'already_signed_up') {
         setMessage('That email is already signed up for this workshop, so there’s nothing to pay. Look for the Stripe receipt in its inbox.', 'error');
@@ -1014,7 +1172,16 @@
         renderAll();
         setMessage('Sorry, the last spot has just gone. Nothing was charged.', 'error');
       } else if (data.error === 'workshop_past' || data.error === 'unknown_workshop') {
-        setMessage('Sign-ups for this workshop have closed. Nothing was charged.', 'error');
+        // Hidden, taken off or over since the list came in: off the list here too, and
+        // the list fetched again.
+        if (workshops) workshops = workshops.filter(function (other) { return other.id !== w.id; });
+        delete spotsById[w.id];
+        stopCount();
+        renderAll();
+        loadWorkshops(true);
+        setMessage(data.error === 'workshop_past'
+          ? 'Sorry, sign-ups for this workshop have closed. Nothing was charged.'
+          : 'Sorry, this workshop has just been taken off the list. Nothing was charged.', 'error');
       } else {
         console.warn('Workshop checkout could not be started:', result.status, data);
         setMessage('Something went wrong on our side and nothing was charged. Please try again in a moment.', 'error');
@@ -1055,22 +1222,35 @@
 
   renderAll();
 
+  // Back from Stripe, the message waits for the list (RETURN_WAIT_MS at most) to find
+  // the workshop paid for; without it, the Workshops window has a message naming none.
   var returned = takeReturn();
   if (returned) {
-    var paidFor = find(recall(), upcoming());
-    if (paidFor) openSignup(paidFor, returned);
-    else openList(null, returned);
+    var paidId = recall();
+    var told = false;
+    var tell = function () {
+      if (told) return;
+      told = true;
+      var paidFor = paidId ? find(paidId, upcoming()) : null;
+      if (paidFor) openSignup(paidFor, returned);
+      else openList(null, returned);
+    };
+    loadWorkshops().then(tell);
+    setTimeout(tell, RETURN_WAIT_MS);
   }
 
-  // For the workshop calendar (calendar.js): the workshops, past ones too, the sign-up
-  // window (which closes the Workshops window), and setCalendar, which takes its
-  // drawing, run each time the Workshops window opens. If the window is open already
-  // (back from Stripe, before calendar.js ran), the month is drawn into it at once.
+  // For the workshop calendar (calendar.js): the workshops (from the last fetch, past
+  // ones too while the page stays open), a workshop's time ("1:00–4:00 pm" or ''), the
+  // sign-up window (which closes the Workshops window), and setCalendar, which takes
+  // its drawing, run each time the Workshops window opens and as the list comes in or
+  // changes. If the window is open already (back from Stripe, before calendar.js ran),
+  // the month is drawn into it at once.
   window.studioWorkshops = {
-    all: function () { return WORKSHOPS.slice(); },
+    all: function () { return (workshops || []).slice(); },
     today: studioToday,
     upcoming: upcoming,
     find: find,
+    time: timeText,
     openSignup: openSignup,
     setCalendar: function (draw) {
       drawCalendar = draw;

@@ -156,8 +156,7 @@
        colour like "Sign up", fixed at the top right, that opens the Workshops window, a month calendar of
        the workshops coming up with a link to each under it; each one opens its own
        sign-up window. Both are modal Aqua windows like the boxes. The button stays hidden
-       until workshop.js runs, as it does nothing without it, and again once no workshops
-       are left. -->
+       until workshop.js runs, as it does nothing without it. -->
   <button class="workshop-button aqua-pill aqua-pill--tint" id="workshop-button" type="button"
           aria-label="Workshops" aria-haspopup="dialog" aria-controls="workshops" hidden>
     <span class="workshop-button__label" id="workshop-button-label">Workshops</span>
@@ -167,8 +166,10 @@
        the month of the next workshop, with each workshop's day marked; a marked day
        opens its sign-up window. calendar.js shows it and draws the month
        (#calendar-days) each time the window opens. Under it, workshop.js fills the list
-       (#workshops-list): one plain blue link per workshop coming up, its name and date
-       ("Paint a piece, Sat 7 Nov"), then, once they are in, its spots left. -->
+       (#workshops-list): one plain blue link per workshop coming up, its name, date and
+       time ("Paint a piece, Sat 7 Nov, 1:00–4:00 pm"), then its spots left. Over it,
+       #workshops-status says while the list is loading, couldn't be loaded (with "Try
+       again", #workshops-retry) or has none. -->
   <dialog class="workshop workshop--list box" id="workshops" aria-labelledby="workshops-title">
     <div class="box__titlebar">
       <span class="box__lights"><button class="box__light box__light--close box__close" id="workshops-close" type="button" aria-label="Close" title="Close"><svg viewBox="0 0 7 7" aria-hidden="true" focusable="false"><path d="M1 1l5 5M6 1L1 6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" fill="none"/></svg></button><span class="box__light box__light--min" aria-hidden="true"></span><span class="box__light box__light--zoom" aria-hidden="true"></span></span>
@@ -188,12 +189,14 @@
         </table>
       </div>
 
-      <ul class="workshop__list" id="workshops-list"></ul>
+      <p class="workshop__status" id="workshops-status" role="status" aria-live="polite" tabindex="-1">Loading workshops…</p>
+      <button class="workshop__retry aqua-pill" id="workshops-retry" type="button" hidden>Try again</button>
+      <ul class="workshop__list" id="workshops-list" hidden></ul>
     </div>
   </dialog>
 
-  <!-- A workshop's sign-up window: workshop.js fills in the workshop (its name, date
-       and price), names the dialog after it ("Paint a piece sign-up"), and once the
+  <!-- A workshop's sign-up window: workshop.js fills in the workshop (its name, its
+       description and time if it has them, its date and price), names the dialog after it ("Paint a piece sign-up"), and once the
        spots are in, the title bar says how many are left, counting down to them.
        Screen readers hear the count once, from #workshop-count. -->
   <dialog class="workshop box" id="workshop" aria-label="Workshop sign-up">
@@ -216,9 +219,12 @@
       </div>
 
       <p class="workshop__name" id="workshop-name"></p>
+      <p class="workshop__description" id="workshop-description" hidden></p>
       <dl class="workshop__facts">
         <dt>Date</dt>
         <dd><time id="workshop-date"></time></dd>
+        <dt id="workshop-time-term" hidden>Time</dt>
+        <dd hidden><time id="workshop-time"></time></dd>
         <dt>Price</dt>
         <!-- The price per spot, then "× 1" and − / + for how many spots (1 to the
              spots left, or to 10 until they are in). The total is on the pay button. -->
@@ -236,7 +242,8 @@
         </dd>
       </dl>
 
-      <!-- Only while there is something to say: "Checking spots…" or "not open yet". -->
+      <!-- Only while there is something to say: "Checking spots…", that they couldn't
+           be checked, or that the workshop is no longer available. -->
       <p class="workshop__spots" id="workshop-spots" role="status" aria-live="polite" data-state="loading">Checking spots…</p>
       <p class="visually-hidden" id="workshop-count" role="status" aria-live="polite"></p>
 
