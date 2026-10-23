@@ -176,3 +176,169 @@ body {
   margin: 0;
   color: var(--admin-muted);
 }
+
+/* ---- Wallpaper section (admin-wallpaper.js) -------------------------------------
+   The current photo with the card's spot outlined, the upload progress, and the box
+   the owner drags over the photo to mark the spot. */
+
+.wallpaper {
+  --wallpaper-spot-fill: rgba(26, 95, 208, 0.22);
+  --wallpaper-spot-fill-active: rgba(26, 95, 208, 0.34);
+  --wallpaper-ok: #1e6b34;
+  --wallpaper-ok-bg: #e7f4ea;
+}
+
+.wallpaper .admin-message-ok {
+  background: var(--wallpaper-ok-bg);
+  color: var(--wallpaper-ok);
+}
+
+.wallpaper .admin-message:focus {
+  outline: none;
+}
+
+.wallpaper-figure {
+  position: relative;
+  max-width: 100%;
+  margin: 0 auto 12px;
+  background: var(--admin-bg);
+}
+
+.wallpaper-photo {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 4px;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+/* The spot: a white frame with a dark edge either side, so it shows on any photo. */
+.wallpaper-spot,
+.wallpaper-box {
+  position: absolute;
+  border: 2px solid #ffffff;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.6), inset 0 0 0 1px rgba(0, 0, 0, 0.6);
+  background: var(--wallpaper-spot-fill);
+}
+
+.wallpaper-spot {
+  pointer-events: none;
+}
+
+.wallpaper-box {
+  cursor: move;
+  touch-action: none;
+}
+
+.wallpaper-box:focus {
+  outline: none;
+}
+
+.wallpaper-box:focus-visible {
+  outline: 3px solid var(--admin-accent);
+  outline-offset: 3px;
+}
+
+.wallpaper-box.is-dragging {
+  background: var(--wallpaper-spot-fill-active);
+}
+
+.wallpaper-handle {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--admin-accent);
+  border-radius: 2px;
+  background: #ffffff;
+  touch-action: none;
+}
+
+/* A bigger area to grab than the handle shows. */
+.wallpaper-handle::before {
+  content: "";
+  position: absolute;
+  inset: -10px;
+}
+
+.wallpaper-handle-nw { left: -9px; top: -9px; cursor: nwse-resize; }
+.wallpaper-handle-ne { right: -9px; top: -9px; cursor: nesw-resize; }
+.wallpaper-handle-sw { left: -9px; bottom: -9px; cursor: nesw-resize; }
+.wallpaper-handle-se { right: -9px; bottom: -9px; cursor: nwse-resize; }
+
+/* On touch screens: bigger handles, just outside the corners, so a small box can
+   still be dragged by its middle. */
+@media (pointer: coarse) {
+  .wallpaper-handle {
+    width: 18px;
+    height: 18px;
+  }
+
+  .wallpaper-handle::before {
+    inset: -8px;
+  }
+
+  .wallpaper-handle-nw { left: -16px; top: -16px; }
+  .wallpaper-handle-ne { right: -16px; top: -16px; }
+  .wallpaper-handle-sw { left: -16px; bottom: -16px; }
+  .wallpaper-handle-se { right: -16px; bottom: -16px; }
+}
+
+.wallpaper-caption,
+.wallpaper-readout {
+  margin: 0 0 12px;
+  color: var(--admin-muted);
+  font-size: 0.9375rem;
+}
+
+.wallpaper-readout {
+  font-variant-numeric: tabular-nums;
+}
+
+.wallpaper-note {
+  margin: 12px 0 0;
+  font-size: 0.9375rem;
+}
+
+.wallpaper-progress {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  margin: 0 0 12px;
+}
+
+.wallpaper-progress-text {
+  flex: 1 0 100%;
+  font-variant-numeric: tabular-nums;
+}
+
+.wallpaper-progress-bar {
+  flex: 1 1 160px;
+  min-width: 0;
+  height: 10px;
+}
+
+.wallpaper-editor-title {
+  margin: 0 0 4px;
+  font-size: 1rem;
+  line-height: 1.3;
+}
+
+.wallpaper-editor-title:focus {
+  outline: none;
+}
+
+.wallpaper-editor-intro {
+  margin: 0 0 4px;
+}
+
+.wallpaper-hint {
+  margin: 0 0 12px;
+  font-size: 0.9375rem;
+}
+
+.wallpaper-loading > :last-child {
+  margin-bottom: 0;
+}
