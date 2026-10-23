@@ -1,1 +1,470 @@
-/* Mac System 6 theme (after system.css). See themes/README.md. */
+/* Mac System 6 theme, after system.css by Sakun Acharige (MIT,
+   github.com/sakofchit/system.css, npm @sakun/system.css): a flat 1-bit look.
+   Windows have a 1px frame and a hard drop shadow; title bars are striped, with the
+   title in a cleared box and a square close box on the left; buttons are rounded
+   rectangles, the default one with a thick outline; pressed and selected things go
+   inverse video. No library CSS is loaded: the shapes are redrawn here on the
+   existing markup. See themes/README.md.
+
+   Colours: where the original is white this uses the colour's --face (fields and
+   menus keep the fixed white --field), and where it is black the fixed --face-text,
+   so the whole look tints with the chosen colour. Every pair is from the palette
+   (README section 2): --face-text and --face-muted on --face and --field (4.5:1 and
+   up), --shadow on --face for disabled edges (3:1), --page-text on the page.
+
+   Font: system.css bundles ChiKareGo2 and FindersKeepers (Chicago 12 and Geneva 9
+   recreations) and ChicagoFLF, but none of them states a licence, so the chrome is
+   set in Pixelify Sans instead (Stefie Justprince, SIL Open Font License 1.1,
+   fonts/system6/LICENSE.txt), a free pixel face: weight 600 stands in for Chicago
+   (title bars, buttons, labels, menus) and 400 for Geneva (text fields). */
+
+@font-face {
+  font-family: "S414 System 6";
+  src: url("../fonts/system6/PixelifySans.woff2") format("woff2");
+  font-weight: 400 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root[data-theme="system6"] {
+  --aqua-font: "S414 System 6", Chicago, Geneva, sans-serif;
+  --aqua-radius: 0;
+  --s6-chicago: 600;          /* the chrome's weight */
+  --s6-geneva: 400;           /* the fields' weight */
+  --s6-radius: 9px;           /* buttons */
+  --s6-close: 11px;           /* the close box */
+  /* Six 1px lines with 1px gaps, 12px in all, drawn across the title bar 1px in from
+     its sides and centred on it (12px so the centring always lands on a whole pixel
+     for the 22, 24 and 32px bars). */
+  --s6-stripes: repeating-linear-gradient(to bottom, var(--face-text) 0 1px, transparent 1px 2px)
+    1px 50% / calc(100% - 2px) 12px no-repeat;
+  /* The pixel-stepped triangle on a pop-up menu (system.css's select button). */
+  --s6-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='13' height='7' viewBox='0 0 13 7'%3E%3Cpath d='M0 0h13v1h-1v1h-1v1h-1v1h-1v1h-1v1h-1v1h-1v-1h-1v-1h-1v-1h-1v-1h-1v-1h-1v-1h-1z' fill='%23000'/%3E%3C/svg%3E");
+  --s6-arrow-inverse: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='13' height='7' viewBox='0 0 13 7'%3E%3Cpath d='M0 0h13v1h-1v1h-1v1h-1v1h-1v1h-1v1h-1v1h-1v-1h-1v-1h-1v-1h-1v-1h-1v-1h-1v-1h-1z' fill='%23fff'/%3E%3C/svg%3E");
+}
+
+/* Built from the palette, so declared again on anything with its own data-color. */
+:root[data-theme="system6"],
+:root[data-theme="system6"] [data-color] {
+  --s6-paper: var(--face);
+  --s6-ink: var(--face-text);
+  --s6-drop: 2px 2px 0 var(--face-text);
+  /* The default button's outline: a 1px gap, then 3px of ink. */
+  --s6-default-ring: 0 0 0 1px var(--face), 0 0 0 4px var(--face-text);
+}
+
+/* ---------- Windows ---------- */
+
+:root[data-theme="system6"] .box {
+  border: 1px solid var(--s6-ink);
+  border-radius: 0;
+  background: var(--s6-paper);
+  color: var(--s6-ink);
+  box-shadow: var(--s6-drop);
+  -webkit-font-smoothing: auto;
+  -moz-osx-font-smoothing: auto;
+}
+
+:root[data-theme="system6"] .box ::selection {
+  background: var(--face-text);
+  color: var(--face);
+}
+
+:root[data-theme="system6"] .box__titlebar {
+  gap: 8px;
+  padding: 0 8px;
+  border-bottom: 1px solid var(--s6-ink);
+  border-radius: 0;
+  background: var(--s6-stripes);
+  background-color: var(--s6-paper);
+  color: var(--s6-ink);
+}
+
+/* The spacer that centres the title: as wide as the close box now. */
+:root[data-theme="system6"] .box__titlebar:has(> .box__lights)::after {
+  width: var(--s6-close);
+}
+
+/* The title in a box cleared out of the stripes. */
+:root[data-theme="system6"] .box__title {
+  flex: 0 1 auto;
+  margin: 0 auto;
+  padding: 0 6px;
+  background: var(--s6-paper);
+  font-family: var(--aqua-font);
+  font-size: 13px;
+  font-weight: var(--s6-chicago);
+  line-height: 16px;
+  text-shadow: none;
+}
+
+/* The move handle has no ring of its own over the stripes: focused, the title goes
+   inverse video. The transparent outline shows in high-contrast modes. */
+:root[data-theme="system6"] .box__handle:focus-visible {
+  outline: 2px solid transparent;
+  outline-offset: -3px;
+}
+
+:root[data-theme="system6"] .box__titlebar:has(> .box__handle:focus-visible) .box__title {
+  background: var(--face-text);
+  color: var(--face);
+}
+
+/* One square close box on the left, cleared out of the stripes; no zoom box. */
+:root[data-theme="system6"] .box__lights {
+  gap: 0;
+}
+
+:root[data-theme="system6"] .box__light {
+  width: var(--s6-close);
+  height: var(--s6-close);
+  border: 1px solid var(--s6-ink);
+  border-radius: 0;
+  background: var(--s6-paper);
+  box-shadow: 0 0 0 2px var(--s6-paper);
+  color: var(--s6-ink);
+}
+
+:root[data-theme="system6"] .box__light--min,
+:root[data-theme="system6"] .box__light--zoom {
+  display: none;
+}
+
+:root[data-theme="system6"] .box__close::before {
+  border-radius: 0;
+}
+
+/* The × shows only while the box is pressed (and focused), as in the original. */
+:root[data-theme="system6"] .box__close svg {
+  opacity: 0;
+}
+
+:root[data-theme="system6"] .box__close:active svg,
+:root[data-theme="system6"] .box__close:focus-visible svg {
+  opacity: 1;
+}
+
+:root[data-theme="system6"] .box__close:focus-visible {
+  outline: 2px dotted var(--s6-ink);
+  outline-offset: 1px;
+  box-shadow: 0 0 0 4px var(--s6-paper);
+}
+
+/* The grow box: a small square over a larger one, bottom right. */
+:root[data-theme="system6"] .box__grip::after {
+  right: 3px;
+  bottom: 3px;
+  width: 12px;
+  height: 12px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M.5.5h6v6h-6zM6.5 4.5h5v7h-7v-5' fill='none' stroke='%23000'/%3E%3C/svg%3E") no-repeat;
+  clip-path: none;
+}
+
+:root[data-theme="system6"] .box__grip:focus-visible {
+  outline: 2px dotted var(--s6-ink);
+  outline-offset: -2px;
+}
+
+/* ---------- Buttons ---------- */
+
+/* A rounded rectangle with a 1px line; the tinted kind is the same in 1 bit. */
+:root[data-theme="system6"] .aqua-pill {
+  border: 1px solid var(--s6-ink);
+  border-radius: var(--s6-radius);
+  background: var(--s6-paper);
+  color: var(--s6-ink);
+  box-shadow: none;
+  font-family: var(--aqua-font);
+  font-weight: var(--s6-chicago);
+}
+
+:root[data-theme="system6"] .aqua-pill::after,
+:root[data-theme="system6"] .aqua-pill--pulse::before {
+  content: none;
+  animation: none;
+}
+
+/* The default button (Sign up, Pay): a thick outline round it, 1px clear of it. */
+:root[data-theme="system6"] .aqua-pill--tint.aqua-pill--pulse {
+  box-shadow: var(--s6-default-ring);
+}
+
+/* Pressed, or open (the paint roller): inverse video. */
+:root[data-theme="system6"] .aqua-pill:active:not(:disabled),
+:root[data-theme="system6"] .aqua-pill[aria-expanded="true"] {
+  background: var(--face-text);
+  color: var(--face);
+}
+
+/* A dotted line inside the button, in its own text colour. */
+:root[data-theme="system6"] .aqua-pill:focus-visible {
+  outline: 2px dotted currentColor;
+  outline-offset: -5px;
+}
+
+/* Disabled: greyed words and line (the default outline too); it does not press. */
+:root[data-theme="system6"] .aqua-pill:disabled {
+  border-color: var(--shadow);
+  background: var(--s6-paper);
+  color: var(--face-muted);
+}
+
+:root[data-theme="system6"] .aqua-pill--tint.aqua-pill--pulse:disabled {
+  box-shadow: 0 0 0 1px var(--face), 0 0 0 4px var(--shadow);
+}
+
+/* ---------- Text fields ---------- */
+
+:root[data-theme="system6"] .aqua-field {
+  border: 1px solid var(--s6-ink);
+  border-radius: 0;
+  background: var(--field);
+  color: var(--field-text);
+  box-shadow: none;
+  font-family: var(--aqua-font);
+  font-weight: var(--s6-geneva);
+}
+
+/* Focused, a field goes inverse video, as in system.css. The placeholder is a light
+   grey on the black (10:1); the transparent outline shows in high-contrast modes. */
+:root[data-theme="system6"] .aqua-field:focus-visible {
+  border-color: var(--face-text);
+  outline: 2px solid transparent;
+  background: var(--face-text);
+  color: var(--field);
+  caret-color: var(--field);
+  box-shadow: none;
+}
+
+:root[data-theme="system6"] .aqua-field:focus-visible::placeholder {
+  color: color-mix(in srgb, var(--field) 70%, var(--face-text));
+}
+
+/* ---------- Pop-up menus ---------- */
+
+/* A white box with a 1px shadow and the stepped triangle at the right. */
+:root[data-theme="system6"] .aqua-popup {
+  --popup-arrows: var(--s6-arrow);
+  --popup-gloss: none;
+  --popup-cap: none;
+  --popup-body: none;
+  --popup-position: right 9px center, 0 0, 0 0, 0 0;
+  --popup-size: 13px 7px, auto, auto, auto;
+  border: 1px solid var(--s6-ink);
+  border-radius: 0;
+  background-color: var(--field);
+  color: var(--field-text);
+  box-shadow: 1px 1px 0 var(--s6-ink);
+  font-family: var(--aqua-font);
+  font-weight: var(--s6-chicago);
+}
+
+:root[data-theme="system6"] .aqua-popup:focus-visible {
+  --popup-arrows: var(--s6-arrow-inverse);
+  border-color: var(--face-text);
+  outline: 2px solid transparent;
+  background-color: var(--face-text);
+  color: var(--field);
+  box-shadow: 1px 1px 0 var(--s6-ink);
+}
+
+/* The open list stays black on white, whatever the menu shows while focused. */
+:root[data-theme="system6"] .aqua-popup option {
+  background: var(--field);
+  color: var(--field-text);
+}
+
+/* ---------- Check box ---------- */
+
+/* A white square with a 1px line; ticked, an X from corner to corner. */
+:root[data-theme="system6"] .workshop__check input {
+  border: 1px solid var(--s6-ink);
+  border-radius: 0;
+  background: var(--field);
+  box-shadow: none;
+}
+
+:root[data-theme="system6"] .workshop__check input:checked {
+  border-color: var(--s6-ink);
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='13' height='13' viewBox='0 0 13 13'%3E%3Cpath d='M0 0h1v1h-1zM12 0h1v1h-1zM1 1h1v1h-1zM11 1h1v1h-1zM2 2h1v1h-1zM10 2h1v1h-1zM3 3h1v1h-1zM9 3h1v1h-1zM4 4h1v1h-1zM8 4h1v1h-1zM5 5h1v1h-1zM7 5h1v1h-1zM6 6h1v1h-1zM7 7h1v1h-1zM5 7h1v1h-1zM8 8h1v1h-1zM4 8h1v1h-1zM9 9h1v1h-1zM3 9h1v1h-1zM10 10h1v1h-1zM2 10h1v1h-1zM11 11h1v1h-1zM1 11h1v1h-1zM12 12h1v1h-1zM0 12h1v1h-1z' fill='%23000'/%3E%3C/svg%3E") center / 13px 13px no-repeat, var(--field);
+}
+
+/* Held down, the line thickens. */
+:root[data-theme="system6"] .workshop__check input:active:not(:disabled) {
+  box-shadow: inset 0 0 0 1px var(--s6-ink);
+}
+
+:root[data-theme="system6"] .workshop__check input:focus-visible {
+  outline: 2px dotted var(--s6-ink);
+  outline-offset: 2px;
+  box-shadow: none;
+}
+
+/* ---------- Mailing-list card ---------- */
+
+:root[data-theme="system6"] .signup__label {
+  font-family: var(--aqua-font);
+  font-weight: var(--s6-chicago);
+  font-size: clamp(0.875rem, 3.6cqw, 1rem);
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+/* The dotted focus rectangle, in the ink. */
+:root[data-theme="system6"] .signup__email:focus-visible {
+  outline: 1px dotted var(--s6-ink);
+}
+
+/* ---------- Display ---------- */
+
+:root[data-theme="system6"] .switcher__label {
+  font-family: var(--aqua-font);
+  font-size: 12px;
+  font-weight: var(--s6-chicago);
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+/* ---------- Buttons on the page ---------- */
+
+/* Workshops, the paint roller and Move 414 sit on the page or the photo: their focus
+   ring goes outside, in the page's text colour (Move 414 keeps its dotted line). */
+:root[data-theme="system6"] .workshop-button:focus-visible,
+:root[data-theme="system6"] .switcher-toggle:focus-visible {
+  outline: 2px solid var(--page-text);
+  outline-offset: 3px;
+}
+
+/* Open, the roller's paint goes inverse with the button. */
+:root[data-theme="system6"] .switcher-toggle[aria-expanded="true"] .switcher-toggle__paint {
+  fill: var(--face);
+}
+
+/* Still clipped to nothing until it is focused. */
+:root[data-theme="system6"] .big-414__handle:not(:focus) {
+  border: 0;
+}
+
+/* ---------- Comment box ---------- */
+
+/* A window of its own: the face, a frame and drop shadow, and its heading as a striped
+   title bar (the bar's line is the second background, 22px down). Inside, the page
+   colours give way to the face's. */
+:root[data-theme="system6"] .comments__inner {
+  --page-text: var(--face-text);
+  --page-text-muted: var(--face-muted);
+  padding-top: 0;
+  border: 1px solid var(--s6-ink);
+  background:
+    repeating-linear-gradient(to bottom, var(--face-text) 0 1px, transparent 1px 2px) 1px 5px / calc(100% - 2px) 12px no-repeat,
+    linear-gradient(var(--face-text), var(--face-text)) 0 22px / 100% 1px no-repeat,
+    var(--s6-paper);
+  color: var(--s6-ink);
+  box-shadow: var(--s6-drop);
+}
+
+:root[data-theme="system6"] .comments > .comments__inner {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+:root[data-theme="system6"] .comments__title {
+  align-self: center;
+  max-width: 100%;
+  margin: 0 0 1px;
+  padding: 0 6px;
+  overflow: hidden;
+  background: var(--s6-paper);
+  font-family: var(--aqua-font);
+  font-size: 13px;
+  font-weight: var(--s6-chicago);
+  line-height: 22px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+:root[data-theme="system6"] .comments__label {
+  font-family: var(--aqua-font);
+  font-size: 14px;
+  font-weight: var(--s6-chicago);
+}
+
+:root[data-theme="system6"] .comments__input,
+:root[data-theme="system6"] .comments__textarea {
+  border: 1px solid var(--s6-ink);
+  background: var(--field);
+  color: var(--field-text);
+  font-family: var(--aqua-font);
+  font-weight: var(--s6-geneva);
+}
+
+:root[data-theme="system6"] .comments__input:focus-visible,
+:root[data-theme="system6"] .comments__textarea:focus-visible {
+  outline: 2px solid transparent;
+  background: var(--face-text);
+  color: var(--field);
+  caret-color: var(--field);
+}
+
+:root[data-theme="system6"] .comments__input:focus-visible::placeholder,
+:root[data-theme="system6"] .comments__textarea:focus-visible::placeholder {
+  color: color-mix(in srgb, var(--field) 70%, var(--face-text));
+}
+
+:root[data-theme="system6"] .comments__input[aria-invalid="true"]:focus-visible,
+:root[data-theme="system6"] .comments__textarea[aria-invalid="true"]:focus-visible {
+  box-shadow: inset 0 0 0 1px var(--field);
+}
+
+/* "Post comment" as a button. */
+:root[data-theme="system6"] .comments__submit {
+  min-width: 96px;
+  height: 32px;
+  padding: 0 16px;
+  border: 1px solid var(--s6-ink);
+  border-radius: var(--s6-radius);
+  background: var(--s6-paper);
+  color: var(--s6-ink);
+  font-family: var(--aqua-font);
+  font-size: 14px;
+  font-weight: var(--s6-chicago);
+  text-decoration: none;
+}
+
+:root[data-theme="system6"] .comments__submit:active:not(:disabled) {
+  background: var(--face-text);
+  color: var(--face);
+}
+
+:root[data-theme="system6"] .comments__submit:disabled {
+  border-color: var(--shadow);
+  color: var(--face-muted);
+}
+
+:root[data-theme="system6"] .comments__submit:focus-visible {
+  outline: 2px dotted currentColor;
+  outline-offset: -5px;
+}
+
+/* ---------- High contrast ---------- */
+
+@media (forced-colors: active) {
+  :root[data-theme="system6"] .box__titlebar,
+  :root[data-theme="system6"] .comments__inner {
+    background: Canvas;
+  }
+
+  :root[data-theme="system6"] .box__light {
+    border-color: CanvasText;
+  }
+}
+
+/* ---------- Reduced motion ---------- */
+
+/* Nothing here moves (the default button does not pulse); kept so it stays so. */
+@media (prefers-reduced-motion: reduce) {
+  :root[data-theme="system6"] .aqua-pill--pulse::before {
+    animation: none;
+    transition: none;
+  }
+}
