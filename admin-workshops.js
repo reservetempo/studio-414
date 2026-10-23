@@ -80,8 +80,9 @@
     listRetry.hidden = true;
     var upcomingEmpty = el('p', 'admin-hint workshops-empty');
     var upcomingList = el('ul', 'workshops-list');
-    var pastToggle = button('');
-    pastToggle.classList.add('workshops-past-toggle');
+    // A disclosure triangle with its label, not a pill.
+    var pastToggle = el('button', 'workshops-past-toggle');
+    pastToggle.type = 'button';
     pastToggle.setAttribute('aria-controls', 'workshops-past');
     pastToggle.setAttribute('aria-expanded', 'false');
     var pastList = el('ul', 'workshops-list workshops-list-past');
@@ -100,7 +101,7 @@
     var dateInput = input('date', 'workshops-date');
     var startInput = input('time', 'workshops-start');
     var endInput = input('time', 'workshops-end');
-    var descriptionInput = el('textarea', 'workshops-input workshops-textarea');
+    var descriptionInput = el('textarea', 'workshops-input workshops-textarea aqua-field');
     descriptionInput.id = 'workshops-description';
     descriptionInput.rows = 4;
     descriptionInput.maxLength = MAX_DESCRIPTION;
@@ -332,8 +333,14 @@
       var taken = w.paid + w.held;
       var spots = taken + ' of ' + w.capacity + ' spots taken' +
         (w.held ? ' (' + w.held + ' held while someone pays)' : '');
-      var metaLine = el('p', 'workshops-item-meta',
-        spots + ' · ' + formatPrice(w.price_cents) + ' a spot');
+      // Spots and price: two lines in a right-hand column on wide screens, one line
+      // (with the dot between them) on phones.
+      var metaLine = el('p', 'workshops-item-meta');
+      metaLine.append(
+        el('span', 'workshops-item-spots', spots),
+        el('span', 'workshops-item-sep', ' · '),
+        el('span', 'workshops-item-price', formatPrice(w.price_cents) + ' a spot')
+      );
 
       var editButton = actionButton(w, 'edit', 'Edit');
       var hideButton = actionButton(w, 'hide',
@@ -907,7 +914,7 @@
   }
 
   function input(type, id) {
-    var node = el('input', 'workshops-input');
+    var node = el('input', 'workshops-input aqua-field');
     node.type = type;
     node.id = id;
     return node;

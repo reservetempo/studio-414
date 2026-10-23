@@ -3,17 +3,11 @@
    (.aqua-pill), fields (.aqua-field) and pop-up menus (.aqua-popup) in boxes.css, as
    on the public site. Here: the desktop (the site's photo, dimmed a little), the menu
    bar, the dialogs (loading, sign-in, not an owner, error) and the owner page's
-   windows, all in Lucida Grande (--aqua-font). Then the insides of the two sections.
-   The --admin-* colours are for those insides. */
+   windows, all in Lucida Grande (--aqua-font). Then the insides of the two sections,
+   also Aqua (an image well, a list view, a table, a group box). The --admin-error
+   colours are for the error messages outside the sections. */
 
 :root {
-  --admin-text: #1d1d1f;
-  --admin-muted: #5f6368;
-  --admin-bg: #f5f5f7;
-  --admin-panel: #ffffff;
-  --admin-border: #d2d2d7;
-  --admin-accent: #1a5fd0;
-  --admin-accent-text: #ffffff;
   --admin-error: #b3261e;
   --admin-error-bg: #fdecea;
 }
@@ -375,48 +369,115 @@ body::before {
 
 /* ---- Wallpaper section (admin-wallpaper.js) -------------------------------------
    The current photo with the card's spot outlined, the upload progress, and the box
-   the owner drags over the photo to mark the spot. */
+   the owner drags over the photo to mark the spot. As in Mac OS X: the photo sits in
+   an inset image well, the spot is a selection rectangle in the colour with round
+   glossy handles, and an upload runs in Aqua's striped gel progress bar. "Choose
+   photo" is a pill like the other buttons (the file input itself stays hidden). */
 
-.wallpaper {
-  --wallpaper-spot-fill: rgba(26, 95, 208, 0.22);
-  --wallpaper-spot-fill-active: rgba(26, 95, 208, 0.34);
-  --wallpaper-ok: #1e6b34;
-  --wallpaper-ok-bg: #e7f4ea;
+/* Notices in both sections (something went wrong, or a change was saved): a small
+   white panel with a thin grey edge and an icon at the left, a yellow caution triangle
+   or a green tick. They are focused only so they're read out, so no ring. */
+.wallpaper .admin-message,
+.workshops .admin-message {
+  position: relative;
+  margin: 0 0 12px;
+  padding: 7px 10px 7px 33px;
+  border: 1px solid color-mix(in srgb, var(--face-text) 30%, var(--face));
+  border-radius: 4px;
+  background: linear-gradient(to bottom, #ffffff, color-mix(in srgb, var(--face) 22%, #ffffff));
+  color: var(--face-text);
+  font-size: 12px;
+  line-height: 1.4;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.14);
 }
 
-.wallpaper .admin-message-ok {
-  background: var(--wallpaper-ok-bg);
-  color: var(--wallpaper-ok);
+.wallpaper .admin-message-error,
+.workshops .admin-message-error {
+  color: var(--error);
 }
 
-.wallpaper .admin-message:focus {
+.wallpaper .admin-message:focus,
+.workshops .admin-message:focus {
   outline: none;
 }
 
+/* The icons are decoration: each message says what it is in words. */
+.wallpaper .admin-message::before,
+.workshops .admin-message::before {
+  position: absolute;
+  top: 7px;
+  left: 10px;
+  display: grid;
+  width: 15px;
+  height: 14px;
+  color: #000000;
+  font: bold 10px/1 var(--aqua-font);
+}
+
+/* Caution: a yellow gel triangle with a black "!". */
+.wallpaper .admin-message-error::before,
+.workshops .admin-message-error::before {
+  content: "!";
+  content: "!" / "";
+  place-items: end center;
+  padding-bottom: 1px;
+  background: linear-gradient(to bottom, #ffe680, var(--aqua-yellow) 60%, var(--aqua-yellow-rim));
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+}
+
+/* Done: a green gumdrop with a white tick. */
+.wallpaper .admin-message-ok::before,
+.workshops .admin-message-ok::before {
+  content: "\2713";
+  content: "\2713" / "";
+  place-items: center;
+  width: 14px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 28%, var(--aqua-green-glow), var(--aqua-green) 70%);
+  box-shadow: inset 0 0 0 1px var(--aqua-green-rim);
+  color: #ffffff;
+  font-size: 9px;
+}
+
+/* The image well: a thin grey edge with a light line under it, and a soft shadow
+   inside (::after, over the photo and under the spot). No padding or border, so the
+   spot's percentages and the drag maths stay on the photo itself. */
 .wallpaper-figure {
   position: relative;
   max-width: 100%;
   margin: 0 auto 12px;
-  background: var(--admin-bg);
+  background: var(--field);
+  box-shadow: 0 0 0 1px var(--aqua-field-edge), 0 1px 0 1px rgb(255 255 255 / 0.7);
+}
+
+.wallpaper-figure::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  box-shadow: inset 0 1px 4px rgb(0 0 0 / 0.45), inset 0 0 0 1px rgb(0 0 0 / 0.12);
+  pointer-events: none;
 }
 
 .wallpaper-photo {
   display: block;
   width: 100%;
   height: auto;
-  border-radius: 4px;
   -webkit-user-select: none;
   user-select: none;
   -webkit-user-drag: none;
 }
 
-/* The spot: a white frame with a dark edge either side, so it shows on any photo. */
+/* The spot: an Aqua selection rectangle, a see-through wash of the colour inside a
+   1px edge of it, with a light line either side so it shows on any photo. */
 .wallpaper-spot,
 .wallpaper-box {
+  --wallpaper-lines: 0 0 0 1px rgb(255 255 255 / 0.6), inset 0 0 0 1px rgb(255 255 255 / 0.5);
   position: absolute;
-  border: 2px solid #ffffff;
-  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.6), inset 0 0 0 1px rgba(0, 0, 0, 0.6);
-  background: var(--wallpaper-spot-fill);
+  z-index: 2;
+  border: 1px solid color-mix(in srgb, var(--aqua-tint) 75%, #ffffff);
+  background: color-mix(in srgb, var(--aqua-tint-glow) 50%, transparent);
+  box-shadow: var(--wallpaper-lines);
 }
 
 .wallpaper-spot {
@@ -432,22 +493,28 @@ body::before {
   outline: none;
 }
 
+/* The transparent outline shows only in high-contrast modes, which drop the ring. */
 .wallpaper-box:focus-visible {
-  outline: 3px solid var(--admin-accent);
-  outline-offset: 3px;
+  outline: 2px solid transparent;
+  box-shadow: var(--aqua-focus-ring), var(--wallpaper-lines);
 }
 
 .wallpaper-box.is-dragging {
-  background: var(--wallpaper-spot-fill-active);
+  background: color-mix(in srgb, var(--aqua-tint-glow) 62%, transparent);
 }
 
+/* The handles: small round gumdrops in the colour, glossed at the top, centred on the
+   box's corners. */
 .wallpaper-handle {
   position: absolute;
-  width: 14px;
-  height: 14px;
-  border: 2px solid var(--admin-accent);
-  border-radius: 2px;
-  background: #ffffff;
+  width: 12px;
+  height: 12px;
+  border: 1px solid var(--aqua-tint-rim);
+  border-radius: 50%;
+  background:
+    radial-gradient(ellipse 60% 38% at 50% 28%, rgb(255 255 255 / 0.95), rgb(255 255 255 / 0)),
+    radial-gradient(circle at 50% 80%, var(--aqua-tint-glow), var(--aqua-tint) 75%);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.45);
   touch-action: none;
 }
 
@@ -458,10 +525,10 @@ body::before {
   inset: -10px;
 }
 
-.wallpaper-handle-nw { left: -9px; top: -9px; cursor: nwse-resize; }
-.wallpaper-handle-ne { right: -9px; top: -9px; cursor: nesw-resize; }
-.wallpaper-handle-sw { left: -9px; bottom: -9px; cursor: nesw-resize; }
-.wallpaper-handle-se { right: -9px; bottom: -9px; cursor: nwse-resize; }
+.wallpaper-handle-nw { left: -7px; top: -7px; cursor: nwse-resize; }
+.wallpaper-handle-ne { right: -7px; top: -7px; cursor: nesw-resize; }
+.wallpaper-handle-sw { left: -7px; bottom: -7px; cursor: nesw-resize; }
+.wallpaper-handle-se { right: -7px; bottom: -7px; cursor: nwse-resize; }
 
 /* On touch screens: bigger handles, just outside the corners, so a small box can
    still be dragged by its middle. */
@@ -484,8 +551,8 @@ body::before {
 .wallpaper-caption,
 .wallpaper-readout {
   margin: 0 0 12px;
-  color: var(--admin-muted);
-  font-size: 0.9375rem;
+  color: var(--face-muted);
+  font-size: 12px;
 }
 
 .wallpaper-readout {
@@ -494,31 +561,102 @@ body::before {
 
 .wallpaper-note {
   margin: 12px 0 0;
-  font-size: 0.9375rem;
+  font-size: 12px;
 }
 
 .wallpaper-progress {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 8px 12px;
+  gap: 6px 12px;
   margin: 0 0 12px;
 }
 
 .wallpaper-progress-text {
   flex: 1 0 100%;
+  font-size: 12px;
   font-variant-numeric: tabular-nums;
 }
 
+/* The bar: Aqua's progress bar, a blue gel filling from the left over a grey track,
+   its diagonal stripes rolling along under a gloss (standing still under reduced
+   motion). Until the size is known (no value) the whole bar is striped, like the
+   barber pole in the dialogs. The stripes are 18px tiles; they move one tile and
+   start again. */
 .wallpaper-progress-bar {
+  --progress-track: linear-gradient(to bottom,
+    color-mix(in srgb, var(--face) 75%, #555555), color-mix(in srgb, var(--face) 45%, #ffffff) 45%, #ffffff);
+  --progress-gloss: linear-gradient(to bottom,
+    rgb(255 255 255 / 0.7), rgb(255 255 255 / 0.2) 50%, transparent 50%, rgb(255 255 255 / 0.25));
+  --progress-stripes: linear-gradient(-45deg,
+    var(--progress-dark) 25%, var(--progress-light) 25% 50%, var(--progress-dark) 50% 75%, var(--progress-light) 75%);
+  --progress-dark: color-mix(in srgb, var(--aqua-tint) 80%, #ffffff);
+  --progress-light: color-mix(in srgb, var(--aqua-tint) 55%, #ffffff);
   flex: 1 1 160px;
   min-width: 0;
-  height: 10px;
+  height: 12px;
+  border: 1px solid var(--aqua-field-edge);
+  border-radius: 6px;
+  overflow: hidden;
+  background: var(--progress-track);
+  color: var(--aqua-tint);
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.wallpaper-progress-bar::-webkit-progress-bar {
+  background: var(--progress-track);
+  box-shadow: inset 0 1px 2px rgb(0 0 0 / 0.25);
+}
+
+.wallpaper-progress-bar::-webkit-progress-value {
+  background: var(--progress-gloss), var(--progress-stripes);
+  background-size: 100% 100%, 18px 18px;
+  box-shadow: inset -1px 0 0 var(--aqua-tint-rim);
+  animation: wallpaper-progress 0.8s linear infinite;
+}
+
+.wallpaper-progress-bar::-moz-progress-bar {
+  background: var(--progress-gloss), var(--progress-stripes);
+  background-size: 100% 100%, 18px 18px;
+  box-shadow: inset -1px 0 0 var(--aqua-tint-rim);
+  animation: wallpaper-progress 0.8s linear infinite;
+}
+
+.wallpaper-progress-bar:indeterminate {
+  background: var(--progress-gloss), var(--progress-stripes);
+  background-size: 100% 100%, 18px 18px;
+  animation: wallpaper-progress 0.8s linear infinite;
+}
+
+.wallpaper-progress-bar:indeterminate::-webkit-progress-bar {
+  background: transparent;
+}
+
+.wallpaper-progress-bar:indeterminate::-moz-progress-bar {
+  background: transparent;
+}
+
+@keyframes wallpaper-progress {
+  from {
+    background-position: 0 0, 0 0;
+  }
+  to {
+    background-position: 0 0, 18px 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wallpaper-progress-bar,
+  .wallpaper-progress-bar::-webkit-progress-value,
+  .wallpaper-progress-bar::-moz-progress-bar {
+    animation: none;
+  }
 }
 
 .wallpaper-editor-title {
   margin: 0 0 4px;
-  font-size: 1rem;
+  font-size: 13px;
   line-height: 1.3;
 }
 
@@ -531,8 +669,8 @@ body::before {
 }
 
 .wallpaper-hint {
-  margin: 0 0 12px;
-  font-size: 0.9375rem;
+  margin: 0 0 14px;
+  font-size: 12px;
 }
 
 .wallpaper-loading > :last-child {
@@ -540,23 +678,18 @@ body::before {
 }
 
 /* ---- Workshops section (admin-workshops.js) -------------------------------------
-   The list of workshops (upcoming first, past ones folded away), the form for adding
-   or editing one, and each workshop's paid sign-ups. */
+   The list of workshops (upcoming first, past ones folded away under a disclosure
+   triangle), the form for adding or editing one, and each workshop's paid sign-ups.
+   As in Mac OS X: the list is a list view (a white well, rows in alternating light
+   blue, spots and price in a right-hand column), the sign-ups an Aqua table with
+   column headers, and the form a group box with its labels right-aligned beside the
+   fields (above them on phones). Notices are styled with the Wallpaper section's;
+   in the form and in the list a problem is a small red line instead. */
 
 .workshops {
-  --workshops-ok: #1e6b34;
-  --workshops-ok-bg: #e7f4ea;
-  --workshops-badge-bg: #e8e8ed;
-  --workshops-past-bg: #f7f7f9;
-}
-
-.workshops .admin-message-ok {
-  background: var(--workshops-ok-bg);
-  color: var(--workshops-ok);
-}
-
-.workshops .admin-message:focus {
-  outline: none;
+  --workshops-row: color-mix(in srgb, var(--title) 7%, #ffffff);         /* alternate rows */
+  --workshops-rule: color-mix(in srgb, var(--face-text) 22%, #ffffff);   /* thin lines */
+  --workshops-label-width: 10.5rem;
 }
 
 .workshops .admin-button[aria-disabled="true"] {
@@ -568,151 +701,265 @@ body::before {
   margin-bottom: 0;
 }
 
-.workshops-top {
-  margin: 0 0 16px;
-}
-
-.workshops-list-retry {
-  margin: 0 0 16px;
-}
-
+.workshops-top,
+.workshops-list-retry,
 .workshops-empty {
-  margin: 0 0 16px;
+  margin: 0 0 14px;
 }
 
+/* A problem in the form or under a workshop: a small red line with the caution
+   triangle, no panel. */
+.workshops-form .admin-message-error,
+.workshops-item .admin-message-error {
+  padding: 0 0 0 19px;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+
+.workshops-form .admin-message-error::before,
+.workshops-item .admin-message-error::before {
+  top: 1px;
+  left: 0;
+  width: 13px;
+  height: 12px;
+  font-size: 9px;
+}
+
+/* The list view. */
 .workshops-list {
   list-style: none;
   margin: 0;
   padding: 0;
+  border: 1px solid var(--aqua-field-edge);
+  background: var(--field);
+  color: var(--field-text);
+  box-shadow: 0 1px 0 rgb(255 255 255 / 0.7);
 }
 
+/* A row: the name (and its capsules) over the date, with spots and price at the
+   right; the buttons, any notes and the sign-ups across the whole row below. */
 .workshops-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  column-gap: 16px;
   min-width: 0;
-  margin: 0 0 12px;
-  padding: 12px;
-  border: 1px solid var(--admin-border);
-  border-radius: 6px;
-  background: var(--admin-panel);
+  padding: 9px 12px 10px;
+}
+
+.workshops-item:nth-child(even) {
+  background: var(--workshops-row);
+}
+
+.workshops-item > * {
+  grid-column: 1 / -1;
 }
 
 /* Past workshops: greyed. */
 .workshops-item.is-past {
-  background: var(--workshops-past-bg);
-  color: var(--admin-muted);
+  color: var(--face-muted);
 }
 
 .workshops-item-head {
+  grid-column: 1;
+  grid-row: 1;
   display: flex;
   flex-wrap: wrap;
-  align-items: baseline;
-  gap: 4px 8px;
-  margin: 0 0 2px;
+  align-items: center;
+  gap: 2px 6px;
 }
 
 .workshops-item-name {
   min-width: 0;
   margin: 0;
-  font-size: 1rem;
-  line-height: 1.3;
+  font-size: 13px;
+  font-weight: bold;
+  line-height: 1.35;
   overflow-wrap: anywhere;
 }
 
+/* "Hidden" and "Past": small grey capsules. */
 .workshops-badge {
   display: inline-block;
-  padding: 1px 8px;
+  padding: 0 7px;
+  border: 1px solid color-mix(in srgb, var(--face-text) 35%, #ffffff);
   border-radius: 999px;
-  background: var(--workshops-badge-bg);
-  color: var(--admin-text);
-  font-size: 0.8125rem;
-  font-weight: 600;
-  line-height: 1.5;
+  background: linear-gradient(to bottom, #f6f6f6, #d6d6d6);
+  color: color-mix(in srgb, var(--face-text) 80%, #ffffff);
+  font-size: 10px;
+  font-weight: bold;
+  line-height: 15px;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.8);
 }
 
 .workshops-badge-past {
-  color: var(--admin-muted);
+  color: var(--face-muted);
 }
 
 .workshops-item-when,
 .workshops-item-meta {
   margin: 0;
-  font-size: 0.9375rem;
+  color: var(--face-muted);
+  font-size: 12px;
+}
+
+.workshops-item-when {
+  grid-column: 1;
+  grid-row: 2;
 }
 
 .workshops-item-meta {
-  margin-bottom: 10px;
-  color: var(--admin-muted);
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  max-width: 22rem;
+  text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
+.workshops-item-spots,
+.workshops-item-price {
+  display: block;
+}
+
+.workshops-item-sep {
+  display: none;
+}
+
+.workshops-item-actions {
+  gap: 6px 8px;
+  margin-top: 8px;
+}
+
+/* Smaller pills in the rows, where a pointer is precise. */
+@media (pointer: fine) {
+  .workshops-item-actions .admin-button {
+    min-height: 24px;
+    padding: 2px 14px;
+    font-size: 12px;
+  }
+}
+
 .workshops-reason {
-  margin: 6px 0 0;
-  font-size: 0.875rem;
+  margin: 5px 0 0;
+  font-size: 11px;
 }
 
 .workshops-item .admin-message {
-  margin: 10px 0 0;
+  margin: 8px 0 0;
+}
+
+/* "Past workshops (N)": a disclosure triangle and its label, pointing right while
+   folded and turning to point down when open (aria-expanded). */
+.workshops-past-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 24px;
+  margin: 14px 0 0;
+  padding: 2px 8px 2px 2px;
+  border: 0;
+  border-radius: 3px;
+  background: none;
+  color: var(--face-text);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
 }
 
 .workshops-past-toggle::before {
-  content: "\25B8\00A0";
+  content: "\25B8";
+  content: "\25B8" / "";
+  width: 10px;
+  color: color-mix(in srgb, var(--face-text) 70%, #ffffff);
+  font-size: 13px;
+  line-height: 1;
+  text-align: center;
+  transition: transform 0.15s ease-out;
 }
 
 .workshops-past-toggle[aria-expanded="true"]::before {
-  content: "\25BE\00A0";
+  transform: rotate(90deg);
+}
+
+.workshops-past-toggle:focus {
+  outline: none;
+}
+
+/* The transparent outline shows only in high-contrast modes, which drop the ring. */
+.workshops-past-toggle:focus-visible {
+  outline: 2px solid transparent;
+  box-shadow: var(--aqua-focus-ring);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .workshops-past-toggle::before {
+    transition: none;
+  }
 }
 
 .workshops-list-past {
-  margin-top: 12px;
+  margin-top: 6px;
 }
 
-/* A workshop's sign-ups. */
+/* A workshop's sign-ups, under its row. */
 .workshops-signups {
-  margin-top: 12px;
-  padding-top: 12px;
-  border-top: 1px solid var(--admin-border);
-  color: var(--admin-text);
+  margin-top: 10px;
+  color: var(--field-text);
 }
 
 .workshops-signups-title {
-  margin: 0 0 8px;
-  font-size: 0.9375rem;
+  margin: 0 0 6px;
+  font-size: 12px;
 }
 
 .workshops-signups-status {
   margin: 0;
+  font-size: 12px;
 }
 
 .workshops-signups .admin-message {
   margin: 0 0 8px;
 }
 
+/* The table: a white well with OS X column headers (a light gradient, a thin line
+   between columns) over rows in alternating light blue. */
 .workshops-signups-wrap {
   overflow-x: auto;
+  border: 1px solid var(--aqua-field-edge);
+  background: var(--field);
 }
 
 .workshops-signups-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.9375rem;
+  font-size: 12px;
 }
 
 .workshops-signups-table th,
 .workshops-signups-table td {
-  padding: 6px 8px;
-  border-bottom: 1px solid var(--admin-border);
+  padding: 3px 8px;
   text-align: left;
   vertical-align: top;
 }
 
 .workshops-signups-table th {
-  color: var(--admin-muted);
-  font-weight: 600;
+  border-bottom: 1px solid var(--aqua-field-edge);
+  border-left: 1px solid var(--workshops-rule);
+  background: linear-gradient(to bottom, #ffffff,
+    color-mix(in srgb, var(--face) 30%, #ffffff) 50%, color-mix(in srgb, var(--face) 50%, #ffffff) 50%,
+    color-mix(in srgb, var(--face) 25%, #ffffff));
+  font-size: 11px;
+  font-weight: normal;
   white-space: nowrap;
 }
 
-.workshops-signups-table th:first-child,
-.workshops-signups-table td:first-child {
-  padding-left: 0;
+.workshops-signups-table th:first-child {
+  border-left: 0;
+}
+
+.workshops-signups-table tbody tr:nth-child(even) {
+  background: var(--workshops-row);
 }
 
 .workshops-signups-table .workshops-signups-number {
@@ -725,13 +972,14 @@ body::before {
 }
 
 .workshops-signups-email {
-  color: var(--admin-accent);
+  color: var(--accent-ink);
   overflow-wrap: anywhere;
 }
 
 .workshops-signups-total {
-  margin: 8px 0 0;
-  font-weight: 600;
+  margin: 6px 0 0;
+  font-size: 12px;
+  font-weight: bold;
 }
 
 .workshops-visually-hidden {
@@ -746,10 +994,19 @@ body::before {
   border: 0;
 }
 
-/* The form for adding or editing a workshop. */
+/* The form for adding or editing a workshop: a group box, a little darker than the
+   window and sunk into it. */
+.workshops-form {
+  padding: 14px 16px 16px;
+  border: 1px solid rgb(0 0 0 / 0.2);
+  border-radius: 5px;
+  background: rgb(0 0 0 / 0.05);
+  box-shadow: inset 0 1px 2px rgb(0 0 0 / 0.12), 0 1px 0 rgb(255 255 255 / 0.65);
+}
+
 .workshops-form-title {
-  margin: 0 0 12px;
-  font-size: 1rem;
+  margin: 0 0 14px;
+  font-size: 13px;
   line-height: 1.3;
   overflow-wrap: anywhere;
 }
@@ -758,44 +1015,75 @@ body::before {
   outline: none;
 }
 
+/* A field: its label right-aligned at the left, with a colon, as in a preference
+   pane; the field beside it, and any hint in small grey under the field (in the
+   page the hint comes before the field, which names it with aria-describedby). */
 .workshops-field {
+  display: grid;
+  grid-template-columns: var(--workshops-label-width) minmax(0, 1fr);
+  column-gap: 10px;
   min-width: 0;
-  margin: 0 0 14px;
+  margin: 0 0 10px;
 }
 
 .workshops-label {
-  display: block;
-  margin-bottom: 2px;
-  font-weight: 600;
+  grid-column: 1;
+  grid-row: 1;
+  align-self: start;
+  padding-top: 4px;
+  font-size: 13px;
+  text-align: right;
+}
+
+.workshops-label::after {
+  content: ":";
+}
+
+.workshops-field > .workshops-input,
+.workshops-field > .workshops-price {
+  grid-column: 2;
+  grid-row: 1;
 }
 
 .workshops-field-hint {
-  display: block;
-  margin-bottom: 4px;
-  color: var(--admin-muted);
-  font-size: 0.875rem;
+  grid-column: 2;
+  grid-row: 2;
+  margin-top: 3px;
+  color: var(--face-muted);
+  font-size: 11px;
 }
 
+/* The fields are Aqua fields (.aqua-field, boxes.css: the edge, the inner shadow and
+   the focus ring); this only sizes them. Dates, times, numbers and the price are
+   short. */
 .workshops-input {
   display: block;
   width: 100%;
   min-width: 0;
-  min-height: 44px;
-  padding: 8px 10px;
-  border: 1px solid var(--admin-border);
-  border-radius: 6px;
-  background: var(--admin-panel);
-  color: var(--admin-text);
+  min-height: 26px;
+  margin: 0;
+  padding: 3px 6px;
   font: inherit;
+  font-size: 13px;
+  line-height: 1.3;
 }
 
-.workshops-input:focus-visible {
-  outline: 3px solid var(--admin-accent);
-  outline-offset: 1px;
+.workshops-field > input[type="date"],
+.workshops-field > input[type="time"],
+.workshops-field > input[type="number"],
+.workshops-field > .workshops-price {
+  max-width: 11rem;
 }
 
+/* A field to fix: a red edge (inside the focus halo while it's focused). */
 .workshops-input[aria-invalid="true"] {
-  border-color: var(--admin-error);
+  border-color: var(--error);
+  box-shadow: var(--aqua-field-shadow), 0 0 0 1px var(--error);
+}
+
+.workshops-input[aria-invalid="true"]:focus-visible {
+  border-color: var(--error);
+  box-shadow: var(--aqua-field-shadow), 0 0 0 1px var(--error), 0 0 0 4px var(--aqua-halo);
 }
 
 .workshops-textarea {
@@ -803,43 +1091,107 @@ body::before {
   resize: vertical;
 }
 
+/* Start and end times, spots and price: one field a line here, side by side on
+   phones. */
 .workshops-form-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0 12px;
+  display: block;
 }
 
-.workshops-form-row > .workshops-field {
-  flex: 1 1 160px;
-}
-
+/* The price: a "$" just before its field. */
 .workshops-price {
   display: flex;
-}
-
-.workshops-price-symbol {
-  display: flex;
   align-items: center;
-  padding: 0 10px;
-  border: 1px solid var(--admin-border);
-  border-right: 0;
-  border-radius: 6px 0 0 6px;
-  background: var(--admin-bg);
-  color: var(--admin-muted);
+  gap: 5px;
 }
 
 .workshops-price .workshops-input {
   flex: 1 1 auto;
-  border-radius: 0 6px 6px 0;
 }
 
 .workshops-form-note {
-  margin: 0 0 14px;
-  font-size: 0.9375rem;
+  margin: 4px 0 12px;
+  font-size: 11px;
 }
 
-/* Phones: each sign-up becomes a small stack of labelled lines. */
+/* The note, any problem and the buttons line up with the fields. */
+.workshops-form-note,
+.workshops-form .admin-message,
+.workshops-form .admin-actions {
+  margin-left: calc(var(--workshops-label-width) + 10px);
+}
+
+/* Touch screens: taller fields (at 16px, so iOS doesn't zoom), the labels lowered to
+   match, and a bigger disclosure triangle to tap. */
+@media (pointer: coarse) {
+  .workshops-input {
+    min-height: 40px;
+    padding: 8px 8px;
+  }
+
+  .workshops-label {
+    padding-top: 10px;
+  }
+
+  .workshops-past-toggle {
+    min-height: 40px;
+  }
+}
+
+/* Phones: rows in one column (spots and price on one line under the date), labels
+   above their fields, and each sign-up a small stack of labelled lines. */
 @media (max-width: 560px) {
+  .workshops-item {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .workshops-item-meta {
+    grid-column: 1;
+    grid-row: auto;
+    max-width: none;
+    text-align: left;
+  }
+
+  .workshops-item-spots,
+  .workshops-item-price,
+  .workshops-item-sep {
+    display: inline;
+  }
+
+  .workshops-form {
+    padding: 12px 12px 14px;
+  }
+
+  .workshops-field {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .workshops-label {
+    margin-bottom: 3px;
+    padding-top: 0;
+    text-align: left;
+  }
+
+  .workshops-field-hint {
+    order: 1;
+  }
+
+  .workshops-form-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 12px;
+  }
+
+  .workshops-form-row > .workshops-field {
+    flex: 1 1 140px;
+  }
+
+  .workshops-form-note,
+  .workshops-form .admin-message,
+  .workshops-form .admin-actions {
+    margin-left: 0;
+  }
+
   .workshops-signups-table thead {
     position: absolute;
     width: 1px;
@@ -857,17 +1209,19 @@ body::before {
   }
 
   .workshops-signups-table tr {
-    padding: 8px 0;
-    border-bottom: 1px solid var(--admin-border);
+    padding: 6px 8px;
+    border-bottom: 1px solid var(--workshops-rule);
   }
 
-  .workshops-signups-table td,
-  .workshops-signups-table td:first-child {
+  .workshops-signups-table tr:last-child {
+    border-bottom: 0;
+  }
+
+  .workshops-signups-table td {
     display: grid;
     grid-template-columns: 4.5rem minmax(0, 1fr);
     gap: 8px;
     padding: 1px 0;
-    border: 0;
   }
 
   .workshops-signups-table .workshops-signups-number {
@@ -880,7 +1234,7 @@ body::before {
 
   .workshops-signups-table td::before {
     content: attr(data-label);
-    color: var(--admin-muted);
-    font-weight: 600;
+    color: var(--face-muted);
+    font-weight: bold;
   }
 }
