@@ -8,10 +8,12 @@
 -- the public anon / publishable key: Row Level Security is on with no policies, and
 -- the anon and authenticated roles have no privileges on the table or the functions.
 -- Only the edge functions, which use the service role key on the server, read and
--- write it. The owner sees sign-ups in the dashboard (Table Editor -> workshop_signups).
+-- write it. The owner sees sign-ups in the dashboard (Table Editor -> workshop_signups);
+-- workshops.sql, run after this file, also lets owners read them from the owner page
+-- (running this file again takes that back, so run workshops.sql again after it).
 --
--- Each row is one order: one email booking `quantity` spots in one workshop (the id
--- from the WORKSHOPS list in supabase/functions/workshop-checkout/index.ts), under
+-- Each row is one order: one email booking `quantity` spots in one workshop (its id
+-- in public.workshops, see workshops.sql), under
 -- `name`, with an optional `friend_name` for whoever comes along.
 --
 -- A row's status:

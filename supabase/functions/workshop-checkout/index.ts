@@ -5,14 +5,20 @@
     GET  /functions/v1/workshop-checkout
          200 { "workshops": [
                { "id": "paint-a-piece", "name": "Paint a piece", "date": "2026-11-07",
+                 "startTime": "13:00", "endTime": "15:30",
+                 "description": "Paint a piece of bisque pottery ...",
                  "price": 5999, "currency": "cad",
                  "capacity": 10, "taken": 3, "remaining": 7 },
                ...
              ] }
 
-         Upcoming workshops only, soonest first (an empty list when there are none).
-         "date" is the workshop's day (YYYY-MM-DD, studio time); it stays listed
-         until that day has ended in STUDIO_TIME_ZONE. "price" is per spot, in cents.
+         The workshops in the public.workshops table (supabase/workshops.sql; the
+         owners edit it on admin.html) that aren't hidden and are still upcoming,
+         soonest first (an empty list when there are none). "date" is the workshop's
+         day (YYYY-MM-DD, studio time); it stays listed until that day has ended in
+         STUDIO_TIME_ZONE. "startTime" and "endTime" are "HH:MM" (24-hour clock,
+         studio time) or null when not set; "description" is text or null. "price"
+         is per spot, in cents.
 
     POST /functions/v1/workshop-checkout
          body { "workshop": "paint-a-piece", "email": "someone@example.com",
@@ -27,7 +33,7 @@
 
          200 { "url": "https://checkout.stripe.com/..." }   send the visitor there;
                                                            Stripe charges price × quantity
-         400 { "error": "unknown_workshop" }      missing, or not an id in the list
+         400 { "error": "unknown_workshop" }      missing, not a workshop, or hidden
          409 { "error": "workshop_past" }         its day has ended
          400 { "error": "invalid_email" }
          400 { "error": "invalid_name" }          missing, blank, not text or too long
@@ -53,8 +59,8 @@
   already_signed_up there (it can still book the other workshops).
 
   Runs with JWT verification off (see supabase/config.toml): the site calls it with
-  its publishable key, which is not a JWT. It reads and writes the sign-ups table
-  with the service role key, which never leaves the server.
+  its publishable key, which is not a JWT. It reads the workshops table and reads and
+  writes the sign-ups table with the service role key, which never leaves the server.
 
   Environment: STRIPE_SECRET_KEY and SITE_URL (set with `supabase secrets set`), plus
   SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY, which Supabase provides.
@@ -64,22 +70,21 @@ import { createClient } from "npm:@supabase/supabase-js@2";
 
 /* ---------- The workshops ---------- */
 
+// The workshops live in the public.workshops table (supabase/workshops.sql), which
+// the owners edit on admin.html. Past ones drop off on their own; hidden ones are
+// left out of GET and refused by POST.
 type Workshop = {
   id: string; // stored with each sign-up; spots are counted by it
   name: string;
   date: string; // YYYY-MM-DD, the day of the workshop in STUDIO_TIME_ZONE
+  startTime: string | null; // "HH:MM", 24-hour clock, studio time
+  endTime: string | null;
+  description: string | null;
   capacity: number; // spots
   priceCents: number; // per spot (Stripe amounts are in cents)
 };
 
-// Every workshop people can sign up for. The front end (workshop.js) keeps a
-// matching list of ids, names and dates, so change both together. Past workshops
-// drop off on their own. Never reuse an id for a later date: its old sign-ups would
-// count against the new one's spots.
-const WORKSHOPS: readonly Workshop[] = [
-  { id: "paint-a-piece", name: "Paint a piece", date: "2026-11-07", capacity: 10, priceCents: 5999 },
-  { id: "hand-building", name: "Hand building", date: "2026-12-05", capacity: 10, priceCents: 5999 },
-];
+const WORKSHOP_COLUMNS = "id, name, date, start_time, end_time, description, capacity, price_cents, hidden";
 
 const CURRENCY = "cad"; // Canadian dollars
 
@@ -162,10 +167,64 @@ function studioToday(): string {
   return `${part("year")}-${part("month")}-${part("day")}`;
 }
 
-/** Workshops whose day hasn't ended yet in the studio's time zone, soonest first. */
-function upcomingWorkshops(): Workshop[] {
-  const today = studioToday();
-  return WORKSHOPS.filter((w) => w.date >= today).sort((a, b) => a.date.localeCompare(b.date));
+/** "13:00:00" (a Postgres time) -> "13:00"; null stays null. */
+function timeOfDay(value: unknown, row: unknown): string | null {
+  if (value === null || value === undefined) return null;
+  const match = typeof value === "string" ? /^(\d{2}):(\d{2})/.exec(value) : null;
+  if (!match) throw new Error(`Unexpected workshop row ${JSON.stringify(row)}`);
+  return `${match[1]}:${match[2]}`;
+}
+
+/** A row of public.workshops as a Workshop (checked, in case the table changes shape). */
+function toWorkshop(row: Record<string, unknown>): Workshop {
+  const { id, name, date, description, capacity, price_cents: priceCents } = row;
+  if (
+    typeof id !== "string" || typeof name !== "string" ||
+    typeof date !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(date) ||
+    (description !== null && typeof description !== "string") ||
+    typeof capacity !== "number" || !Number.isInteger(capacity) || capacity < 1 ||
+    typeof priceCents !== "number" || !Number.isInteger(priceCents) || priceCents < 1
+  ) {
+    throw new Error(`Unexpected workshop row ${JSON.stringify(row)}`);
+  }
+  return {
+    id,
+    name,
+    date,
+    startTime: timeOfDay(row.start_time, row),
+    endTime: timeOfDay(row.end_time, row),
+    description: description || null,
+    capacity,
+    priceCents,
+  };
+}
+
+/** Workshops that aren't hidden and whose day hasn't ended yet in studio time, soonest first. */
+async function upcomingWorkshops(): Promise<Workshop[]> {
+  const { data, error } = await supabase
+    .from("workshops")
+    .select(WORKSHOP_COLUMNS)
+    .eq("hidden", false)
+    .gte("date", studioToday())
+    .order("date", { ascending: true })
+    .order("start_time", { ascending: true, nullsFirst: false })
+    .order("id", { ascending: true });
+  if (error) throw new Error(`Reading workshops failed: ${error.message}`);
+  return ((data ?? []) as unknown as Record<string, unknown>[]).map(toWorkshop);
+}
+
+/** The workshop with this id, or null when there's none or it is hidden. */
+async function findWorkshop(id: unknown): Promise<Workshop | null> {
+  if (typeof id !== "string" || !id || id.length > 64) return null;
+  const { data, error } = await supabase
+    .from("workshops")
+    .select(WORKSHOP_COLUMNS)
+    .eq("id", id)
+    .maybeSingle();
+  if (error) throw new Error(`Reading workshop ${id} failed: ${error.message}`);
+  const row = data as unknown as Record<string, unknown> | null;
+  if (!row || row.hidden !== false) return null;
+  return toWorkshop(row);
 }
 
 /** "2026-11-07" -> "7 November 2026" */
@@ -315,7 +374,7 @@ async function settlePending(workshopId: string, email: string): Promise<void> {
 /* ---------- Handlers ---------- */
 
 async function handleGet(): Promise<Response> {
-  const workshops = upcomingWorkshops();
+  const workshops = await upcomingWorkshops();
   const taken = await countTaken(workshops.map((w) => w.id));
   return json(200, {
     workshops: workshops.map((w) => {
@@ -324,6 +383,9 @@ async function handleGet(): Promise<Response> {
         id: w.id,
         name: w.name,
         date: w.date,
+        startTime: w.startTime,
+        endTime: w.endTime,
+        description: w.description,
         price: w.priceCents,
         currency: CURRENCY,
         capacity: w.capacity,
@@ -344,7 +406,7 @@ async function handlePost(req: Request): Promise<Response> {
   const input: Record<string, unknown> =
     body && typeof body === "object" && !Array.isArray(body) ? (body as Record<string, unknown>) : {};
 
-  const workshop = WORKSHOPS.find((w) => w.id === input.workshop);
+  const workshop = await findWorkshop(input.workshop);
   if (!workshop) return json(400, { error: "unknown_workshop" });
   if (workshop.date < studioToday()) return json(409, { error: "workshop_past" });
 
