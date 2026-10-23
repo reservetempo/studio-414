@@ -8,7 +8,7 @@
    a pale yellow Aqua tooltip over it under the pointer or the keyboard focus. Days
    gone by are greyed out, a workshop that is over is a faded pill that doesn't press,
    and today is ringed in the colour. The colours and fonts are the tokens in
-   styles.css, so it follows the style switcher like everything else. */
+   aqua.css and styles.css, so it follows the style switcher like everything else. */
 
 .calendar {
   display: flex;

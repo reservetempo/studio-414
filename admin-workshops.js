@@ -923,7 +923,7 @@
   }
 
   function button(label, primary) {
-    var node = el('button', 'admin-button' + (primary ? ' admin-button-primary' : ''), label);
+    var node = el('button', 'admin-button aqua-pill' + (primary ? ' admin-button-primary aqua-pill--tint' : ''), label);
     node.type = 'button';
     return node;
   }

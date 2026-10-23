@@ -2,24 +2,25 @@
    (switcher.js; the fonts are in fonts.css).
 
    data-color="1" to data-color="20" picks a colour; 0 (or no attribute) keeps
-   "Classic", the palette in styles.css. On <html> it colours the page and every
+   "Classic", the palette in aqua.css. On <html> it colours the page and every
    window. On a window (the mailing list #signup, the Workshops dialogs #workshops and
    #workshop, Display #switcher and its paint roller .switcher-toggle) it colours that
    window alone, over the page's colour: a window inherits the colour tokens from
    <html> unless it carries its own data-color. The comment section is not a window
    and follows <html> alone.
-   That is why styles.css declares Classic for [data-color="0"] too (a window can be
-   set back to it), and declares the button fill and the bevels again on every
-   element carrying data-color: they are built from these colours, and a custom
+   That is why aqua.css declares Classic for [data-color="0"] too (a window can be
+   set back to it), and aqua.css and styles.css declare the Aqua tokens, the button
+   fill and the bevels again on every element carrying data-color: they are built
+   from these colours, and a custom
    property built from others is worked out where it is declared, so on :root alone
    they would keep the page's colour inside a window. The page itself (--page-bg,
    --page-text: the background, the big 414 and the text on the page) is worked out
    on :root only, so it follows <html> alone.
-   These rules have the same specificity as styles.css's :root and win by coming
-   after it (switcher.css loads later).
+   These rules have the same specificity as the :root rules in aqua.css and
+   styles.css and win by coming after them (switcher.css loads later).
    Each colour is a window scheme: a tinted face (with its own bevel highlight, light
    and shadow, still used by the Workshops dialogs), a title colour and its text, and
-   an ink for comment names and links. styles.css builds the Aqua look from them
+   an ink for comment names and links. aqua.css builds the Aqua look from them
    (--aqua-*): the pinstripes from the face, the title bars, glossy buttons and focus
    rings from the title colour. On <html>, the title-bar colour
    is also the colour of the page itself and of the big 414 (--page-bg in styles.css),

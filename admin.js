@@ -49,13 +49,17 @@
   };
   var loadingText = document.getElementById('admin-loading-text');
   var signinButton = document.getElementById('admin-signin-google');
-  var signinLabel = signinButton.textContent;
+  // The words on the button (beside the Google mark), changed while Google opens.
+  var signinText = signinButton.querySelector('[data-admin-label]') || signinButton;
+  var signinLabel = signinText.textContent;
   var signinError = document.getElementById('admin-signin-error');
   var errorText = document.getElementById('admin-error-text');
   var retryButton = document.getElementById('admin-retry');
   var errorSignout = views.error.querySelector('[data-admin-signout]');
   var signoutButtons = document.querySelectorAll('[data-admin-signout]');
   var signoutError = document.getElementById('admin-signout-error');
+  // The email and Sign out in the menu bar, shown with the owner page only.
+  var account = document.getElementById('admin-account');
 
   // Sections by name: { body, placeholder, render, cleanup }.
   var sections = {};
@@ -132,7 +136,7 @@
 
   signinButton.addEventListener('click', function () {
     signinButton.disabled = true;
-    signinButton.textContent = 'Opening Google…';
+    signinText.textContent = 'Opening Google…';
     signinError.hidden = true;
     urlError = '';
     var start;
@@ -360,6 +364,7 @@
     Object.keys(views).forEach(function (key) {
       views[key].hidden = key !== name;
     });
+    account.hidden = name !== 'owner';
     signoutError.hidden = true;
   }
 
@@ -381,7 +386,7 @@
 
   function resetSignInButton() {
     signinButton.disabled = false;
-    signinButton.textContent = signinLabel;
+    signinText.textContent = signinLabel;
   }
 
   function showError(message, retry) {

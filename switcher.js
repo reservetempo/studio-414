@@ -57,8 +57,8 @@
 
   To remove the switcher: delete switcher.js, switcher.css, fonts.css and fonts/,
   their <link> / <script> tags and the two inline scripts that mention it (in <head>,
-  and in <body> after the windows). The tokens in styles.css (--display-*, --face,
-  --title and the rest) keep the default colours on their own, with EB Garamond
+  and in <body> after the windows). The tokens in styles.css and aqua.css (--display-*,
+  --face, --title and the rest) keep the default colours on their own, with EB Garamond
   (font 1) as the display face.
 */
 (function () {

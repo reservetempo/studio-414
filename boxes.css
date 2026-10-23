@@ -5,12 +5,13 @@
    the left and the title centred. On the card a ridged resize grip sits in the
    bottom-right corner. (The comment section is not a window: comments.css.)
    boxes.js adds the drag handle over the title bar and the grip, and moves and sizes
-   the boxes; the colours are the tokens in styles.css (the --aqua-* ones are built
+   the boxes; the colours are the tokens in aqua.css (the --aqua-* ones are built
    from the palette that switcher.css swaps per colour). Where each box sits by
    default is in styles.css (the card) and switcher.css (Display).
 
-   Reusable (for the Workshops and calendar dialogs, an owner page, ...): load
-   styles.css (palette and --aqua-* tokens) and this file, then
+   Reusable (the owner page, admin.html, uses them; also for the Workshops and
+   calendar dialogs, ...): load aqua.css (palette and --aqua-* tokens) and this file,
+   neither of which lays out a page, then
    - a window:   .box > .box__titlebar > .box__lights + .box__title, then the body.
                  In .box__lights, a real close button is
                  <button class="box__light box__light--close box__close" aria-label="Close ...">
@@ -22,7 +23,7 @@
                  .aqua-pill--pulse (the default button's gentle pulse); disabled, any
                  of them turns plain and faded.
    - fields:     .aqua-field (text inputs), .aqua-popup (selects).
-   Each colour token for these is --aqua-* in styles.css. */
+   Each colour token for these is --aqua-* in aqua.css. */
 
 .box {
   /* Above the hero's shading; boxes.js restacks the boxes as they are used. */

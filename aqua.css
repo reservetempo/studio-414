@@ -1,0 +1,111 @@
+/* Mac OS X Aqua, shared by the public site (index.html) and the owner page
+   (admin.html): the colour-0 palette and the --aqua-* tokens built from it. The
+   windows, buttons and fields drawn with them are in boxes.css (see the comment at its
+   top). Load this file first, then boxes.css; the public site loads styles.css (its
+   layout, the bevels and the other tokens) and switcher.css (colours 1-20) after it. */
+
+/* The palette. The boxes (the mailing-list card and Display, and the owner page's
+   windows) are Mac OS X Aqua windows built from it (the --aqua-* tokens below, used
+   by boxes.css); the Workshops dialogs and calendar still use the older bevel tokens
+   (styles.css). These are colour
+   0, "Classic": a warm grey face and a navy title colour. switcher.css swaps them
+   per colour.
+   Contrast: text 4.5:1 or more on the face and on the white fields, and --shadow
+   3:1 or more against the face, so every bevelled edge reads as a border.
+   They are declared for [data-color="0"] as well as :root, so a window carrying
+   data-color="0" is Classic even when <html> has another colour (switcher.css). */
+:root,
+[data-color="0"] {
+  --face: #d4d0c8;          /* window fill, and the buttons on it */
+  --face-text: #000000;
+  --face-muted: #4a4742;    /* notes and messages */
+  --hilight: #ffffff;       /* bevel: the lit outer edge (top and left of raised things) */
+  --light: #e5e3de;         /* bevel: the lit inner edge */
+  --shadow: #77746e;        /* bevel: the shaded inner edge */
+  --dk-shadow: #000000;     /* bevel: the shaded outer edge, and the window frame */
+  --field: #ffffff;         /* text fields */
+  --field-text: #000000;
+  --placeholder: #686868;
+  --title: #0a246a;         /* title bars */
+  --title-text: #ffffff;
+  --accent-ink: #0a246a;    /* names and links */
+  --error: #9c0000;
+  --focus: #000000;
+}
+
+/* ---------- Mac OS X Aqua (2001-2005) ----------
+   The tokens the Aqua pieces in boxes.css are drawn with (.box windows, their title
+   bar and gumdrops, .aqua-pill buttons, .aqua-field text fields, .aqua-popup menus).
+   Fixed ones first: the face the chrome is set in (title bars and buttons are always
+   Lucida Grande, whatever font is picked; text inside the windows keeps it), the
+   corner radius, the soft drop shadow (no black frame) and the three gumdrops, which
+   stay red, yellow and green in every colour. */
+:root {
+  --aqua-font: "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", Geneva, Verdana, sans-serif;
+  --aqua-radius: 7px;
+  --aqua-window-shadow: 0 16px 36px rgb(0 0 0 / 0.42), 0 3px 10px rgb(0 0 0 / 0.3);
+  --aqua-light-size: 13px;
+  --aqua-light-gap: 7px;
+  --aqua-red: #e2463f;
+  --aqua-red-rim: #a4241d;
+  --aqua-red-glow: #ffb0a3;
+  --aqua-yellow: #f2b22a;
+  --aqua-yellow-rim: #b07408;
+  --aqua-yellow-glow: #ffeb98;
+  --aqua-green: #4fb336;
+  --aqua-green-rim: #287718;
+  --aqua-green-glow: #c5f5a6;
+}
+
+/* The tinted ones, built from the colour's tokens, so declared again on every element
+   carrying data-color (as the bevels above), and a window with its own colour gets
+   its own Aqua tint.
+   - Window body: fine horizontal pinstripes of the face and a lighter face.
+   - Title bar: the colour's title colour washed into the face, light at the top and
+     deeper at the bottom, with faint 1px stripes; its text is the face text (black),
+     7:1 or more on every colour.
+   - Tinted pills (the default button, the Workshops button): the title colour itself
+     with its own text colour (4.5:1 or more, the glosses keep clear of the words), a
+     darker rim and a lighter glow. Plain pills (other buttons) are the face lifted
+     towards white, with black text.
+   - Fields: white, with a grey edge (3:1 or more on the face) and an inner shadow.
+   - Focus: a solid edge of the title colour darkened (3:1 or more on the face and the
+     fields in every colour) inside a soft halo of the colour. */
+:root,
+[data-color] {
+  --aqua-stripe: color-mix(in srgb, var(--face) 55%, #ffffff);
+  --aqua-pinstripes: repeating-linear-gradient(to bottom,
+    var(--face) 0 2px, var(--aqua-stripe) 2px 4px);
+  --aqua-edge: color-mix(in srgb, var(--face-text) 40%, transparent);
+
+  --aqua-title-top: color-mix(in srgb, var(--title) 10%, #ffffff);
+  --aqua-title-mid: color-mix(in srgb, var(--title) 26%, var(--face));
+  --aqua-title-bottom: color-mix(in srgb, var(--title) 40%, var(--face));
+  --aqua-title-line: color-mix(in srgb, var(--aqua-title-bottom) 62%, #000000);
+  --aqua-title-text: var(--face-text);
+  --aqua-titlebar:
+    repeating-linear-gradient(to bottom, rgb(255 255 255 / 0.3) 0 1px, transparent 1px 2px),
+    linear-gradient(to bottom, var(--aqua-title-top), var(--aqua-title-mid) 55%, var(--aqua-title-bottom));
+
+  --aqua-tint: var(--title);
+  --aqua-tint-text: var(--title-text);
+  --aqua-tint-deep: color-mix(in srgb, var(--title) 84%, #000000);
+  --aqua-tint-rim: color-mix(in srgb, var(--title) 58%, #000000);
+  --aqua-tint-glow: color-mix(in srgb, var(--title) 45%, #ffffff);
+  --aqua-tint-pressed: color-mix(in srgb, var(--title) 85%, #000000);
+
+  --aqua-plain: color-mix(in srgb, var(--face) 35%, #ffffff);
+  --aqua-plain-text: var(--face-text);
+  --aqua-plain-deep: color-mix(in srgb, var(--face) 70%, #ffffff);
+  --aqua-plain-rim: color-mix(in srgb, var(--face-text) 50%, var(--face));
+  --aqua-plain-glow: #ffffff;
+  --aqua-plain-pressed: color-mix(in srgb, var(--face) 88%, var(--title));
+
+  --aqua-field-edge: color-mix(in srgb, var(--face-text) 55%, var(--field));
+  --aqua-field-edge-top: color-mix(in srgb, var(--face-text) 66%, var(--field));
+  --aqua-field-shadow: inset 0 1px 2px rgb(0 0 0 / 0.2);
+
+  --aqua-focus: color-mix(in srgb, var(--title) 50%, #000000);
+  --aqua-halo: color-mix(in srgb, var(--title) 60%, transparent);
+  --aqua-focus-ring: 0 0 0 1px var(--aqua-focus), 0 0 0 4px var(--aqua-halo);
+}
