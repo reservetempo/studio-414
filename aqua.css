@@ -1,19 +1,20 @@
 /* Mac OS X Aqua, shared by the public site (index.html) and the owner page
    (admin.html): the colour-0 palette and the --aqua-* tokens built from it. The
    windows, buttons and fields drawn with them are in boxes.css (see the comment at its
-   top). Load this file first, then boxes.css; the public site loads styles.css (its
-   layout, the bevels and the other tokens) and switcher.css (colours 1-20) after it. */
+   top). Load this file first, then colors.css (colours 1-20), then boxes.css; the
+   public site loads styles.css (its layout, the bevels and the other tokens) after
+   colors.css. */
 
 /* The palette. The boxes (the mailing-list card and Display, and the owner page's
    windows) are Mac OS X Aqua windows built from it (the --aqua-* tokens below, used
    by boxes.css); the Workshops dialogs and calendar still use the older bevel tokens
    (styles.css). These are colour
-   0, "Classic": a warm grey face and a navy title colour. switcher.css swaps them
-   per colour.
+   0, "Classic": a warm grey face and a navy title colour. colors.css swaps them
+   per colour (data-color on <html>).
    Contrast: text 4.5:1 or more on the face and on the white fields, and --shadow
    3:1 or more against the face, so every bevelled edge reads as a border.
-   They are declared for [data-color="0"] as well as :root, so a window carrying
-   data-color="0" is Classic even when <html> has another colour (switcher.css). */
+   They are declared for [data-color="0"] as well as :root, so an element carrying
+   data-color="0" is Classic even when <html> has another colour (colors.css). */
 :root,
 [data-color="0"] {
   --face: #d4d0c8;          /* window fill, and the buttons on it */
@@ -58,8 +59,8 @@
 }
 
 /* The tinted ones, built from the colour's tokens, so declared again on every element
-   carrying data-color (as the bevels above), and a window with its own colour gets
-   its own Aqua tint.
+   carrying data-color (as the bevels in styles.css), and an element with its own
+   colour gets its own Aqua tint.
    - Window body: fine horizontal pinstripes of the face and a lighter face.
    - Title bar: the colour's title colour washed into the face, light at the top and
      deeper at the bottom, with faint 1px stripes; its text is the face text (black),

@@ -1,11 +1,11 @@
 /*
   Style switcher for Studio 414.
 
-  Lets friends try twenty display faces (fonts.css) and twenty colours (switcher.css)
-  independently, and say which they like in a comment by number ("colour 1 and
-  font 6").
-  Option 0 of each is the default design (Terminal Grotesque, the Classic grey and
-  navy); font 1 is EB Garamond, the original face.
+  Lets friends try twenty display faces (fonts.css) and say which they like in a
+  comment by number ("font 6").
+  Font 0 is the default design (Terminal Grotesque); font 1 is EB Garamond, the
+  original face. The colour is not picked here: the owner picks the site's colour
+  (colors.css, data-color on <html>), and this file leaves it alone.
 
   The panel is a second Mac OS X Aqua window, "Display" (#switcher, styled by
   boxes.css and switcher.css), fixed to the screen. boxes.js lets it be dragged by
@@ -20,46 +20,48 @@
   was left open is kept in localStorage under "studio414.display" ("open" or
   "closed"), so a first visit starts closed.
 
-  The rows, top to bottom: Part, Font, Colour, then two "Reset" buttons that show
-  only while there is something to reset (Styles and Layout).
+  The rows, top to bottom: Part, Font, then two "Reset" buttons that show only while
+  there is something to reset (Styles and Layout).
 
-  Part picks what the Font and Colour rows show and change: "Everything" (the page
-  and every window) or one window (PARTS below: the mailing list, the Workshops
-  dialogs or Display itself with its paint roller). The comment section is not a
-  window and follows Everything.
+  Part picks what the Font row shows and changes: "Everything" (the page and every
+  window) or one window (PARTS below: the mailing list, the Workshops dialogs or
+  Display itself with its paint roller). The comment section is not a window and
+  follows Everything.
 
-  Everything lives on <html data-font="N" data-color="N">. A small inline script in
-  index.html's <head> sets those before first paint, from the URL (?font=6&color=1,
-  which wins) or else from localStorage ("studio414.style.font" and ".color"); this
-  file builds the panel and keeps the attributes, localStorage and the URL in step as
-  the choice changes. Values that are not a whole number from 0 to the last option
-  (20 for the font and for the colour) count as 0.
+  Everything's font lives on <html data-font="N">. A small inline script in
+  index.html's <head> sets it before first paint, from the URL (?font=6, which wins)
+  or else from localStorage ("studio414.style.font"); this file builds the panel and
+  keeps the attribute, localStorage and the URL in step as the choice changes. Values
+  that are not a whole number from 0 to the last font (20) count as 0.
 
-  A window's Font and Colour start with "Same as everything", its default; the ‹ ›
-  steps go through it too. Any other choice puts data-font / data-color on that
-  window's own elements, over Everything (switcher.css, fonts.css), and keeps it there
-  when Everything changes; "Same as everything" removes the attribute again. Each is
-  kept in localStorage under "studio414.style.<part>.font" and ".color" (the part's
-  key in PARTS, e.g. "studio414.style.mailing.color"); a missing or invalid key means
-  "Same as everything". They are not put in the URL, which carries Everything alone.
+  A window's Font starts with "Same as everything", its default; the ‹ › steps go
+  through it too. Any other choice puts data-font on that window's own elements, over
+  Everything (fonts.css), and keeps it there when Everything changes; "Same as
+  everything" removes the attribute again. Each is kept in localStorage under
+  "studio414.style.<part>.font" (the part's key in PARTS, e.g.
+  "studio414.style.mailing.font"); a missing or invalid key means "Same as
+  everything". They are not put in the URL, which carries Everything alone.
   A second inline script, in index.html's <body> just after the windows (before the
   deferred scripts), sets them on the windows in the page before first paint; this
   file sets Display's own as it builds it, and all of them again in case that script
   is missing. Its list of windows and their selectors must match PARTS.
 
+  Display used to pick colours too. Any colour keys left in localStorage from then
+  ("studio414.style.color", "studio414.style.<part>.color") are ignored and left as
+  they are, and ?color= in the URL is neither read nor written here.
+
   "Reset" on the Styles row puts every window back to "Same as everything" and clears
-  their keys; it shows only while some window has its own font or colour.
+  their keys; it shows only while some window has its own font.
   "Reset" on the Layout row is for the layout of the boxes, shown only while a box
   (this window included) has been moved or resized. boxes.js reports that with a
   "studio414:layoutchange" event ({ detail: { custom } }); the button asks it to reset
   with "studio414:layoutreset". Without boxes.js the row just stays hidden.
-  Either button gives the focus to the Colour dropdown when it goes away under it.
+  Either button gives the focus to the Font dropdown when it goes away under it.
 
   To remove the switcher: delete switcher.js, switcher.css, fonts.css and fonts/,
-  their <link> / <script> tags and the two inline scripts that mention it (in <head>,
-  and in <body> after the windows). The tokens in styles.css and aqua.css (--display-*,
-  --face, --title and the rest) keep the default colours on their own, with EB Garamond
-  (font 1) as the display face.
+  their <link> / <script> tags, the font part of the inline script in <head> and the
+  inline script in <body> after the windows. The tokens in styles.css (--display-*
+  and the rest) keep EB Garamond (font 1) as the display face on their own.
 */
 (function () {
   'use strict';
@@ -68,75 +70,38 @@
   var OPEN_KEY = 'studio414.display';
   var root = document.documentElement;
 
-  var OPTIONS = {
-    font: {
-      label: 'Font',
-      names: [
-        'Terminal Grotesque',
-        'EB Garamond',
-        'Basteleur',
-        'Lineal',
-        'Le Murmure',
-        'Sligoil',
-        'Ouroboros',
-        'Façade',
-        'Karrik',
-        'Trickster',
-        'Compagnon',
-        'Anthony',
-        'Victorianna',
-        'Gulax',
-        'BackOut',
-        'Bluu Next',
-        'Daubenton',
-        'Grotesk',
-        'Kaeru Kaeru',
-        'Format 1452',
-        'Flor de Ruina'
-      ]
-    },
-    color: {
-      label: 'Colour',
-      names: [
-        'Classic',
-        'Vermilion',
-        'Saffron',
-        'Chartreuse',
-        'Malachite',
-        'Verdigris',
-        'Cerulean',
-        'Klein Blue',
-        'Wisteria',
-        'Fuchsia',
-        'Flamingo',
-        'Oxblood',
-        'Tangerine',
-        'Umber',
-        'Olive',
-        'Turquoise',
-        'Teal',
-        'Ultraviolet',
-        'Hot Pink',
-        'Porcelain',
-        'Raku'
-      ],
-      // The title bar of each colour, for the swatch in the panel (as in switcher.css).
-      swatches: [
-        '#0a246a', '#b5301a', '#f5b83d', '#cdea3c', '#35c27a', '#0f5e52',
-        '#4db5f2', '#1a33d1', '#b59dff', '#9c1f86', '#ff88b1', '#701038',
-        '#ff7a1a', '#634016', '#5d6a12', '#40e0d0', '#00a3a3', '#6a22c8',
-        '#ff3fd2', '#ece6d8', '#1e1b1a'
-      ]
-    }
-  };
+  // The fonts, by number (fonts.css).
+  var FONTS = [
+    'Terminal Grotesque',
+    'EB Garamond',
+    'Basteleur',
+    'Lineal',
+    'Le Murmure',
+    'Sligoil',
+    'Ouroboros',
+    'Façade',
+    'Karrik',
+    'Trickster',
+    'Compagnon',
+    'Anthony',
+    'Victorianna',
+    'Gulax',
+    'BackOut',
+    'Bluu Next',
+    'Daubenton',
+    'Grotesk',
+    'Kaeru Kaeru',
+    'Format 1452',
+    'Flor de Ruina'
+  ];
 
-  var KINDS = ['font', 'color'];
+  // The number of the last font: 20.
+  var LAST = FONTS.length - 1;
 
   // What the Part row can pick. Everything (key null) is <html>; each other part is a
-  // window, its elements found by selector, that can carry its own font and colour.
-  // key names it in localStorage ("studio414.style.<key>.font" / ".color"). The inline
-  // script in index.html's <body>, after the windows, repeats these (all but Display,
-  // which this file builds).
+  // window, its elements found by selector, that can carry its own font. key names it
+  // in localStorage ("studio414.style.<key>.font"). The inline script in index.html's
+  // <body>, after the windows, repeats these (all but Display, which this file builds).
   var PARTS = [
     { key: null, label: 'Everything' },
     { key: 'mailing', label: 'Mailing list', selector: '#signup' },
@@ -146,19 +111,14 @@
 
   /* ---------- Values, storage and the URL ---------- */
 
-  // The number of the last option of a kind: 20 for the font and for the colour.
-  function last(kind) {
-    return OPTIONS[kind].names.length - 1;
-  }
-
-  // A whole number from 0 to the last option, or else null.
-  function check(value, kind) {
+  // A whole number from 0 to the last font, or else null.
+  function check(value) {
     var text = String(value == null ? '' : value).trim();
-    return /^(0|[1-9][0-9]?)$/.test(text) && Number(text) <= last(kind) ? Number(text) : null;
+    return /^(0|[1-9][0-9]?)$/.test(text) && Number(text) <= LAST ? Number(text) : null;
   }
 
-  function parse(value, kind) {
-    var number = check(value, kind);
+  function parse(value) {
+    var number = check(value);
     return number === null ? 0 : number;
   }
 
@@ -188,88 +148,64 @@
 
   // The head script has already applied the choice; read it back, or work it out
   // again the same way if that script is missing.
-  function initialValue(kind) {
-    var attr = root.getAttribute('data-' + kind);
-    if (attr != null) return parse(attr, kind);
+  function initialValue() {
+    var attr = root.getAttribute('data-font');
+    if (attr != null) return parse(attr);
     var params = new URLSearchParams(window.location.search);
-    if (params.has(kind)) return parse(params.get(kind), kind);
-    return parse(readStorage(KEY_PREFIX + kind), kind);
+    if (params.has('font')) return parse(params.get('font'));
+    return parse(readStorage(KEY_PREFIX + 'font'));
   }
 
-  var state = {
-    font: initialValue('font'),
-    color: initialValue('color')
-  };
+  // Everything's font.
+  var font = initialValue();
 
   function apply() {
-    root.setAttribute('data-font', String(state.font));
-    root.setAttribute('data-color', String(state.color));
+    root.setAttribute('data-font', String(font));
   }
 
   function save() {
-    writeStorage(KEY_PREFIX + 'font', String(state.font));
-    writeStorage(KEY_PREFIX + 'color', String(state.color));
+    writeStorage(KEY_PREFIX + 'font', String(font));
   }
 
-  // Each window's own choice, by its key: { font, color }, null for "Same as
-  // everything".
+  // Each window's own font, by its key: a number, or null for "Same as everything".
   var own = {};
   PARTS.forEach(function (part) {
-    if (part.key === null) return;
-    own[part.key] = {};
-    KINDS.forEach(function (kind) {
-      own[part.key][kind] = check(readStorage(KEY_PREFIX + part.key + '.' + kind), kind);
-    });
+    if (part.key !== null) own[part.key] = check(readStorage(KEY_PREFIX + part.key + '.font'));
   });
 
-  // The part's choice of a kind: a number, or null for a window that follows Everything.
-  function choice(part, kind) {
-    return part.key === null ? state[kind] : own[part.key][kind];
-  }
-
-  // The option the part actually shows.
-  function effective(part, kind) {
-    var value = choice(part, kind);
-    return value === null ? state[kind] : value;
+  // The part's font: a number, or null for a window that follows Everything.
+  function choice(part) {
+    return part.key === null ? font : own[part.key];
   }
 
   function hasOwn() {
     return PARTS.some(function (part) {
-      return part.key !== null && KINDS.some(function (kind) {
-        return own[part.key][kind] !== null;
-      });
+      return part.key !== null && own[part.key] !== null;
     });
   }
 
-  // Puts a window's own choice on its elements, or takes it off to follow <html>.
+  // Puts a window's own font on its elements, or takes it off to follow <html>.
   function applyOwn(part) {
-    var elements = document.querySelectorAll(part.selector);
-    KINDS.forEach(function (kind) {
-      var value = own[part.key][kind];
-      Array.prototype.forEach.call(elements, function (node) {
-        if (value === null) node.removeAttribute('data-' + kind);
-        else node.setAttribute('data-' + kind, String(value));
-      });
+    var value = own[part.key];
+    Array.prototype.forEach.call(document.querySelectorAll(part.selector), function (node) {
+      if (value === null) node.removeAttribute('data-font');
+      else node.setAttribute('data-font', String(value));
     });
   }
 
   function saveOwn(part) {
-    KINDS.forEach(function (kind) {
-      var key = KEY_PREFIX + part.key + '.' + kind;
-      var value = own[part.key][kind];
-      if (value === null) removeStorage(key);
-      else writeStorage(key, String(value));
-    });
+    var key = KEY_PREFIX + part.key + '.font';
+    if (own[part.key] === null) removeStorage(key);
+    else writeStorage(key, String(own[part.key]));
   }
 
-  // Puts ?font=N&color=N in the address bar (keeping any other parameters and the
-  // hash), so the address can be copied and shared as it is.
+  // Puts ?font=N in the address bar (keeping any other parameters, ?color= among them,
+  // and the hash), so the address can be copied and shared as it is.
   function reflectInUrl() {
     if (!window.history || typeof window.history.replaceState !== 'function') return;
     try {
       var url = new URL(window.location.href);
-      url.searchParams.set('font', String(state.font));
-      url.searchParams.set('color', String(state.color));
+      url.searchParams.set('font', String(font));
       if (url.href !== window.location.href) {
         window.history.replaceState(window.history.state, '', url.href);
       }
@@ -287,19 +223,15 @@
     return node;
   }
 
-  function describe(kind, value) {
-    return OPTIONS[kind].label + ' ' + value + ', ' + OPTIONS[kind].names[value];
-  }
-
-  // The part's choice in words: "Font 6, Façade", or for a window that follows
+  // The part's font in words: "Font 6, Façade", or for a window that follows
   // Everything, "Font same as everything (6, Façade)".
-  function describeChoice(part, kind) {
-    if (choice(part, kind) !== null) return describe(kind, choice(part, kind));
-    return OPTIONS[kind].label + ' same as everything (' + state[kind] + ', ' +
-      OPTIONS[kind].names[state[kind]] + ')';
+  function describeChoice(part) {
+    var value = choice(part);
+    if (value !== null) return 'Font ' + value + ', ' + FONTS[value];
+    return 'Font same as everything (' + font + ', ' + FONTS[font] + ')';
   }
 
-  // The part the Font and Colour rows show and change.
+  // The part the Font row shows and changes.
   var shown = PARTS[0];
 
   // An Aqua window like the card: a title bar with the three gumdrops and the title,
@@ -307,7 +239,7 @@
   // screen rather than placed in the page.
   var panel = element('aside', 'switcher box box--fixed');
   panel.id = 'switcher';
-  panel.setAttribute('aria-label', 'Font and colour switcher');
+  panel.setAttribute('aria-label', 'Font switcher');
 
   var titlebar = element('div', 'box__titlebar');
   var lights = element('span', 'box__lights');
@@ -389,46 +321,40 @@
 
   body.appendChild(partControl.row);
 
-  /* Font and Colour */
+  /* Font */
 
-  var controls = {};
-
-  // The next value one step (by: 1 or -1) from value, round in a loop. A window's
-  // loop starts with "Same as everything" (null), before 0.
-  function step(kind, value, by) {
-    var count = last(kind) + 1;
+  // The next font one step (by: 1 or -1) from value, round in a loop. A window's loop
+  // starts with "Same as everything" (null), before 0.
+  function step(value, by) {
+    var count = LAST + 1;
     if (shown.key === null) return (value + by + count) % count;
     var index = value === null ? 0 : value + 1;
     index = (index + by + count + 1) % (count + 1);
     return index === 0 ? null : index - 1;
   }
 
-  KINDS.forEach(function (kind) {
-    var option = OPTIONS[kind];
-    var control = buildRow(option.label, 'switcher__select--' + kind);
-    option.names.forEach(function (name, index) {
-      var item = element('option', null, index + ' — ' + name);
-      item.value = String(index);
-      control.select.appendChild(item);
-    });
-    // First in the list while a window is shown (render() puts it in and takes it out).
-    control.same = element('option', null, 'Same as everything');
-    control.same.value = '';
-
-    control.prev.addEventListener('click', function () {
-      set(kind, step(kind, choice(shown, kind), -1));
-    });
-    control.next.addEventListener('click', function () {
-      set(kind, step(kind, choice(shown, kind), 1));
-    });
-    control.select.addEventListener('change', function () {
-      var value = control.select.value;
-      set(kind, value === '' && shown.key !== null ? null : parse(value, kind));
-    });
-
-    controls[kind] = control;
-    body.appendChild(control.row);
+  var fontControl = buildRow('Font', 'switcher__select--font');
+  FONTS.forEach(function (name, index) {
+    var item = element('option', null, index + ' — ' + name);
+    item.value = String(index);
+    fontControl.select.appendChild(item);
   });
+  // First in the list while a window is shown (render() puts it in and takes it out).
+  var sameOption = element('option', null, 'Same as everything');
+  sameOption.value = '';
+
+  fontControl.prev.addEventListener('click', function () {
+    set(step(choice(shown), -1));
+  });
+  fontControl.next.addEventListener('click', function () {
+    set(step(choice(shown), 1));
+  });
+  fontControl.select.addEventListener('change', function () {
+    var value = fontControl.select.value;
+    set(value === '' && shown.key !== null ? null : parse(value));
+  });
+
+  body.appendChild(fontControl.row);
 
   /* ---------- Resetting the windows' own styles ---------- */
 
@@ -443,13 +369,11 @@
   var stylesReset = element('button', 'switcher__reset aqua-pill', 'Reset');
   stylesReset.type = 'button';
   stylesReset.setAttribute('aria-label', 'Reset styles');
-  stylesReset.title = 'Give every window the same font and colour as everything';
+  stylesReset.title = 'Give every window the same font as everything';
   stylesReset.addEventListener('click', function () {
     PARTS.forEach(function (part) {
       if (part.key === null) return;
-      KINDS.forEach(function (kind) {
-        own[part.key][kind] = null;
-      });
+      own[part.key] = null;
       applyOwn(part);
       saveOwn(part);
     });
@@ -483,7 +407,7 @@
   document.addEventListener('studio414:layoutchange', function (event) {
     var custom = Boolean(event.detail && event.detail.custom);
     // Keep focus in the panel when the button it was on goes away.
-    if (!custom && document.activeElement === resetButton) controls.color.select.focus();
+    if (!custom && document.activeElement === resetButton) fontControl.select.focus();
     layoutRow.hidden = !custom;
   });
 
@@ -504,13 +428,13 @@
   /* ---------- Opening and closing: the paint roller ---------- */
 
   // A glossy Aqua button (aqua-pill) with a pixel paint roller (16 x 16, drawn at twice the size):
-  // a black outline and handle, and a roller covered in the colour's own title-bar
+  // a black outline and handle, and a roller covered in the site colour's own title-bar
   // colour, with a lit top and a shaded bottom row (switcher.css).
   var toggle = element('button', 'switcher-toggle aqua-pill');
   toggle.type = 'button';
-  toggle.setAttribute('aria-label', 'Display: fonts and colours');
+  toggle.setAttribute('aria-label', 'Display: fonts');
   toggle.setAttribute('aria-controls', panel.id);
-  toggle.title = 'Display: fonts and colours';
+  toggle.title = 'Display: fonts';
   toggle.innerHTML =
     '<svg viewBox="0 0 16 16" aria-hidden="true" focusable="false" shape-rendering="crispEdges">' +
     '<path class="switcher-toggle__paint" d="M2 2h9v4H2z"/>' +
@@ -560,61 +484,54 @@
 
   /* ---------- Updating ---------- */
 
-  // Shows the shown part's choices in the rows (with "Same as everything" first in the
+  // Shows the shown part's font in its row (with "Same as everything" first in the
   // list for a window), names that part in the labels, and shows the Styles row while
-  // some window has its own choice.
+  // some window has its own font.
   function render() {
     var isWindow = shown.key !== null;
     var part = shown.label.toLowerCase();
+    var select = fontControl.select;
+    var range = '0 to ' + LAST;
+    var value = choice(shown);
     partControl.select.value = String(PARTS.indexOf(shown));
 
-    KINDS.forEach(function (kind) {
-      var control = controls[kind];
-      var select = control.select;
-      var name = OPTIONS[kind].label.toLowerCase();
-      var range = '0 to ' + last(kind);
-      var value = choice(shown, kind);
-
-      if (isWindow && control.same.parentNode !== select) {
-        select.insertBefore(control.same, select.firstChild);
-      } else if (!isWindow && control.same.parentNode === select) {
-        select.removeChild(control.same);
-      }
-      select.value = value === null ? '' : String(value);
-      select.title = describeChoice(shown, kind);
-      select.setAttribute('aria-label', isWindow ?
-        shown.label + ' ' + name + ' (Same as everything, or ' + range + ')' :
-        OPTIONS[kind].label + ' for everything (' + range + ')');
-      control.prev.setAttribute('aria-label', 'Previous ' + name + ' for ' + part);
-      control.next.setAttribute('aria-label', 'Next ' + name + ' for ' + part);
-    });
-    // The colour the shown part actually has, even when it follows Everything.
-    controls.color.select.style.setProperty('--swatch', OPTIONS.color.swatches[effective(shown, 'color')]);
+    if (isWindow && sameOption.parentNode !== select) {
+      select.insertBefore(sameOption, select.firstChild);
+    } else if (!isWindow && sameOption.parentNode === select) {
+      select.removeChild(sameOption);
+    }
+    select.value = value === null ? '' : String(value);
+    select.title = describeChoice(shown);
+    select.setAttribute('aria-label', isWindow ?
+      shown.label + ' font (Same as everything, or ' + range + ')' :
+      'Font for everything (' + range + ')');
+    fontControl.prev.setAttribute('aria-label', 'Previous font for ' + part);
+    fontControl.next.setAttribute('aria-label', 'Next font for ' + part);
 
     var custom = hasOwn();
     // Keep focus in the panel when the button it was on goes away.
-    if (!custom && document.activeElement === stylesReset) controls.color.select.focus();
+    if (!custom && document.activeElement === stylesReset) select.focus();
     stylesRow.hidden = !custom;
   }
 
-  // Sets the shown part's choice of a kind (null: a window back to "Same as everything").
-  function set(kind, value) {
-    if (choice(shown, kind) === value) return;
+  // Sets the shown part's font (null: a window back to "Same as everything").
+  function set(value) {
+    if (choice(shown) === value) return;
     if (shown.key === null) {
-      state[kind] = value;
+      font = value;
       apply();
       save();
       reflectInUrl();
     } else {
-      own[shown.key][kind] = value;
+      own[shown.key] = value;
       applyOwn(shown);
       saveOwn(shown);
     }
     render();
-    live.textContent = (shown.key === null ? '' : shown.label + ': ') + describeChoice(shown, kind) + '.';
+    live.textContent = (shown.key === null ? '' : shown.label + ': ') + describeChoice(shown) + '.';
   }
 
-  // Shows another part in the Font and Colour rows.
+  // Shows another part in the Font row.
   function show(part) {
     if (part === shown) return;
     shown = part;
@@ -639,7 +556,7 @@
   // Keep a choice that came from the URL or storage, and show it in the address bar
   // once it is anything other than the default design (or the URL already had it).
   var params = new URLSearchParams(window.location.search);
-  if (params.has('font') || params.has('color') || state.font || state.color) {
+  if (params.has('font') || font) {
     save();
     reflectInUrl();
   }

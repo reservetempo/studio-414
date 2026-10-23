@@ -456,9 +456,8 @@ html.is-sizing-box * {
 /* A pop-up menu (a select): a white gel lozenge with a hard gloss line across its
    middle, and a cap at the right end, tinted with the colour, with black up and down
    arrows. Give it padding on the right to clear the cap (about 28px). Its layers are
-   custom properties, so a menu that adds a layer of its own (Display's colour swatch,
-   switcher.css) can list them again after it, with --popup-position and
-   --popup-size. */
+   custom properties, so a menu that adds a layer of its own can list them again
+   after it, with --popup-position and --popup-size. */
 .aqua-popup {
   --popup-arrows: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='7' height='11' viewBox='0 0 7 11'%3E%3Cpath d='M3.5 0L7 4H0zM3.5 11L0 7h7z' fill='%23000'/%3E%3C/svg%3E");
   --popup-gloss: linear-gradient(to bottom, rgb(255 255 255 / 0.75), rgb(255 255 255 / 0.2) 50%, transparent 50%);

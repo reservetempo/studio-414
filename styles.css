@@ -28,7 +28,7 @@
   /* The page itself is the colour's main colour, the one on its title bars and its
      swatch (navy for Classic): the page background, the bands above and below the
      photo and the fades into them, and the big 414. It follows --title, which
-     switcher.css sets per colour, so nothing else needs changing per colour.
+     colors.css sets per colour, so nothing else needs changing per colour.
      Text straight on the page (the credit line) uses the title-bar text colour, which
      every colour keeps at 4.5:1 or more on --title; the muted version (85% of it) is
      4.8:1 or more on all of them.

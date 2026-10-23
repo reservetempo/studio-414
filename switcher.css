@@ -1,293 +1,15 @@
-/* Style switcher: the twenty colours, and the window that picks them and the fonts
-   (switcher.js; the fonts are in fonts.css).
-
-   data-color="1" to data-color="20" picks a colour; 0 (or no attribute) keeps
-   "Classic", the palette in aqua.css. On <html> it colours the page and every
-   window. On a window (the mailing list #signup, the Workshops dialogs #workshops and
-   #workshop, Display #switcher and its paint roller .switcher-toggle) it colours that
-   window alone, over the page's colour: a window inherits the colour tokens from
-   <html> unless it carries its own data-color. The comment section is not a window
-   and follows <html> alone.
-   That is why aqua.css declares Classic for [data-color="0"] too (a window can be
-   set back to it), and aqua.css and styles.css declare the Aqua tokens, the button
-   fill and the bevels again on every element carrying data-color: they are built
-   from these colours, and a custom
-   property built from others is worked out where it is declared, so on :root alone
-   they would keep the page's colour inside a window. The page itself (--page-bg,
-   --page-text: the background, the big 414 and the text on the page) is worked out
-   on :root only, so it follows <html> alone.
-   These rules have the same specificity as the :root rules in aqua.css and
-   styles.css and win by coming after them (switcher.css loads later).
-   Each colour is a window scheme: a tinted face (with its own bevel highlight, light
-   and shadow, still used by the Workshops dialogs), a title colour and its text, and
-   an ink for comment names and links. aqua.css builds the Aqua look from them
-   (--aqua-*): the pinstripes from the face, the title bars, glossy buttons and focus
-   rings from the title colour. On <html>, the title-bar colour
-   is also the colour of the page itself and of the big 414 (--page-bg in styles.css),
-   and the title text is the text on the page and the edge of the 414 (--page-text).
-   Black text and frames, white fields, the error red and the focus rings stay the same
-   for all of them.
-   Deep title bars (Vermilion, Verdigris, Klein Blue, Fuchsia, Oxblood, Umber, Olive,
-   Ultraviolet, Raku) take white text; light ones (Saffron, Chartreuse, Malachite,
-   Cerulean, Wisteria, Flamingo, Tangerine, Turquoise, Teal, Hot Pink, Porcelain) take
-   black. The two near-neutrals borrow a glaze for their ink: cobalt for Porcelain,
-   copper for Raku.
-   Contrast was checked for every colour: text 4.5:1 or more (title text on the title
-   bar, and so on the page; text, secondary text, names, links and errors on the face
-   and on the white fields), and 3:1 or more for the bevel shadow against the face and
-   the fields. The Aqua windows have no black frame: a thin grey edge and a big soft
-   drop shadow set them off the page and the photo. */
-
-/* ---------- The twenty colours ---------- */
-
-/* 1. Vermilion */
-[data-color="1"] {
-  --face: #ecd3c8;
-  --face-muted: #783a2e;
-  --hilight: #faf4f1;
-  --light: #f4e5de;
-  --shadow: #a06e63;
-  --title: #b5301a;
-  --title-text: #ffffff;
-  --accent-ink: #a0260f;
-}
-
-/* 2. Saffron */
-[data-color="2"] {
-  --face: #efe1c0;
-  --face-muted: #674e1e;
-  --hilight: #fbf8ef;
-  --light: #f5edd9;
-  --shadow: #937e53;
-  --title: #f5b83d;
-  --title-text: #000000;
-  --accent-ink: #7a4f00;
-}
-
-/* 3. Chartreuse */
-[data-color="3"] {
-  --face: #e2e8c4;
-  --face-muted: #4e5822;
-  --hilight: #f8f9f0;
-  --light: #eef1dc;
-  --shadow: #7f8757;
-  --title: #cdea3c;
-  --title-text: #000000;
-  --accent-ink: #4d5c00;
-}
-
-/* 4. Malachite */
-[data-color="4"] {
-  --face: #cfe6d6;
-  --face-muted: #295a41;
-  --hilight: #f3f9f5;
-  --light: #e2f0e6;
-  --shadow: #608872;
-  --title: #35c27a;
-  --title-text: #000000;
-  --accent-ink: #0b6338;
-}
-
-/* 5. Verdigris */
-[data-color="5"] {
-  --face: #cde3de;
-  --face-muted: #305750;
-  --hilight: #f2f8f7;
-  --light: #e1eeeb;
-  --shadow: #64857f;
-  --title: #0f5e52;
-  --title-text: #ffffff;
-  --accent-ink: #0f5e52;
-}
-
-/* 6. Cerulean */
-[data-color="6"] {
-  --face: #d1e3f0;
-  --face-muted: #31556e;
-  --hilight: #f4f8fb;
-  --light: #e3eef6;
-  --shadow: #668398;
-  --title: #4db5f2;
-  --title-text: #000000;
-  --accent-ink: #0b5485;
-}
-
-/* 7. Klein Blue */
-[data-color="7"] {
-  --face: #d5d9ef;
-  --face-muted: #404886;
-  --hilight: #f4f6fb;
-  --light: #e6e8f5;
-  --shadow: #7278a9;
-  --title: #1a33d1;
-  --title-text: #ffffff;
-  --accent-ink: #1a33d1;
-}
-
-/* 8. Wisteria */
-[data-color="8"] {
-  --face: #e0d9f3;
-  --face-muted: #544486;
-  --hilight: #f7f6fc;
-  --light: #ece8f8;
-  --shadow: #8276ab;
-  --title: #b59dff;
-  --title-text: #000000;
-  --accent-ink: #5130b8;
-}
-
-/* 9. Fuchsia */
-[data-color="9"] {
-  --face: #ecd4e6;
-  --face-muted: #713a67;
-  --hilight: #faf4f9;
-  --light: #f4e5f0;
-  --shadow: #9b6e92;
-  --title: #9c1f86;
-  --title-text: #ffffff;
-  --accent-ink: #9c1f86;
-}
-
-/* 10. Flamingo */
-[data-color="10"] {
-  --face: #f3d8e1;
-  --face-muted: #7c3b54;
-  --hilight: #fcf5f8;
-  --light: #f8e8ed;
-  --shadow: #a47084;
-  --title: #ff88b1;
-  --title-text: #000000;
-  --accent-ink: #a3134f;
-}
-
-/* 11. Oxblood */
-[data-color="11"] {
-  --face: #f4d5dc;
-  --face-muted: #773c4d;
-  --hilight: #fcf5f6;
-  --light: #f8e6ea;
-  --shadow: #9e6d7a;
-  --title: #701038;
-  --title-text: #ffffff;
-  --accent-ink: #701038;
-}
-
-/* 12. Tangerine */
-[data-color="12"] {
-  --face: #f3d8ca;
-  --face-muted: #764123;
-  --hilight: #fcf5f2;
-  --light: #f8e7df;
-  --shadow: #9d715a;
-  --title: #ff7a1a;
-  --title-text: #000000;
-  --accent-ink: #883c02;
-}
-
-/* 13. Umber */
-[data-color="13"] {
-  --face: #efdac5;
-  --face-muted: #704714;
-  --hilight: #fbf6f1;
-  --light: #f5e9dd;
-  --shadow: #977552;
-  --title: #634016;
-  --title-text: #ffffff;
-  --accent-ink: #634016;
-}
-
-/* 14. Olive */
-[data-color="14"] {
-  --face: #dbe2c7;
-  --face-muted: #4d571a;
-  --hilight: #f6f8f2;
-  --light: #e9edde;
-  --shadow: #788154;
-  --title: #5d6a12;
-  --title-text: #ffffff;
-  --accent-ink: #505c02;
-}
-
-/* 15. Turquoise */
-[data-color="15"] {
-  --face: #c5e6e1;
-  --face-muted: #055e57;
-  --hilight: #f1f9f7;
-  --light: #ddf0ed;
-  --shadow: #4a877f;
-  --title: #40e0d0;
-  --title-text: #000000;
-  --accent-ink: #05635b;
-}
-
-/* 16. Teal */
-[data-color="16"] {
-  --face: #c4e6e5;
-  --face-muted: #045d5d;
-  --hilight: #f1f9f8;
-  --light: #dcf0ef;
-  --shadow: #488787;
-  --title: #00a3a3;
-  --title-text: #000000;
-  --accent-ink: #036262;
-}
-
-/* 17. Ultraviolet */
-[data-color="17"] {
-  --face: #dfdaf4;
-  --face-muted: #55477b;
-  --hilight: #f7f6fc;
-  --light: #ece9f8;
-  --shadow: #7f75a0;
-  --title: #6a22c8;
-  --title-text: #ffffff;
-  --accent-ink: #6a22c8;
-}
-
-/* 18. Hot Pink */
-[data-color="18"] {
-  --face: #efd5e6;
-  --face-muted: #6f3d60;
-  --hilight: #fbf5f8;
-  --light: #f5e6f0;
-  --shadow: #986e8a;
-  --title: #ff3fd2;
-  --title-text: #000000;
-  --accent-ink: #8d1e73;
-}
-
-/* 19. Porcelain */
-[data-color="19"] {
-  --face: #e2ded4;
-  --face-muted: #59503c;
-  --hilight: #f8f7f4;
-  --light: #edebe5;
-  --shadow: #837b6b;
-  --title: #ece6d8;
-  --title-text: #000000;
-  --accent-ink: #1f48a6;
-}
-
-/* 20. Raku */
-[data-color="20"] {
-  --face: #e4dcda;
-  --face-muted: #5c4d49;
-  --hilight: #f8f6f6;
-  --light: #eeeae8;
-  --shadow: #857975;
-  --title: #1e1b1a;
-  --title-text: #ffffff;
-  --accent-ink: #8c3a12;
-}
+/* Style switcher: Display, the window that picks the fonts (switcher.js; the fonts
+   are in fonts.css), and its paint roller. The colours are not picked here: they are
+   in colors.css. */
 
 /* ---------- The window ----------
    "Display", a second Aqua window like the card: the window, the title bar with its
    gumdrops and the colours all come from boxes.css and the palette, so it follows
-   the selected colour like the others (black text on the face, the white menus and
+   the site's colour like the others (black text on the face, the white menus and
    the plain pills keep every control at 4.5:1 or more on all of them). All of it is
    in Lucida Grande, as Aqua's controls are, so the controls keep their shape while
    the fonts are browsed.
-   Its rows: Part (Everything or one window), Font and Colour for that part, each a
+   Its rows: Part (Everything or one window) and the Font for that part, each a
    pop-up menu (.aqua-popup) between round ‹ and › buttons (.aqua-pill), then the
    Styles and Layout "Reset" pills, each shown only while there is something to reset.
    It is fixed to the screen, so it is at hand wherever the page is scrolled to.
@@ -350,7 +72,7 @@
   font-size: 20px;
 }
 
-/* "Reset", on the Styles row (shown while a window has its own font or colour) and on
+/* "Reset", on the Styles row (shown while a window has its own font) and on
    the Layout row (shown once a box has been moved or resized, boxes.js). */
 .switcher__reset {
   grid-column: 2 / -1;
@@ -367,18 +89,6 @@
   font-size: 16px;
   font-variant-numeric: lining-nums tabular-nums;
   text-overflow: ellipsis;
-}
-
-/* A framed square of the colour's title colour before its name, as two more layers
-   in front of the menu's own (boxes.css). */
-.switcher__select--color {
-  padding-left: 30px;
-  background-image:
-    linear-gradient(var(--swatch, #0a246a), var(--swatch, #0a246a)),
-    linear-gradient(#000, #000),
-    var(--popup-arrows), var(--popup-gloss), var(--popup-cap), var(--popup-body);
-  background-position: 10px center, 9px center, var(--popup-position);
-  background-size: 12px 12px, 14px 14px, var(--popup-size);
 }
 
 .switcher__live {
@@ -448,11 +158,6 @@
 
   .switcher__select {
     padding: 0 26px 0 7px;
-  }
-
-  .switcher__select--color {
-    padding-left: 26px;
-    background-position: 7px center, 6px center, var(--popup-position);
   }
 }
 

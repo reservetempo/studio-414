@@ -5,21 +5,24 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Studio 414</title>
   <script>
-    // Style switcher (switcher.js): applies the chosen font and colour before first
-    // paint, from ?font=&color= in the URL (which wins) or else from localStorage.
+    // Applies the font and the colour before first paint. The font is the one chosen in
+    // Display (switcher.js), from ?font= in the URL (which wins) or else from
+    // localStorage. The colour (colors.css) is not chosen in Display: it comes from
+    // ?color= in the URL alone, else Classic (0).
     (function () {
       var params = new URLSearchParams(location.search);
-      // max is the number of the last option: 20 for the font and for the colour.
-      function pick(name, max) {
-        var value = params.get(name);
-        if (value === null) {
-          try { value = localStorage.getItem('studio414.style.' + name); } catch (e) { value = null; }
-        }
+      // A whole number from 0 to max (the number of the last option: 20 for the font
+      // and for the colour), as a string, or else '0'.
+      function valid(value, max) {
         value = String(value).trim();
         return /^(0|[1-9][0-9]?)$/.test(value) && Number(value) <= max ? value : '0';
       }
-      document.documentElement.setAttribute('data-font', pick('font', 20));
-      document.documentElement.setAttribute('data-color', pick('color', 20));
+      var font = params.get('font');
+      if (font === null) {
+        try { font = localStorage.getItem('studio414.style.font'); } catch (e) { font = null; }
+      }
+      document.documentElement.setAttribute('data-font', valid(font, 20));
+      document.documentElement.setAttribute('data-color', valid(params.get('color'), 20));
     })();
   </script>
   <script>
@@ -70,6 +73,7 @@
   <!-- 800 is only for the big 414; Google serves all three upright weights from one file. -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,800;1,400&display=swap">
   <link rel="stylesheet" href="aqua.css">
+  <link rel="stylesheet" href="colors.css">
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="boxes.css">
   <link rel="stylesheet" href="comments.css">
@@ -279,23 +283,21 @@
   </dialog>
 
   <script>
-    // Style switcher (switcher.js): gives each window above the font and colour chosen
-    // for it alone in Display, before first paint, from localStorage
-    // ("studio414.style.<part>.font" / ".color"). A missing or invalid key means "Same
-    // as everything" (no attribute). These must match PARTS in switcher.js, which sets
+    // Style switcher (switcher.js): gives each window above the font chosen for it
+    // alone in Display, before first paint, from localStorage
+    // ("studio414.style.<part>.font"). A missing or invalid key means "Same as
+    // everything" (no attribute). These must match PARTS in switcher.js, which sets
     // Display's own as it builds it.
     (function () {
       var parts = { mailing: '#signup', workshops: '#workshops, #workshop' };
       Object.keys(parts).forEach(function (part) {
-        ['font', 'color'].forEach(function (kind) {
-          var value;
-          try { value = localStorage.getItem('studio414.style.' + part + '.' + kind); } catch (e) { value = null; }
-          value = String(value).trim();
-          // 20 is the number of the last option, for the font and for the colour.
-          if (!/^(0|[1-9][0-9]?)$/.test(value) || Number(value) > 20) return;
-          var nodes = document.querySelectorAll(parts[part]);
-          for (var i = 0; i < nodes.length; i++) nodes[i].setAttribute('data-' + kind, value);
-        });
+        var value;
+        try { value = localStorage.getItem('studio414.style.' + part + '.font'); } catch (e) { value = null; }
+        value = String(value).trim();
+        // 20 is the number of the last font.
+        if (!/^(0|[1-9][0-9]?)$/.test(value) || Number(value) > 20) return;
+        var nodes = document.querySelectorAll(parts[part]);
+        for (var i = 0; i < nodes.length; i++) nodes[i].setAttribute('data-font', value);
       });
     })();
   </script>

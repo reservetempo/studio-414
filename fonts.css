@@ -11,7 +11,7 @@
    inherits these tokens from <html> unless it carries its own data-font. The big
    414, "Opening soon!", the Workshops link and the comment section sit on the page,
    so they follow <html> alone.
-   Unlike the bevels (see switcher.css), nothing here needs declaring again on a
+   Unlike the bevels (see styles.css), nothing here needs declaring again on a
    window: the tokens the windows use are plain values, and the one built from
    another, --big-weight, is worked out on the element carrying data-font anyway and
    is only used by the 414.
