@@ -1,1 +1,462 @@
-/* Windows 98 theme (after 98.css). See themes/README.md. */
+/* Windows 98, after 98.css (v0.1.21, https://github.com/jdan/98.css, MIT licence,
+   copyright 2020 Jordan Scales). No 98.css is loaded: its shapes are redrawn here on
+   our own markup, in the chosen colour (see themes/README.md). The bevels, the
+   title-bar glyphs (minimise, maximise, close) and the drop-down arrow follow 98.css;
+   the colours come from the palette, so the grey is the colour's face.
+   Font: the pixel "MS Sans Serif" and "MS Sans Serif Bold" FontStructions by "lou"
+   (fontstruct.com), as shipped by 98.css, under the Creative Commons
+   Attribution-ShareAlike 3.0 licence: fonts/win98/LICENSE.txt.
+   Every rule starts :root[data-theme="win98"], so it wins over the Aqua base. */
+
+@font-face {
+  font-family: "S414 W98";
+  src: url("../fonts/win98/MSSansSerif.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "S414 W98";
+  src: url("../fonts/win98/MSSansSerif-Bold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ---------- Tokens ---------- */
+
+:root[data-theme="win98"] {
+  --aqua-font: "S414 W98", "MS Sans Serif", "Microsoft Sans Serif", Tahoma, Arial, sans-serif;
+  --aqua-radius: 0;
+}
+
+/* Built from the palette, so declared again on [data-color] (a custom property is
+   computed where it is declared). Bevels, as 98.css draws them: the window, a push
+   button, the default button (one dark line more), pressed, and a sunken field. */
+:root[data-theme="win98"],
+:root[data-theme="win98"] [data-color] {
+  --w98-window: inset -1px -1px var(--dk-shadow), inset 1px 1px var(--light),
+    inset -2px -2px var(--shadow), inset 2px 2px var(--hilight);
+  --w98-raised: inset -1px -1px var(--dk-shadow), inset 1px 1px var(--hilight),
+    inset -2px -2px var(--shadow), inset 2px 2px var(--light);
+  --w98-pressed: inset -1px -1px var(--hilight), inset 1px 1px var(--dk-shadow),
+    inset -2px -2px var(--light), inset 2px 2px var(--shadow);
+  --w98-default: inset -2px -2px var(--dk-shadow), inset 1px 1px var(--dk-shadow),
+    inset 2px 2px var(--hilight), inset -3px -3px var(--shadow), inset 3px 3px var(--light);
+  --w98-default-pressed: inset 2px 2px var(--dk-shadow), inset -1px -1px var(--dk-shadow),
+    inset -2px -2px var(--hilight), inset 3px 3px var(--shadow), inset -3px -3px var(--light);
+  --w98-sunken: inset -1px -1px var(--hilight), inset 1px 1px var(--shadow),
+    inset -2px -2px var(--light), inset 2px 2px var(--dk-shadow);
+  /* The title bar's left-to-right gradient: a shade laid over the title colour at the
+     left and a lift at the right. These amounts keep the title text 4.5:1 or more
+     across the bar for all 21 colours whichever its text is (at most 20% black under
+     black text, 12% white under white text). */
+  --w98-title-shade: rgb(0 0 0 / 0.15);
+  --w98-title-lift: rgb(255 255 255 / 0.12);
+  --w98-titlebar:
+    linear-gradient(90deg, var(--w98-title-shade), transparent),
+    linear-gradient(90deg, transparent, var(--w98-title-lift)),
+    var(--title);
+}
+
+/* Where colours can be worked out from the title text (always #000 or #fff), the
+   gradient grows away from it, as on Windows 98: under white text the left end goes
+   darker (40% black), under black text the right end lighter (55% white). Both only
+   raise the contrast. */
+@supports (color: rgb(from red r g b)) {
+  :root[data-theme="win98"],
+  :root[data-theme="win98"] [data-color] {
+    --w98-title-shade: rgb(from var(--title-text) 0 0 0 / calc(0.15 + min(r, 1) * 0.25));
+    --w98-title-lift: rgb(from var(--title-text) 255 255 255 / calc(0.12 + (1 - min(r, 1)) * 0.43));
+  }
+}
+
+/* ---------- Windows ---------- */
+
+/* A grey (face) window with a two-tone raised edge, square, without a drop shadow. */
+:root[data-theme="win98"] .box {
+  padding: 3px;
+  border: 0;
+  border-radius: 0;
+  background: var(--face);
+  box-shadow: var(--w98-window);
+  -webkit-font-smoothing: auto;
+  -moz-osx-font-smoothing: auto;
+}
+
+:root[data-theme="win98"] .box ::selection {
+  background: var(--title);
+  color: var(--title-text);
+}
+
+/* The title bar: the gradient, the title in white (or black) bold at the left, the
+   buttons at the right. 18px tall with a mouse; touch screens keep the taller bar. */
+:root[data-theme="win98"] .box__titlebar {
+  gap: 4px;
+  padding: 3px 2px 3px 3px;
+  border-bottom: 0;
+  border-radius: 0;
+  background: var(--w98-titlebar);
+  color: var(--title-text);
+  -webkit-font-smoothing: none;
+}
+
+@media not (pointer: coarse) {
+  :root[data-theme="win98"] .box__titlebar {
+    min-height: 18px;
+  }
+}
+
+:root[data-theme="win98"] .box__titlebar:has(> .box__lights)::after {
+  content: none;
+}
+
+:root[data-theme="win98"] .box__title {
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 13px;
+  text-align: left;
+  text-shadow: none;
+}
+
+:root[data-theme="win98"] .box__handle:focus-visible {
+  outline: 1px dotted var(--title-text);
+  outline-offset: -2px;
+}
+
+/* The gumdrops become small square buttons at the right, in Windows order:
+   minimise, maximise, then close (2px apart). Each glyph is 98.css's, in black
+   (--face-text is always black). */
+:root[data-theme="win98"] .box__lights {
+  order: 1;
+  gap: 0;
+}
+
+:root[data-theme="win98"] .box__light {
+  width: 16px;
+  height: 14px;
+  border: 0;
+  border-radius: 0;
+  background: var(--face) no-repeat;
+  box-shadow: var(--w98-raised);
+  color: var(--face-text);
+}
+
+:root[data-theme="win98"] .box__light--min {
+  order: 1;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='6' height='2'%3E%3Cpath fill='%23000' d='M0 0h6v2H0z'/%3E%3C/svg%3E");
+  background-position: left 4px bottom 3px;
+}
+
+:root[data-theme="win98"] .box__light--zoom {
+  order: 2;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='9'%3E%3Cpath fill='%23000' fill-rule='evenodd' d='M9 0H0v9h9V0zM8 2H1v6h7V2z'/%3E%3C/svg%3E");
+  background-position: left 3px top 2px;
+}
+
+:root[data-theme="win98"] .box__light--close {
+  order: 3;
+  margin-left: 2px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='7'%3E%3Cpath fill='%23000' d='M0 0h2v1h1v1h2V1h1V0h2v1H7v1H6v1H5v1h1v1h1v1h1v1H6V6H5V5H3v1H2v1H0V6h1V5h1V4h1V3H2V2H1V1H0V0z'/%3E%3C/svg%3E");
+  background-position: left 4px top 3px;
+}
+
+/* A real close (Display, the Workshops dialogs) draws the same × box; its own × is
+   not needed. Pressed, the edge sinks and the glyph moves down and right. */
+:root[data-theme="win98"] .box__close svg {
+  display: none;
+}
+
+:root[data-theme="win98"] .box__close:active {
+  box-shadow: var(--w98-pressed);
+  background-position: left 5px top 4px;
+}
+
+:root[data-theme="win98"] .box__close:focus-visible {
+  outline: 1px dotted var(--title-text);
+  outline-offset: 1px;
+}
+
+/* The resize grip: Windows' three diagonal ridges, a light line and a shadow each. */
+:root[data-theme="win98"] .box__grip::after {
+  right: 4px;
+  bottom: 4px;
+  width: 12px;
+  height: 12px;
+  background: repeating-linear-gradient(135deg,
+    transparent 0 1px,
+    var(--hilight) 1px 2px,
+    var(--shadow) 2px 4px);
+}
+
+:root[data-theme="win98"] .box__grip:focus-visible {
+  outline: 1px dotted var(--focus);
+  outline-offset: -3px;
+}
+
+/* ---------- Push buttons (.aqua-pill) ---------- */
+
+/* Square, grey, raised; 11px text. Tinted pills are plain push buttons too: Windows
+   has no coloured buttons. */
+:root[data-theme="win98"] .aqua-pill {
+  border: 0;
+  border-radius: 0;
+  background: var(--face);
+  color: var(--face-text);
+  box-shadow: var(--w98-raised);
+  font-size: 11px;
+  -webkit-font-smoothing: none;
+}
+
+:root[data-theme="win98"] .aqua-pill::after,
+:root[data-theme="win98"] .aqua-pill--pulse::before {
+  content: none;
+}
+
+/* The default button (Sign up, Pay): one dark line more round it. */
+:root[data-theme="win98"] .aqua-pill--tint.aqua-pill--pulse {
+  box-shadow: var(--w98-default);
+}
+
+:root[data-theme="win98"] .aqua-pill:not(:disabled):active {
+  background: var(--face);
+  box-shadow: var(--w98-pressed);
+}
+
+:root[data-theme="win98"] .aqua-pill--tint.aqua-pill--pulse:not(:disabled):active {
+  box-shadow: var(--w98-default-pressed);
+}
+
+/* A button that stays down while what it opens is open (the paint roller): pressed,
+   and lighter, as Windows' checkered fill reads. (A real 2px checker breaks the
+   page's rendering in Chromium.) */
+:root[data-theme="win98"] .aqua-pill[aria-expanded="true"] {
+  background: var(--light);
+  box-shadow: var(--w98-pressed);
+}
+
+/* The dotted line inside the focused button. */
+:root[data-theme="win98"] .aqua-pill:focus-visible {
+  outline: 1px dotted var(--focus);
+  outline-offset: -4px;
+}
+
+/* Disabled: greyed, etched words (inactive, so no contrast minimum), no press. */
+:root[data-theme="win98"] .aqua-pill:disabled {
+  color: var(--shadow);
+  text-shadow: 1px 1px 0 var(--hilight);
+  cursor: default;
+}
+
+/* ---------- Fields and pop-up menus ---------- */
+
+/* White, sunken two lines deep. Focused: a dotted line round the field. */
+:root[data-theme="win98"] .aqua-field {
+  border: 0;
+  border-radius: 0;
+  background: var(--field);
+  color: var(--field-text);
+  box-shadow: var(--w98-sunken);
+}
+
+:root[data-theme="win98"] .aqua-field:focus-visible {
+  border: 0;
+  outline: 1px dotted var(--focus);
+  outline-offset: 2px;
+  box-shadow: var(--w98-sunken);
+}
+
+/* A drop-down list: a sunken white field with a raised arrow button inside its right
+   edge, drawn as five face-coloured rectangles (the bevel) under 98.css's arrow. */
+:root[data-theme="win98"] .aqua-popup {
+  border: 0;
+  border-radius: 0;
+  background-color: var(--field);
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='7' height='4'%3E%3Cpath fill='%23000' d='M7 0H0v1h1v1h1v1h1v1h1V3h1V2h1V1h1V0z'/%3E%3C/svg%3E"),
+    linear-gradient(var(--face), var(--face)),
+    linear-gradient(var(--hilight), var(--hilight)),
+    linear-gradient(var(--shadow), var(--shadow)),
+    linear-gradient(var(--light), var(--light)),
+    linear-gradient(var(--dk-shadow), var(--dk-shadow));
+  background-repeat: no-repeat;
+  background-position: right 8px center, right 4px top 4px, right 4px top 3px,
+    right 3px top 3px, right 3px top 2px, right 2px top 2px;
+  background-size: 7px 4px, 16px calc(100% - 8px), 17px calc(100% - 7px),
+    18px calc(100% - 6px), 19px calc(100% - 5px), 20px calc(100% - 4px);
+  color: var(--field-text);
+  box-shadow: var(--w98-sunken);
+}
+
+/* Focused, as in 98.css: the field fills with the title colour. (The transparent
+   outline shows in high-contrast modes, which drop the fill.) */
+:root[data-theme="win98"] .aqua-popup:focus-visible {
+  border: 0;
+  outline: 2px solid transparent;
+  background-color: var(--title);
+  color: var(--title-text);
+  box-shadow: var(--w98-sunken);
+}
+
+:root[data-theme="win98"] .aqua-popup option {
+  background: var(--field);
+  color: var(--field-text);
+}
+
+/* ---------- Display ---------- */
+
+:root[data-theme="win98"] .switcher__label {
+  font-size: 11px;
+  letter-spacing: 0;
+  text-transform: none;
+  -webkit-font-smoothing: none;
+}
+
+/* ‹ and › stay large enough to hit and read. */
+:root[data-theme="win98"] .switcher__step {
+  font-size: 16px;
+}
+
+/* ---------- The comment box ---------- */
+
+/* A window of its own on the page: the face, the raised edge, "Comments" as its
+   title bar, and the page's text colours swapped for the face's. */
+:root[data-theme="win98"] .comments__inner {
+  --page-text: var(--face-text);
+  --page-text-muted: var(--face-muted);
+  gap: 8px;
+  padding: 3px 3px 10px;
+  border: 0;
+  background: var(--face);
+  color: var(--face-text);
+  box-shadow: var(--w98-window);
+}
+
+:root[data-theme="win98"] .comments > .comments__inner {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+:root[data-theme="win98"] .comments__inner > :not(.comments__title) {
+  margin-inline: 5px;
+}
+
+:root[data-theme="win98"] .comments__title {
+  min-height: 18px;
+  padding: 3px 3px 2px;
+  background: var(--w98-titlebar);
+  color: var(--title-text);
+  font-family: var(--aqua-font);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 13px;
+  -webkit-font-smoothing: none;
+}
+
+/* The comments in a sunken white list. */
+:root[data-theme="win98"] .comments__pane {
+  padding: 4px 6px;
+  background: var(--field);
+  box-shadow: var(--w98-sunken);
+  scrollbar-color: var(--shadow) var(--face);
+}
+
+:root[data-theme="win98"] .comments__input,
+:root[data-theme="win98"] .comments__textarea {
+  border: 0;
+  background: var(--field);
+  color: var(--field-text);
+  box-shadow: var(--w98-sunken);
+}
+
+:root[data-theme="win98"] .comments__input[aria-invalid="true"],
+:root[data-theme="win98"] .comments__textarea[aria-invalid="true"] {
+  box-shadow: var(--w98-sunken), inset 0 0 0 4px var(--error);
+}
+
+:root[data-theme="win98"] .comments__message[data-state="error"] {
+  color: var(--error);
+}
+
+:root[data-theme="win98"] .comments__link {
+  color: var(--accent-ink);
+}
+
+/* "Post comment": a push button. */
+:root[data-theme="win98"] .comments__submit {
+  min-width: 75px;
+  min-height: 23px;
+  padding: 0 12px;
+  background: var(--face);
+  color: var(--face-text);
+  box-shadow: var(--w98-raised);
+  font-family: var(--aqua-font);
+  font-size: 11px;
+  text-decoration: none;
+  -webkit-font-smoothing: none;
+}
+
+:root[data-theme="win98"] .comments__submit:not(:disabled):active {
+  box-shadow: var(--w98-pressed);
+}
+
+:root[data-theme="win98"] .comments__submit:disabled {
+  color: var(--shadow);
+  text-shadow: 1px 1px 0 var(--hilight);
+}
+
+:root[data-theme="win98"] .comments__pane:focus-visible,
+:root[data-theme="win98"] .comments__submit:focus-visible {
+  outline: 1px dotted var(--focus);
+  outline-offset: -4px;
+}
+
+:root[data-theme="win98"] .comments__input:focus-visible,
+:root[data-theme="win98"] .comments__textarea:focus-visible,
+:root[data-theme="win98"] .comments__link:focus-visible {
+  outline: 1px dotted var(--focus);
+  outline-offset: 2px;
+}
+
+/* ---------- High contrast ---------- */
+
+/* Forced colours drop the bevels (box shadows): draw plain frames instead. */
+@media (forced-colors: active) {
+  :root[data-theme="win98"] .box,
+  :root[data-theme="win98"] .comments__inner {
+    border: 1px solid CanvasText;
+  }
+
+  :root[data-theme="win98"] .box__titlebar,
+  :root[data-theme="win98"] .comments__title {
+    border-bottom: 1px solid CanvasText;
+  }
+
+  :root[data-theme="win98"] .box__light,
+  :root[data-theme="win98"] .aqua-pill,
+  :root[data-theme="win98"] .comments__submit {
+    border: 1px solid ButtonText;
+  }
+
+  :root[data-theme="win98"] .box__close {
+    background-image: none;
+  }
+
+  :root[data-theme="win98"] .box__close svg {
+    display: block;
+    opacity: 1;
+  }
+
+  :root[data-theme="win98"] .aqua-field,
+  :root[data-theme="win98"] .aqua-popup,
+  :root[data-theme="win98"] .comments__pane,
+  :root[data-theme="win98"] .comments__input,
+  :root[data-theme="win98"] .comments__textarea {
+    border: 1px solid CanvasText;
+  }
+
+  :root[data-theme="win98"] .box__grip::after {
+    background: CanvasText;
+  }
+}
