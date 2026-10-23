@@ -342,3 +342,349 @@ body {
 .wallpaper-loading > :last-child {
   margin-bottom: 0;
 }
+
+/* ---- Workshops section (admin-workshops.js) -------------------------------------
+   The list of workshops (upcoming first, past ones folded away), the form for adding
+   or editing one, and each workshop's paid sign-ups. */
+
+.workshops {
+  --workshops-ok: #1e6b34;
+  --workshops-ok-bg: #e7f4ea;
+  --workshops-badge-bg: #e8e8ed;
+  --workshops-past-bg: #f7f7f9;
+}
+
+.workshops .admin-message-ok {
+  background: var(--workshops-ok-bg);
+  color: var(--workshops-ok);
+}
+
+.workshops .admin-message:focus {
+  outline: none;
+}
+
+.workshops .admin-button[aria-disabled="true"] {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.workshops-loading > :last-child {
+  margin-bottom: 0;
+}
+
+.workshops-top {
+  margin: 0 0 16px;
+}
+
+.workshops-list-retry {
+  margin: 0 0 16px;
+}
+
+.workshops-empty {
+  margin: 0 0 16px;
+}
+
+.workshops-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.workshops-item {
+  min-width: 0;
+  margin: 0 0 12px;
+  padding: 12px;
+  border: 1px solid var(--admin-border);
+  border-radius: 6px;
+  background: var(--admin-panel);
+}
+
+/* Past workshops: greyed. */
+.workshops-item.is-past {
+  background: var(--workshops-past-bg);
+  color: var(--admin-muted);
+}
+
+.workshops-item-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 8px;
+  margin: 0 0 2px;
+}
+
+.workshops-item-name {
+  min-width: 0;
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.workshops-badge {
+  display: inline-block;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--workshops-badge-bg);
+  color: var(--admin-text);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.workshops-badge-past {
+  color: var(--admin-muted);
+}
+
+.workshops-item-when,
+.workshops-item-meta {
+  margin: 0;
+  font-size: 0.9375rem;
+}
+
+.workshops-item-meta {
+  margin-bottom: 10px;
+  color: var(--admin-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.workshops-reason {
+  margin: 6px 0 0;
+  font-size: 0.875rem;
+}
+
+.workshops-item .admin-message {
+  margin: 10px 0 0;
+}
+
+.workshops-past-toggle::before {
+  content: "\25B8\00A0";
+}
+
+.workshops-past-toggle[aria-expanded="true"]::before {
+  content: "\25BE\00A0";
+}
+
+.workshops-list-past {
+  margin-top: 12px;
+}
+
+/* A workshop's sign-ups. */
+.workshops-signups {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--admin-border);
+  color: var(--admin-text);
+}
+
+.workshops-signups-title {
+  margin: 0 0 8px;
+  font-size: 0.9375rem;
+}
+
+.workshops-signups-status {
+  margin: 0;
+}
+
+.workshops-signups .admin-message {
+  margin: 0 0 8px;
+}
+
+.workshops-signups-wrap {
+  overflow-x: auto;
+}
+
+.workshops-signups-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9375rem;
+}
+
+.workshops-signups-table th,
+.workshops-signups-table td {
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--admin-border);
+  text-align: left;
+  vertical-align: top;
+}
+
+.workshops-signups-table th {
+  color: var(--admin-muted);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.workshops-signups-table th:first-child,
+.workshops-signups-table td:first-child {
+  padding-left: 0;
+}
+
+.workshops-signups-table .workshops-signups-number {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.workshops-signups-table .workshops-signups-date {
+  white-space: nowrap;
+}
+
+.workshops-signups-email {
+  color: var(--admin-accent);
+  overflow-wrap: anywhere;
+}
+
+.workshops-signups-total {
+  margin: 8px 0 0;
+  font-weight: 600;
+}
+
+.workshops-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* The form for adding or editing a workshop. */
+.workshops-form-title {
+  margin: 0 0 12px;
+  font-size: 1rem;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.workshops-form-title:focus {
+  outline: none;
+}
+
+.workshops-field {
+  min-width: 0;
+  margin: 0 0 14px;
+}
+
+.workshops-label {
+  display: block;
+  margin-bottom: 2px;
+  font-weight: 600;
+}
+
+.workshops-field-hint {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--admin-muted);
+  font-size: 0.875rem;
+}
+
+.workshops-input {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  padding: 8px 10px;
+  border: 1px solid var(--admin-border);
+  border-radius: 6px;
+  background: var(--admin-panel);
+  color: var(--admin-text);
+  font: inherit;
+}
+
+.workshops-input:focus-visible {
+  outline: 3px solid var(--admin-accent);
+  outline-offset: 1px;
+}
+
+.workshops-input[aria-invalid="true"] {
+  border-color: var(--admin-error);
+}
+
+.workshops-textarea {
+  min-height: 6.5rem;
+  resize: vertical;
+}
+
+.workshops-form-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 12px;
+}
+
+.workshops-form-row > .workshops-field {
+  flex: 1 1 160px;
+}
+
+.workshops-price {
+  display: flex;
+}
+
+.workshops-price-symbol {
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  border: 1px solid var(--admin-border);
+  border-right: 0;
+  border-radius: 6px 0 0 6px;
+  background: var(--admin-bg);
+  color: var(--admin-muted);
+}
+
+.workshops-price .workshops-input {
+  flex: 1 1 auto;
+  border-radius: 0 6px 6px 0;
+}
+
+.workshops-form-note {
+  margin: 0 0 14px;
+  font-size: 0.9375rem;
+}
+
+/* Phones: each sign-up becomes a small stack of labelled lines. */
+@media (max-width: 560px) {
+  .workshops-signups-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
+  .workshops-signups-table,
+  .workshops-signups-table tbody,
+  .workshops-signups-table tr {
+    display: block;
+    width: 100%;
+  }
+
+  .workshops-signups-table tr {
+    padding: 8px 0;
+    border-bottom: 1px solid var(--admin-border);
+  }
+
+  .workshops-signups-table td,
+  .workshops-signups-table td:first-child {
+    display: grid;
+    grid-template-columns: 4.5rem minmax(0, 1fr);
+    gap: 8px;
+    padding: 1px 0;
+    border: 0;
+  }
+
+  .workshops-signups-table .workshops-signups-number {
+    text-align: left;
+  }
+
+  .workshops-signups-table .workshops-signups-date {
+    white-space: normal;
+  }
+
+  .workshops-signups-table td::before {
+    content: attr(data-label);
+    color: var(--admin-muted);
+    font-weight: 600;
+  }
+}
