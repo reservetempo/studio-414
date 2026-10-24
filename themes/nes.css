@@ -1435,6 +1435,482 @@
   border-radius: 0;
 }
 
+/* ---------- Wallpaper section ---------- */
+
+/* The words at 8px on 16px lines (admin.css sets 12px and 13px). */
+:root[data-theme="nes"] .wallpaper-caption,
+:root[data-theme="nes"] .wallpaper-readout,
+:root[data-theme="nes"] .wallpaper-note,
+:root[data-theme="nes"] .wallpaper-hint,
+:root[data-theme="nes"] .wallpaper-editor-title,
+:root[data-theme="nes"] .wallpaper-progress-text {
+  font-size: 8px;
+  font-weight: 400;
+  line-height: 16px;
+}
+
+:root[data-theme="nes"] .wallpaper-caption,
+:root[data-theme="nes"] .wallpaper-readout,
+:root[data-theme="nes"] .wallpaper-progress {
+  margin-bottom: 16px;
+}
+
+:root[data-theme="nes"] .wallpaper-note {
+  margin-top: 16px;
+}
+
+:root[data-theme="nes"] .wallpaper-editor-title {
+  margin-bottom: 8px;
+}
+
+:root[data-theme="nes"] .wallpaper-hint {
+  margin-bottom: 16px;
+}
+
+/* The photo in a pixel line, drawn just outside it (::after), so the spot's
+   percentages and the drag maths stay on the photo itself. */
+:root[data-theme="nes"] .wallpaper-figure {
+  margin: var(--nes-u) auto calc(16px + var(--nes-u));
+  box-shadow: none;
+}
+
+:root[data-theme="nes"] .wallpaper-figure::after {
+  inset: calc(-1 * var(--nes-u));
+  background: var(--nes-line);
+  box-shadow: none;
+}
+
+/* The spot: a selection in pixel dashes, the title colour's text over the title
+   colour (4.5:1 apart, so one of them shows on any photo), round a light wash of
+   the colour. The border stays (transparent) for high-contrast modes. */
+:root[data-theme="nes"] .wallpaper-spot,
+:root[data-theme="nes"] .wallpaper-box {
+  --wallpaper-wash: color-mix(in srgb, var(--title) 24%, transparent);
+  --wallpaper-dash-x: repeating-linear-gradient(90deg, var(--title-text) 0 4px, var(--title) 4px 8px);
+  --wallpaper-dash-y: repeating-linear-gradient(180deg, var(--title-text) 0 4px, var(--title) 4px 8px);
+  border: 2px solid transparent;
+  background:
+    var(--wallpaper-dash-x) left top / 100% 2px no-repeat border-box,
+    var(--wallpaper-dash-x) left bottom / 100% 2px no-repeat border-box,
+    var(--wallpaper-dash-y) left top / 2px 100% no-repeat border-box,
+    var(--wallpaper-dash-y) right top / 2px 100% no-repeat border-box,
+    linear-gradient(var(--wallpaper-wash) 0 0) padding-box;
+  box-shadow: none;
+}
+
+:root[data-theme="nes"] .wallpaper-box.is-dragging {
+  --wallpaper-wash: color-mix(in srgb, var(--title) 40%, transparent);
+}
+
+/* Focused: the dotted line, on a white band so it shows on a dark photo too. */
+:root[data-theme="nes"] .wallpaper-box:focus-visible {
+  outline: 2px dotted var(--focus);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px var(--field);
+}
+
+/* The handles: square pixels of the title colour in a line of its text, centred on
+   the box's corners (just outside them on touch screens, as in admin.css). */
+:root[data-theme="nes"] .wallpaper-handle {
+  border: 2px solid var(--title-text);
+  border-radius: 0;
+  background: var(--title);
+  box-shadow: none;
+}
+
+/* The upload: NES.css's progress bar, a pixel line round a solid bar in the ink for
+   names. Until the size is known, blocks of it crawl along a pixel at a time
+   (standing still under reduced motion). */
+:root[data-theme="nes"] .wallpaper-progress-bar {
+  --nes-blocks: repeating-linear-gradient(90deg, var(--accent-ink) 0 8px, transparent 8px 16px);
+  height: 24px;
+  padding: var(--nes-u);
+  border: var(--nes-u) solid transparent;
+  border-radius: 0;
+  background: var(--nes-line);
+  background-origin: border-box;
+  background-clip: border-box;
+  color: var(--accent-ink);
+}
+
+:root[data-theme="nes"] .wallpaper-progress-bar::-webkit-progress-bar {
+  background: transparent;
+  box-shadow: none;
+}
+
+:root[data-theme="nes"] .wallpaper-progress-bar::-webkit-progress-value {
+  background: var(--accent-ink);
+  box-shadow: none;
+  animation: none;
+}
+
+:root[data-theme="nes"] .wallpaper-progress-bar::-moz-progress-bar {
+  background: var(--accent-ink);
+  box-shadow: none;
+  animation: none;
+}
+
+:root[data-theme="nes"] .wallpaper-progress-bar:indeterminate {
+  background: var(--nes-line), var(--nes-blocks) 0 0 / 16px 100% content-box;
+  background-origin: border-box, border-box, border-box, border-box, content-box;
+  background-clip: border-box, border-box, border-box, border-box, content-box;
+  animation: nes-progress 0.8s steps(4) infinite;
+}
+
+:root[data-theme="nes"] .wallpaper-progress-bar:indeterminate::-webkit-progress-bar,
+:root[data-theme="nes"] .wallpaper-progress-bar:indeterminate::-webkit-progress-value {
+  background: transparent;
+}
+
+:root[data-theme="nes"] .wallpaper-progress-bar:indeterminate::-moz-progress-bar {
+  background: transparent;
+}
+
+@keyframes nes-progress {
+  from {
+    background-position: var(--nes-u) 0, var(--nes-u) 100%, 0 var(--nes-u), 100% var(--nes-u), 0 0;
+  }
+  to {
+    background-position: var(--nes-u) 0, var(--nes-u) 100%, 0 var(--nes-u), 100% var(--nes-u), 16px 0;
+  }
+}
+
+/* ---------- Workshops section ---------- */
+
+/* NES.css's lists and tables have no alternate rows: white throughout, a pixel line
+   of the ink between rows. The labels' column fits "Price per spot (CAD):". */
+:root[data-theme="nes"] .workshops {
+  --workshops-row: var(--field);
+  --workshops-rule: var(--nes-ink);
+  --workshops-label-width: 176px;
+}
+
+:root[data-theme="nes"] .workshops-top,
+:root[data-theme="nes"] .workshops-list-retry,
+:root[data-theme="nes"] .workshops-empty {
+  margin-bottom: 16px;
+}
+
+/* The list: white in the notched pixel line, as NES.css's fields and tables. */
+:root[data-theme="nes"] .workshops-list {
+  padding: var(--nes-u);
+  border: 0;
+  background: var(--nes-line), linear-gradient(var(--field) 0 0) var(--nes-u) var(--nes-u) / calc(100% - 2 * var(--nes-u)) calc(100% - 2 * var(--nes-u)) no-repeat;
+  box-shadow: none;
+}
+
+/* A row: room at the left for the arrow that points at the row in use (blinking,
+   as on the Look section's radio buttons). */
+:root[data-theme="nes"] .workshops-item {
+  position: relative;
+  padding: 12px 12px 16px 28px;
+}
+
+:root[data-theme="nes"] .workshops-item + .workshops-item {
+  border-top: var(--nes-u) solid var(--workshops-rule);
+}
+
+:root[data-theme="nes"] .workshops-item:focus-within::before {
+  content: "";
+  position: absolute;
+  top: 13px;
+  left: 10px;
+  width: 8px;
+  height: 14px;
+  background: var(--nes-ink);
+  -webkit-mask: var(--nes-pointer) center / 8px 14px no-repeat;
+  mask: var(--nes-pointer) center / 8px 14px no-repeat;
+  animation: nes-blink 1s steps(1) infinite;
+}
+
+:root[data-theme="nes"] .workshops-item-head {
+  gap: 4px 8px;
+}
+
+/* The name in the ink for names (it has no bold); greyed with the row when past. */
+:root[data-theme="nes"] .workshops-item-name {
+  color: var(--accent-ink);
+  font-size: 8px;
+  font-weight: 400;
+  line-height: 16px;
+}
+
+:root[data-theme="nes"] .workshops-item.is-past .workshops-item-name {
+  color: inherit;
+}
+
+:root[data-theme="nes"] .workshops-item-when,
+:root[data-theme="nes"] .workshops-item-meta,
+:root[data-theme="nes"] .workshops-reason {
+  font-size: 8px;
+  line-height: 16px;
+}
+
+:root[data-theme="nes"] .workshops-reason {
+  margin-top: 8px;
+}
+
+:root[data-theme="nes"] .workshops-item-actions {
+  gap: 8px;
+  margin-top: 12px;
+}
+
+/* The row's buttons as tall as the others. */
+@media (pointer: fine) {
+  :root[data-theme="nes"] .workshops-item-actions .admin-button {
+    min-height: 32px;
+  }
+}
+
+/* "Hidden" and "Past": NES.css's badges, a block with its corners left out:
+   the ink with the face's words, and for a past one the muted grey with white. */
+:root[data-theme="nes"] .workshops-badge {
+  --nes-badge: var(--nes-ink);
+  padding: 0 8px;
+  border: 0;
+  border-radius: 0;
+  background:
+    linear-gradient(var(--nes-badge) 0 0) 2px 0 / calc(100% - 4px) 100% no-repeat,
+    linear-gradient(var(--nes-badge) 0 0) 0 2px / 100% calc(100% - 4px) no-repeat;
+  color: var(--nes-paper);
+  font-size: 8px;
+  font-weight: 400;
+  line-height: 16px;
+  box-shadow: none;
+}
+
+:root[data-theme="nes"] .workshops-badge-past {
+  --nes-badge: var(--face-muted);
+  color: var(--field);
+}
+
+/* Busy (aria-disabled): a disabled button (no shade, the line greyed, the words
+   muted) that doesn't press. */
+:root[data-theme="nes"] .workshops .admin-button[aria-disabled="true"],
+:root[data-theme="nes"] .workshops .admin-button[aria-disabled="true"]:active {
+  --nes-btn-fill: var(--nes-paper);
+  --nes-btn-edge: var(--nes-shade);
+  --nes-btn-shade: transparent;
+  --nes-btn-at: calc(100% - var(--nes-btn-u));
+  --nes-btn-sw: var(--nes-btn-u);
+  padding: 0 20px var(--nes-u) 16px;
+  color: var(--face-muted);
+  opacity: 1;
+}
+
+/* "Past workshops (N)": NES.css's arrow as the disclosure triangle, pointing right
+   while folded and down when open, snapping round; focused, the dotted line. */
+:root[data-theme="nes"] .workshops-past-toggle {
+  gap: 8px;
+  margin-top: 16px;
+  padding: 4px 8px 4px 4px;
+  border-radius: 0;
+  color: var(--nes-ink);
+  font-size: 8px;
+  line-height: 16px;
+}
+
+:root[data-theme="nes"] .workshops-past-toggle::before {
+  content: "";
+  flex: none;
+  width: 8px;
+  height: 14px;
+  background: var(--nes-ink);
+  -webkit-mask: var(--nes-pointer) center / 8px 14px no-repeat;
+  mask: var(--nes-pointer) center / 8px 14px no-repeat;
+  transition: none;
+}
+
+:root[data-theme="nes"] .workshops-past-toggle:focus-visible {
+  outline: 2px dotted var(--focus);
+  outline-offset: 0;
+  box-shadow: none;
+}
+
+:root[data-theme="nes"] .workshops-list-past {
+  margin-top: 8px;
+}
+
+/* The sign-ups: NES.css's bordered table, white in the notched pixel line with a
+   line of the ink between the columns and under the headers, the headers on the
+   face. On phones each sign-up is a block, a line between them. */
+:root[data-theme="nes"] .workshops-signups {
+  margin-top: 12px;
+}
+
+:root[data-theme="nes"] .workshops-signups-title,
+:root[data-theme="nes"] .workshops-signups-status,
+:root[data-theme="nes"] .workshops-signups-total,
+:root[data-theme="nes"] .workshops-signups-table {
+  font-size: 8px;
+  font-weight: 400;
+  line-height: 16px;
+}
+
+:root[data-theme="nes"] .workshops-signups-title {
+  margin-bottom: 8px;
+}
+
+:root[data-theme="nes"] .workshops-signups-total {
+  margin-top: 8px;
+}
+
+:root[data-theme="nes"] .workshops-signups-wrap {
+  padding: var(--nes-u);
+  border: 0;
+  background: var(--nes-line), linear-gradient(var(--field) 0 0) var(--nes-u) var(--nes-u) / calc(100% - 2 * var(--nes-u)) calc(100% - 2 * var(--nes-u)) no-repeat;
+}
+
+:root[data-theme="nes"] .workshops-signups-table th,
+:root[data-theme="nes"] .workshops-signups-table td {
+  padding: 4px 8px;
+  border-left: var(--nes-u) solid var(--nes-ink);
+}
+
+:root[data-theme="nes"] .workshops-signups-table th:first-child,
+:root[data-theme="nes"] .workshops-signups-table td:first-child {
+  border-left: 0;
+}
+
+:root[data-theme="nes"] .workshops-signups-table th {
+  border-bottom: var(--nes-u) solid var(--nes-ink);
+  background: var(--nes-paper);
+  color: var(--nes-ink);
+  font-size: 8px;
+}
+
+:root[data-theme="nes"] .workshops-signups-table tbody tr + tr td {
+  border-top: var(--nes-u) solid var(--nes-ink);
+}
+
+@media (max-width: 560px) {
+  :root[data-theme="nes"] .workshops-signups-table tr {
+    padding: 8px;
+    border-bottom: var(--nes-u) solid var(--workshops-rule);
+  }
+
+  :root[data-theme="nes"] .workshops-signups-table tr:last-child {
+    border-bottom: 0;
+  }
+
+  :root[data-theme="nes"] .workshops-signups-table td,
+  :root[data-theme="nes"] .workshops-signups-table tbody tr + tr td {
+    grid-template-columns: 56px minmax(0, 1fr);
+    padding: 0;
+    border: 0;
+  }
+
+  :root[data-theme="nes"] .workshops-signups-table td::before {
+    font-weight: 400;
+  }
+}
+
+/* The form: NES.css's container with a title, the pixel line round it and the
+   title on its top line (in the flow, so a long title wraps inside the box). */
+:root[data-theme="nes"] .workshops-form {
+  padding: 24px 16px 16px;
+  border: 0;
+  border-radius: 0;
+  background: var(--nes-line);
+  box-shadow: none;
+}
+
+:root[data-theme="nes"] .workshops-form-title {
+  width: fit-content;
+  max-width: 100%;
+  margin: -30px 0 16px -8px;
+  padding: 0 8px;
+  background: var(--nes-paper);
+  font-size: 8px;
+  font-weight: 400;
+  line-height: 16px;
+}
+
+:root[data-theme="nes"] .workshops-field {
+  column-gap: 8px;
+  margin-bottom: 8px;
+}
+
+:root[data-theme="nes"] .workshops-label {
+  padding-top: 8px;
+  font-size: 8px;
+  line-height: 16px;
+}
+
+:root[data-theme="nes"] .workshops-field-hint,
+:root[data-theme="nes"] .workshops-form-note {
+  font-size: 8px;
+  line-height: 16px;
+}
+
+:root[data-theme="nes"] .workshops-field-hint {
+  margin-top: 4px;
+}
+
+:root[data-theme="nes"] .workshops-form-note {
+  margin: 8px 0 16px;
+}
+
+:root[data-theme="nes"] .workshops-form-note,
+:root[data-theme="nes"] .workshops-form .admin-message,
+:root[data-theme="nes"] .workshops-form .admin-actions {
+  margin-left: calc(var(--workshops-label-width) + 8px);
+}
+
+:root[data-theme="nes"] .workshops-price {
+  gap: 8px;
+}
+
+/* The fields: 8px words, 32px tall, the text area a few lines more (touch screens
+   keep the base's taller fields at 16px, so iOS doesn't zoom). */
+:root[data-theme="nes"] .workshops-input {
+  padding: 8px 12px;
+  line-height: 16px;
+}
+
+@media not (pointer: coarse) {
+  :root[data-theme="nes"] .workshops-input {
+    min-height: 32px;
+    font-size: 8px;
+  }
+
+  :root[data-theme="nes"] .workshops-textarea {
+    min-height: 112px;
+  }
+}
+
+@media (pointer: coarse) {
+  :root[data-theme="nes"] .workshops-input {
+    min-height: 40px;
+    line-height: 24px;
+  }
+
+  :root[data-theme="nes"] .workshops-label {
+    padding-top: 12px;
+  }
+}
+
+@media (max-width: 560px) {
+  :root[data-theme="nes"] .workshops-form {
+    padding: 24px 12px 16px;
+  }
+
+  :root[data-theme="nes"] .workshops-form-title {
+    margin-left: -4px;
+  }
+
+  :root[data-theme="nes"] .workshops-label {
+    margin-bottom: 4px;
+    padding-top: 0;
+  }
+
+  :root[data-theme="nes"] .workshops-form-note,
+  :root[data-theme="nes"] .workshops-form .admin-message,
+  :root[data-theme="nes"] .workshops-form .admin-actions {
+    margin-left: 0;
+  }
+}
+
 /* ---------- Owner page, high contrast ---------- */
 
 /* The pixel lines are gradients, which go: plain lines instead. The themes are the
@@ -1467,15 +1943,32 @@
     animation: none;
   }
 
-  :root[data-theme="nes"] .look-color-chip::before {
+  :root[data-theme="nes"] .look-color-chip::before,
+  :root[data-theme="nes"] .workshops-item:focus-within::before,
+  :root[data-theme="nes"] .workshops-past-toggle::before {
     background: CanvasText;
+  }
+
+  :root[data-theme="nes"] .wallpaper-figure {
+    outline: 2px solid CanvasText;
+  }
+
+  :root[data-theme="nes"] .workshops-list,
+  :root[data-theme="nes"] .workshops-signups-wrap,
+  :root[data-theme="nes"] .workshops-form,
+  :root[data-theme="nes"] .workshops-badge {
+    border: 2px solid CanvasText;
+  }
+
+  :root[data-theme="nes"] .wallpaper-progress-bar {
+    border-color: CanvasText;
   }
 }
 
 /* ---------- Owner page, reduced motion ---------- */
 
 /* The words stay put on pressed buttons, the arrows don't blink and the progress
-   bar's blocks stand still. */
+   bars' blocks stand still. */
 @media (prefers-reduced-motion: reduce) {
   :root[data-theme="nes"] .admin-button:not(:disabled):active {
     padding: 0 20px var(--nes-u) 16px;
@@ -1487,7 +1980,9 @@
 
   :root[data-theme="nes"] .admin-barber::before,
   :root[data-theme="nes"] .look-theme-input:checked:focus-visible,
-  :root[data-theme="nes"] .look-color-input:checked:focus-visible ~ .look-color-chip::before {
+  :root[data-theme="nes"] .look-color-input:checked:focus-visible ~ .look-color-chip::before,
+  :root[data-theme="nes"] .wallpaper-progress-bar:indeterminate,
+  :root[data-theme="nes"] .workshops-item:focus-within::before {
     animation: none;
   }
 }
