@@ -35,6 +35,11 @@
   --dos-top: 7px;             /* the outer line from the top and bottom (centred in a row) */
   --dos-side: 4px;            /* and from the sides */
   --dos-bar: 20px;            /* the title row; taller for fingers, the frame stays put */
+  --dos-btn-x: var(--dos-cw); /* a button's shadow: a column right, half a row down */
+  --dos-btn-y: calc(var(--dos-ch) / 2);
+  /* [ ] and [X], three cells: pixels for a mask, painted in the window's text colour. */
+  --dos-box: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 20'%3E%3Cpath d='M2 2h4v2H4v12h2v2H2zM18 2h4v16h-4v-2h2V4h-2z'/%3E%3C/svg%3E");
+  --dos-box-x: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 20'%3E%3Cpath d='M2 2h4v2H4v12h2v2H2zM18 2h4v16h-4v-2h2V4h-2zM8 6h2v2H8zM14 6h2v2h-2zM10 8h4v4h-4zM8 12h2v2H8zM14 12h2v2h-2z'/%3E%3C/svg%3E");
 }
 
 @media (pointer: coarse) {
@@ -50,6 +55,11 @@
   --dos-ink: var(--title-text);
   --dos-dim: color-mix(in srgb, var(--title-text) 85%, var(--title));
   --dos-shade: var(--dk-shadow);
+  /* A button's shadow: the fill dimmed (as text mode dims what a shadow falls on), so
+     it shows against a black button too (3:1 or more). */
+  --dos-btn-shade: color-mix(in srgb, var(--title) 65%, #000000);
+  /* Placeholders on a field (the text colour), 4.5:1 or more. */
+  --dos-hint: color-mix(in srgb, var(--title) 90%, var(--title-text));
   --dos-ink-fill: linear-gradient(var(--dos-ink) 0 0);
   /* The double frame: an outer rectangle of lines, and an inner one a line and a gap
      in, over the fill. */
@@ -305,6 +315,279 @@
   max-width: calc(100% - 4 * var(--dos-cw));
 }
 
+/* ---------- Buttons ---------- */
+
+/* Turbo Vision's, in monochrome: a block in inverse video (the window's text colour,
+   the words in its fill) with a shadow a column right and half a row down (its ▄ and
+   ▀). Pressed (or while what it opens is open: the paint roller), it moves right onto
+   its shadow and the shadow goes. Focused, ► ◄ markers either side of the words.
+   Plain and default buttons look the same; "Post comment" is one too. */
+:root[data-theme="dos"] .aqua-pill,
+:root[data-theme="dos"] .comments__submit {
+  --dos-btn-fill: var(--dos-ink);
+  --dos-btn-text: var(--dos-fill);
+  --dos-mark-in: 4px;         /* the markers from the sides */
+  border: 0;
+  border-radius: 0;
+  background: var(--dos-btn-fill);
+  color: var(--dos-btn-text);
+  box-shadow: var(--dos-btn-x) var(--dos-btn-y) 0 var(--dos-btn-shade);
+  font-family: var(--aqua-font);
+  font-size: var(--dos-text);
+  font-weight: 400;
+  font-style: normal;
+  letter-spacing: 0;
+  line-height: var(--dos-ch);
+  text-decoration: none;
+  text-shadow: none;
+}
+
+/* No shine and no pulse. */
+:root[data-theme="dos"] .aqua-pill::after,
+:root[data-theme="dos"] .aqua-pill--pulse::before {
+  content: none;
+  animation: none;
+}
+
+:root[data-theme="dos"] .aqua-pill:not(:disabled):active,
+:root[data-theme="dos"] .aqua-pill[aria-expanded="true"],
+:root[data-theme="dos"] .comments__submit:not(:disabled):active {
+  box-shadow: none;
+  translate: var(--dos-btn-x) 0;
+}
+
+/* ► and ◄, three columns of pixels each, in the words' colour. The transparent
+   outline shows in high-contrast modes, which drop the markers. */
+:root[data-theme="dos"] .aqua-pill:focus-visible,
+:root[data-theme="dos"] .big-414__handle:focus,
+:root[data-theme="dos"] .comments__submit:focus-visible {
+  outline: 2px solid transparent;
+  outline-offset: 0;
+  background:
+    linear-gradient(var(--dos-btn-text) 0 0) left var(--dos-mark-in) center / 2px 10px no-repeat,
+    linear-gradient(var(--dos-btn-text) 0 0) left calc(var(--dos-mark-in) + 2px) center / 2px 6px no-repeat,
+    linear-gradient(var(--dos-btn-text) 0 0) left calc(var(--dos-mark-in) + 4px) center / 2px 2px no-repeat,
+    linear-gradient(var(--dos-btn-text) 0 0) right var(--dos-mark-in) center / 2px 10px no-repeat,
+    linear-gradient(var(--dos-btn-text) 0 0) right calc(var(--dos-mark-in) + 2px) center / 2px 6px no-repeat,
+    linear-gradient(var(--dos-btn-text) 0 0) right calc(var(--dos-mark-in) + 4px) center / 2px 2px no-repeat,
+    var(--dos-btn-fill);
+}
+
+/* Disabled (Pay until the form is ready, Post comment while posting): no block and no
+   shadow, the words dimmed (4.8:1 on the fill) in a line of the same. */
+:root[data-theme="dos"] .aqua-pill:disabled,
+:root[data-theme="dos"] .comments__submit:disabled {
+  --dos-btn-fill: transparent;
+  --dos-btn-text: var(--dos-dim);
+  box-shadow: inset 0 0 0 2px var(--dos-dim);
+}
+
+/* ---------- Text fields ---------- */
+
+/* dBase's input fields: a strip in inverse video, no edge, with a block cursor that
+   blinks (still with reduced motion, below). Wrong, the strip gets an inner line in
+   the fill; focused, a dotted line round it. The typed words keep the page's font. */
+:root[data-theme="dos"] .aqua-field,
+:root[data-theme="dos"] .comments__input,
+:root[data-theme="dos"] .comments__textarea {
+  border: 0;
+  border-radius: 0;
+  background: var(--dos-ink);
+  color: var(--dos-fill);
+  box-shadow: none;
+  caret-color: var(--dos-fill);
+  caret-shape: block;
+}
+
+:root[data-theme="dos"] .aqua-field::placeholder,
+:root[data-theme="dos"] .comments__input::placeholder,
+:root[data-theme="dos"] .comments__textarea::placeholder {
+  color: var(--dos-hint);
+  opacity: 1;
+}
+
+:root[data-theme="dos"] .aqua-field::selection,
+:root[data-theme="dos"] .comments__input::selection,
+:root[data-theme="dos"] .comments__textarea::selection {
+  background: var(--dos-fill);
+  color: var(--dos-ink);
+}
+
+:root[data-theme="dos"] .aqua-field:focus-visible,
+:root[data-theme="dos"] .aqua-popup:focus-visible,
+:root[data-theme="dos"] .comments__input:focus-visible,
+:root[data-theme="dos"] .comments__textarea:focus-visible {
+  outline: 2px dotted var(--dos-ink);
+  outline-offset: 2px;
+}
+
+:root[data-theme="dos"] .aqua-field[aria-invalid="true"],
+:root[data-theme="dos"] .comments__input[aria-invalid="true"],
+:root[data-theme="dos"] .comments__textarea[aria-invalid="true"] {
+  box-shadow: inset 0 0 0 2px var(--dos-ink), inset 0 0 0 4px var(--dos-fill);
+}
+
+:root[data-theme="dos"] .aqua-field:disabled {
+  background: none;
+  color: var(--dos-dim);
+  box-shadow: inset 0 0 0 2px var(--dos-dim);
+}
+
+:root[data-theme="dos"] .aqua-field:disabled::placeholder {
+  color: var(--dos-dim);
+}
+
+/* ---------- Pop-up menus ---------- */
+
+/* A text-mode drop-down: a strip like the fields, with a pixel ▼ at its right end.
+   The list opens in the window's colours. */
+:root[data-theme="dos"] .aqua-popup {
+  --dos-arrow: linear-gradient(var(--dos-fill) 0 0);
+  border: 0;
+  border-radius: 0;
+  background:
+    var(--dos-arrow) right 8px top calc(50% - 3px) / 8px 2px no-repeat,
+    var(--dos-arrow) right 9px top calc(50% - 1px) / 6px 2px no-repeat,
+    var(--dos-arrow) right 10px top calc(50% + 1px) / 4px 2px no-repeat,
+    var(--dos-arrow) right 11px top calc(50% + 3px) / 2px 2px no-repeat,
+    var(--dos-ink);
+  color: var(--dos-fill);
+  box-shadow: none;
+  font-family: var(--aqua-font);
+  font-size: var(--dos-text);
+  line-height: var(--dos-ch);
+}
+
+:root[data-theme="dos"] .aqua-popup option {
+  background: var(--dos-fill);
+  color: var(--dos-ink);
+}
+
+/* ---------- Check box ---------- */
+
+/* [ ] and [X] in the window's text colour; focused, its line goes inverse video. */
+:root[data-theme="dos"] .workshop__check input {
+  width: calc(3 * var(--dos-cw));
+  height: var(--dos-ch);
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  background: var(--dos-ink);
+  box-shadow: none;
+  -webkit-mask: var(--dos-box) center / 100% 100% no-repeat;
+  mask: var(--dos-box) center / 100% 100% no-repeat;
+}
+
+:root[data-theme="dos"] .workshop__check input:checked {
+  -webkit-mask-image: var(--dos-box-x);
+  mask-image: var(--dos-box-x);
+}
+
+:root[data-theme="dos"] .workshop__check input:focus-visible {
+  outline: 2px solid transparent;
+  box-shadow: none;
+}
+
+:root[data-theme="dos"] .workshop__check:has(input:focus-visible) {
+  background: var(--dos-ink);
+  color: var(--dos-fill);
+}
+
+:root[data-theme="dos"] .workshop__check:has(input:focus-visible) input {
+  background: var(--dos-fill);
+}
+
+/* ---------- Display ---------- */
+
+/* The chrome font at its whole size, and room between the rows and columns for the
+   buttons' shadows. The labels' column fits LAYOUT. */
+:root[data-theme="dos"] .switcher {
+  --dos-step: 32px;
+  font-size: var(--dos-text);
+  line-height: var(--dos-ch);
+}
+
+:root[data-theme="dos"] .switcher__body {
+  gap: 12px;
+  padding-right: calc(3 * var(--dos-cw));
+  padding-bottom: calc(2 * var(--dos-top) + 2px + var(--dos-btn-y));
+}
+
+:root[data-theme="dos"] .switcher__row {
+  grid-template-columns: calc(6 * var(--dos-cw) + 2px) var(--dos-step) minmax(0, 1fr) var(--dos-step);
+  gap: 12px;
+}
+
+@media (max-width: 400px) {
+  :root[data-theme="dos"] .switcher {
+    --dos-step: 28px;
+  }
+}
+
+/* ‹ and ›, the markers close in. */
+:root[data-theme="dos"] .switcher__step {
+  --dos-mark-in: 2px;
+  padding: 0;
+}
+
+/* ---------- Buttons on the page ---------- */
+
+/* The Workshops button, the paint roller and Move 414 stand on the page, the same
+   colour as a window, so they are blocks like the rest. */
+:root[data-theme="dos"] .workshop-button {
+  padding: 0 16px;
+}
+
+:root[data-theme="dos"] .switcher-toggle {
+  --dos-mark-in: 1px;
+}
+
+:root[data-theme="dos"] .big-414__handle:not(:disabled):active {
+  translate: calc(-50% + var(--dos-btn-x)) 0;
+}
+
+:root[data-theme="dos"] .big-414__handle:not(:focus) {
+  box-shadow: none;
+}
+
+/* ---------- Comment box, its controls ---------- */
+
+/* "Post comment" is a button (above), its shadow clear of the frame; "Try again" and
+   "change" stay underlined words, in inverse video under the pointer or focused. */
+:root[data-theme="dos"] .comments__inner {
+  padding-bottom: calc(2 * var(--dos-top) + 2px + var(--dos-btn-y));
+}
+
+:root[data-theme="dos"] .comments__submit {
+  min-height: 32px;
+  padding: 0 16px;
+}
+
+:root[data-theme="dos"] .comments__link {
+  color: var(--dos-ink);
+}
+
+:root[data-theme="dos"] .comments__link:focus-visible {
+  outline: 2px solid transparent;
+  outline-offset: 0;
+  background: var(--dos-ink);
+  color: var(--dos-fill);
+  text-decoration: none;
+}
+
+@media (hover: hover) {
+  :root[data-theme="dos"] .comments__link:hover {
+    background: var(--dos-ink);
+    color: var(--dos-fill);
+    text-decoration: none;
+  }
+}
+
+:root[data-theme="dos"] .comments__pane:focus-visible {
+  outline: 2px dotted var(--dos-ink);
+  outline-offset: 2px;
+}
+
 /* ---------- High contrast ---------- */
 
 /* The gradients go: the double line is drawn as an outline instead, in the same
@@ -336,5 +619,55 @@
   :root[data-theme="dos"] .box__grip::after {
     border-color: CanvasText;
     background: none;
+  }
+
+  /* Buttons, fields and menus get plain lines (the menu its system arrow); the check
+     box is the system's. */
+  :root[data-theme="dos"] .aqua-pill,
+  :root[data-theme="dos"] .comments__submit {
+    border: 2px solid ButtonText;
+  }
+
+  :root[data-theme="dos"] .aqua-field,
+  :root[data-theme="dos"] .comments__input,
+  :root[data-theme="dos"] .comments__textarea {
+    border: 2px solid CanvasText;
+  }
+
+  :root[data-theme="dos"] .aqua-popup {
+    border: 2px solid CanvasText;
+    -webkit-appearance: auto;
+    appearance: auto;
+  }
+
+  :root[data-theme="dos"] .workshop__check input {
+    -webkit-appearance: auto;
+    appearance: auto;
+    width: 16px;
+    height: 16px;
+    background: none;
+    -webkit-mask: none;
+    mask: none;
+  }
+}
+
+/* ---------- Reduced motion ---------- */
+
+/* The cursor stops blinking, and a pressed button no longer moves. */
+@media (prefers-reduced-motion: reduce) {
+  :root[data-theme="dos"] .aqua-field,
+  :root[data-theme="dos"] .comments__input,
+  :root[data-theme="dos"] .comments__textarea {
+    caret-animation: manual;
+  }
+
+  :root[data-theme="dos"] .aqua-pill:not(:disabled):active,
+  :root[data-theme="dos"] .aqua-pill[aria-expanded="true"],
+  :root[data-theme="dos"] .comments__submit:not(:disabled):active {
+    translate: none;
+  }
+
+  :root[data-theme="dos"] .big-414__handle:not(:disabled):active {
+    translate: -50% 0;
   }
 }
