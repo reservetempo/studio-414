@@ -11,7 +11,9 @@
    tones of themselves. The panels are 90% opaque and blur what is behind them. Text,
    titles, links, messages and the rim are light tints of --title. All checked for
    the 21 colours with the panel over white (the worst case under it): text 8:1 and
-   up, muted text 5.3:1, links 5.8:1, errors 4.7:1, the rim 6.5:1. Browsers without
+   up, muted text 5.3:1, links 5.8:1, errors 4.6:1, the rim 6.5:1; in the calendar's
+   dark well everything is 6.9:1 and up, and a workshop's day 4.6:1 under the
+   pointer. Browsers without
    relative colours get opaque panels mixed from --title and fixed light greys.
 
    Font: Pixelify Sans by Stefie Justprince (SIL Open Font License 1.1,
@@ -249,7 +251,9 @@
 
 :root[data-theme="psone"] .signup__label,
 :root[data-theme="psone"] .switcher__label,
-:root[data-theme="psone"] .comments__label {
+:root[data-theme="psone"] .comments__label,
+:root[data-theme="psone"] .workshop__label,
+:root[data-theme="psone"] .workshop__facts dt {
   color: var(--ps-title-text);
   font-family: var(--aqua-font);
   font-size: var(--ps-label);
@@ -493,8 +497,11 @@
 
 /* ---------- Display ---------- */
 
-/* The ‹ and › stay centred: no letter spacing after them. */
-:root[data-theme="psone"] .switcher__step {
+/* The ‹ and › (here and in the calendar) and − and + stay centred: no letter spacing
+   after them. */
+:root[data-theme="psone"] .switcher__step,
+:root[data-theme="psone"] .calendar__step,
+:root[data-theme="psone"] .workshop__step {
   letter-spacing: 0;
 }
 
@@ -592,11 +599,256 @@
   font-size: 14px;
 }
 
+/* ---------- Workshops window ---------- */
+
+/* Status lines, notes and messages in the muted light tint, errors in the light red,
+   as on the card. */
+:root[data-theme="psone"] .workshop__status,
+:root[data-theme="psone"] .workshop__result-text,
+:root[data-theme="psone"] .workshop__spots,
+:root[data-theme="psone"] .workshop__message,
+:root[data-theme="psone"] .workshop__note,
+:root[data-theme="psone"] .workshop__check:has(input:disabled) {
+  color: var(--ps-muted);
+}
+
+:root[data-theme="psone"] .workshop__message[data-state="error"] {
+  color: var(--ps-error);
+}
+
+/* The workshops as a game menu: no bullets, and before the one under the pointer or
+   the keyboard focus, the white pointing glove (PSone.css's radio cursor) in the
+   gutter. */
+:root[data-theme="psone"] .workshop__list {
+  padding: 0 0 0 24px;
+  list-style: none;
+}
+
+:root[data-theme="psone"] .workshop__list li {
+  position: relative;
+}
+
+:root[data-theme="psone"] .workshop__list li::before {
+  content: "";
+  position: absolute;
+  top: calc(0.65em - 5px);
+  left: -23px;
+  width: 16px;
+  height: 10px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='10' viewBox='0 0 16 10' shape-rendering='crispEdges'%3E%3Cpath fill='%23000' d='M2 1h13v1H2zM15 2h1v1h-1zM1 2h1v6H1zM8 3h7v1H8zM10 4h1v1h-1zM7 5h3v1H7zM9 6h1v1H9zM7 7h2v1H7zM2 8h1v1H2zM7 8h1v1H7zM3 9h4v1H3z'/%3E%3Cpath fill='%23fff' d='M2 2h13v1H2zM2 3h6v1H2zM2 4h8v1H2zM2 5h5v1H2z'/%3E%3Cpath fill='%23c4c4c4' d='M2 6h7v1H2zM2 7h5v1H2zM3 8h4v1H3z'/%3E%3C/svg%3E")
+    center / 16px 10px no-repeat;
+  filter: drop-shadow(1px 1px 0 rgb(0 0 0 / 0.6));
+  visibility: hidden;
+}
+
+:root[data-theme="psone"] .workshop__list li:has(.workshop__link:focus-visible)::before {
+  visibility: visible;
+}
+
+/* Links in the light link tint, underlined so they stand out from the text after
+   them; once opened, the muted tint with a dotted line; pressed, the light red. Under
+   the pointer or focused, the menu selection lights up behind the words. */
+:root[data-theme="psone"] .workshop__link {
+  margin: -1px -4px;
+  padding: 1px 4px;
+  border-radius: 4px;
+  color: var(--ps-ink);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  text-shadow: var(--ps-drop-small);
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+
+:root[data-theme="psone"] .workshop__link[data-visited] {
+  color: var(--ps-muted);
+  text-decoration-style: dotted;
+}
+
+:root[data-theme="psone"] .workshop__link:focus-visible {
+  border-radius: 4px;
+  outline: 2px solid var(--ps-rim);
+  outline-offset: 2px;
+}
+
+:root[data-theme="psone"] .workshop__link:focus-visible {
+  background: linear-gradient(to right, transparent, var(--ps-band), transparent);
+}
+
+@media (hover: hover) {
+  :root[data-theme="psone"] .workshop__list li:has(.workshop__link:hover)::before {
+    visibility: visible;
+  }
+
+  :root[data-theme="psone"] .workshop__link:hover {
+    background: linear-gradient(to right, transparent, var(--ps-band), transparent);
+    color: var(--ps-text);
+    text-shadow: var(--ps-drop-small), 0 0 6px var(--ps-glow);
+  }
+}
+
+/* Pressed, the band goes out (the light red needs the plain panel for 4.5:1). */
+:root[data-theme="psone"] .workshop__link:active {
+  background: none;
+  color: var(--ps-error);
+}
+
+/* ---------- Calendar ---------- */
+
+/* The month as a window title: light grey capitals with the hard shadow and glow. */
+:root[data-theme="psone"] .calendar__month {
+  color: var(--ps-title-text);
+  font-family: var(--aqua-font);
+  font-size: 17px;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-shadow: var(--ps-drop), 0 0 8px var(--ps-glow);
+}
+
+/* The grid: a dark well sunk into the panel, like the fields; the weekdays in muted
+   capitals over the faint line that fades at both ends. */
+:root[data-theme="psone"] .calendar__grid {
+  border: 1px solid var(--ps-line);
+  border-radius: 6px;
+  background: var(--ps-deep);
+  color: var(--ps-text);
+  box-shadow: inset 0 1px 3px rgb(0 0 0 / 0.7);
+}
+
+:root[data-theme="psone"] .calendar__grid th {
+  border-bottom: 0;
+  background: linear-gradient(to right, transparent, rgb(255 255 255 / 0.3), transparent)
+    50% 100% / 100% 1px no-repeat;
+  color: var(--ps-muted);
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+:root[data-theme="psone"] .calendar__day:not(.aqua-pill) {
+  border-radius: 6px;
+}
+
+:root[data-theme="psone"] .calendar__day--past:not(.aqua-pill) {
+  color: var(--ps-dim);
+}
+
+/* Today: the rounded menu selection, a band with a light rim and a soft glow. */
+:root[data-theme="psone"] .calendar__day[aria-current="date"]:not(.aqua-pill) {
+  background: linear-gradient(to right, transparent, var(--ps-band), transparent);
+  box-shadow: inset 0 0 0 1px var(--ps-rim), 0 0 6px var(--ps-glow);
+  font-weight: 700;
+}
+
+/* A workshop coming up: a small tinted button (above), its number in bold. Today,
+   its rim is doubled and glows. */
+:root[data-theme="psone"] .calendar__day--workshop.aqua-pill {
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+:root[data-theme="psone"] .calendar__day--workshop.aqua-pill[aria-current="date"] {
+  --ps-edge: var(--ps-text);
+  box-shadow:
+    var(--ps-ring),
+    var(--ps-halo),
+    inset 0 0 0 2px var(--ps-edge),
+    inset 0 0 0 3px rgb(0 0 0 / 0.45),
+    var(--ps-sink),
+    0 0 6px var(--ps-glow),
+    0 1px 3px rgb(0 0 0 / 0.5);
+}
+
+/* A workshop that has been: a disabled button, flat and dark, its number grey. */
+:root[data-theme="psone"] .calendar__day--workshop.calendar__day--past {
+  border: 1px solid color-mix(in srgb, var(--ps-line) 50%, transparent);
+  border-radius: 6px;
+  background: linear-gradient(var(--ps-off-top), var(--ps-off-bottom));
+  color: var(--ps-dim);
+  box-shadow: inset 0 0 2px 2px rgb(0 0 0 / 0.3);
+}
+
+/* The workshop's name over its day in a small panel like the windows. */
+:root[data-theme="psone"] .calendar__tip {
+  padding: 3px 8px 4px;
+  border: 1px solid var(--ps-line);
+  border-radius: 5px;
+  background: linear-gradient(var(--ps-btn-top), var(--ps-btn-bottom));
+  color: var(--ps-text);
+  box-shadow: inset 0 0 0 1px var(--ps-rim), 0 2px 6px rgb(0 0 0 / 0.5);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  text-shadow: var(--ps-drop-small);
+}
+
+/* ---------- Sign-up window ---------- */
+
+/* The workshop's name (and "You're in!") glow in the light tints; the icon takes the
+   link tint and the hard shadow. */
+:root[data-theme="psone"] .workshop__name {
+  color: var(--ps-ink);
+  text-shadow: var(--ps-drop), 0 0 10px var(--ps-glow);
+}
+
+:root[data-theme="psone"] .workshop__result-title {
+  color: var(--ps-title-text);
+  text-shadow: var(--ps-drop), 0 0 8px var(--ps-glow);
+}
+
+:root[data-theme="psone"] .workshop__result-icon {
+  color: var(--ps-ink);
+  filter: drop-shadow(1px 1px 0 #000);
+}
+
+/* − and + with the words' hard shadow. */
+:root[data-theme="psone"] .workshop__step {
+  border-radius: 5px;
+}
+
+:root[data-theme="psone"] .workshop__step svg {
+  filter: drop-shadow(1px 1px 0 #000);
+}
+
+/* The status light glows like a materia orb. */
+:root[data-theme="psone"] .workshop__spots::before {
+  border-color: rgb(0 0 0 / 0.6);
+  box-shadow: 0 0 6px var(--drop), 0 1px 1px rgb(0 0 0 / 0.5);
+}
+
+:root[data-theme="psone"] .workshop__input {
+  padding: 0 10px;
+}
+
+/* A wrong field keeps its red line when focused (the field rules above). */
+:root[data-theme="psone"] .workshop__input[aria-invalid="true"]:focus-visible {
+  box-shadow: var(--ps-field-ring), inset 0 1px 3px rgb(0 0 0 / 0.7), var(--ps-halo);
+}
+
+:root[data-theme="psone"] .workshop__pay {
+  letter-spacing: 0.1em;
+}
+
 /* ---------- High contrast ---------- */
 
 /* The gradients go, and with them the menu's arrow and the drawn check box: both
-   return to the system's. */
+   return to the system's. The workshop links take the system's link colours again. */
 @media (forced-colors: active) {
+  :root[data-theme="psone"] .workshop__link,
+  :root[data-theme="psone"] .workshop__link:hover {
+    color: LinkText;
+  }
+
+  :root[data-theme="psone"] .workshop__link[data-visited],
+  :root[data-theme="psone"] .workshop__link[data-visited]:hover {
+    color: VisitedText;
+  }
+
+  :root[data-theme="psone"] .workshop__link:active,
+  :root[data-theme="psone"] .workshop__link:active:hover {
+    color: ActiveText;
+  }
+
   :root[data-theme="psone"] .box__grip::after {
     background: CanvasText;
   }
