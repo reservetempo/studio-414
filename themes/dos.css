@@ -530,6 +530,248 @@
   padding: 0;
 }
 
+/* ---------- Workshops and sign-up windows ---------- */
+
+/* Room for the frame, and below and right of the last buttons for their shadows. */
+:root[data-theme="dos"] .workshop__body {
+  padding: 6px calc(3 * var(--dos-cw)) calc(2 * var(--dos-top) + 2px + var(--dos-btn-y)) calc(2 * var(--dos-cw));
+}
+
+/* Everything is on the fill: names and icons in the window's text colour, notes and
+   messages dimmed (4.8:1), and no italics, which text mode doesn't have. */
+:root[data-theme="dos"] .workshop__name,
+:root[data-theme="dos"] .workshop__result-icon {
+  color: var(--dos-ink);
+}
+
+:root[data-theme="dos"] .workshop__status,
+:root[data-theme="dos"] .workshop__result-text,
+:root[data-theme="dos"] .workshop__spots,
+:root[data-theme="dos"] .workshop__message,
+:root[data-theme="dos"] .workshop__note,
+:root[data-theme="dos"] .workshop__check:has(input:disabled) {
+  color: var(--dos-dim);
+  font-style: normal;
+}
+
+/* Errors in inverse video, as on the card. */
+:root[data-theme="dos"] .workshop__message[data-state="error"] {
+  width: fit-content;
+  padding: 0 4px;
+  background: var(--dos-ink);
+  color: var(--dos-fill);
+}
+
+/* The labels as the card's; the facts' names dimmed. */
+:root[data-theme="dos"] .workshop__label,
+:root[data-theme="dos"] .workshop__facts dt {
+  color: var(--dos-ink);
+  font-family: var(--aqua-font);
+  font-size: var(--dos-text);
+  font-weight: 400;
+  letter-spacing: 0;
+  line-height: var(--dos-ch);
+  text-transform: uppercase;
+}
+
+:root[data-theme="dos"] .workshop__facts dt {
+  color: var(--dos-dim);
+}
+
+/* The list: square bullets (CP437's ■) and links as words in the window's text
+   colour, underlined, dimmed once visited; in inverse video under the pointer,
+   pressed or focused, like the comment box's. */
+:root[data-theme="dos"] .workshop__list {
+  list-style-type: square;
+}
+
+:root[data-theme="dos"] .workshop__link {
+  color: var(--dos-ink);
+}
+
+:root[data-theme="dos"] .workshop__link[data-visited] {
+  color: var(--dos-dim);
+}
+
+:root[data-theme="dos"] .workshop__link:active,
+:root[data-theme="dos"] .workshop__link:focus-visible {
+  border-radius: 0;
+  outline: 2px solid transparent;
+  outline-offset: 0;
+  background: var(--dos-ink);
+  color: var(--dos-fill);
+  text-decoration: none;
+}
+
+@media (hover: hover) {
+  :root[data-theme="dos"] .workshop__link:hover {
+    background: var(--dos-ink);
+    color: var(--dos-fill);
+    text-decoration: none;
+  }
+}
+
+/* Try again, All workshops, Pay and OK: buttons, the words a column in from each end. */
+:root[data-theme="dos"] .workshop__retry,
+:root[data-theme="dos"] .workshop__back,
+:root[data-theme="dos"] .workshop__pay {
+  padding: 0 calc(2 * var(--dos-cw));
+}
+
+:root[data-theme="dos"] .workshop__back span {
+  font-size: inherit;
+  line-height: inherit;
+}
+
+/* Pay's shadow clears the message under it. */
+:root[data-theme="dos"] .workshop__pay {
+  margin-bottom: calc(var(--dos-btn-y) - 4px);
+}
+
+/* − and +: room between them for the first one's shadow; the markers close in. */
+:root[data-theme="dos"] .workshop__quantity {
+  gap: 12px;
+}
+
+:root[data-theme="dos"] .workshop__step {
+  --dos-mark-in: 1px;
+}
+
+/* The status light: a square block (■), blinking while the spots are checked (text
+   mode's blink), hollow when they couldn't be or the workshop is gone. */
+:root[data-theme="dos"] .workshop__spots::before {
+  width: var(--dos-cw);
+  height: var(--dos-cw);
+  border: 0;
+  border-radius: 0;
+  background: var(--dos-ink);
+  box-shadow: none;
+}
+
+:root[data-theme="dos"] .workshop__spots[data-state="loading"]::before {
+  animation: dos-blink 1s steps(1, end) infinite;
+}
+
+:root[data-theme="dos"] .workshop__spots[data-state="unavailable"]::before,
+:root[data-theme="dos"] .workshop__spots[data-state="gone"]::before {
+  background: none;
+  box-shadow: inset 0 0 0 2px var(--dos-dim);
+}
+
+@keyframes dos-blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+/* The check box, disabled: dimmed, not faded. */
+:root[data-theme="dos"] .workshop__check input:disabled {
+  opacity: 1;
+  background: var(--dos-dim);
+}
+
+/* ---------- Calendar ---------- */
+
+/* No white well: the month is laid out on the fill in the chrome font, weekdays
+   dimmed over a line. Each cell holds its day and room for a button's shadow right
+   and below, so the shadows don't reach the next day. */
+:root[data-theme="dos"] .calendar__month {
+  color: var(--dos-ink);
+}
+
+:root[data-theme="dos"] .calendar__step {
+  --dos-mark-in: 2px;
+  padding: 0;
+}
+
+:root[data-theme="dos"] .calendar__grid {
+  padding: 0;
+  border: 0;
+  border-spacing: 0 4px;
+  background: none;
+  color: var(--dos-ink);
+  box-shadow: none;
+  font-size: var(--dos-text);
+}
+
+:root[data-theme="dos"] .calendar__grid th {
+  padding: 0 calc(var(--dos-btn-x) + 2px) 2px 0;
+  border-bottom: 2px solid var(--dos-dim);
+  color: var(--dos-dim);
+  font-size: var(--dos-text);
+  font-weight: 400;
+  line-height: var(--dos-ch);
+}
+
+:root[data-theme="dos"] .calendar__grid td {
+  padding: 0 calc(var(--dos-btn-x) + 2px) var(--dos-btn-y) 0;
+}
+
+:root[data-theme="dos"] .calendar__day {
+  height: calc(var(--dos-ch) + 4px);
+  font-size: var(--dos-text);
+  font-weight: 400;
+  line-height: var(--dos-ch);
+}
+
+@media (pointer: coarse) {
+  :root[data-theme="dos"] .calendar__day {
+    height: 32px;
+  }
+}
+
+:root[data-theme="dos"] .calendar__day:not(.aqua-pill) {
+  border-radius: 0;
+}
+
+:root[data-theme="dos"] .calendar__day--past {
+  color: var(--dos-dim);
+}
+
+/* Today: a line round it; on a workshop's day, a line in the fill inside the block. */
+:root[data-theme="dos"] .calendar__day[aria-current="date"]:not(.aqua-pill) {
+  background: none;
+  box-shadow: inset 0 0 0 2px var(--dos-ink);
+  font-weight: 400;
+}
+
+:root[data-theme="dos"] .calendar__day--workshop.aqua-pill[aria-current="date"] {
+  box-shadow:
+    inset 0 0 0 2px var(--dos-btn-fill),
+    inset 0 0 0 4px var(--dos-btn-text),
+    var(--dos-btn-x) var(--dos-btn-y) 0 var(--dos-btn-shade);
+}
+
+:root[data-theme="dos"] .calendar__day--workshop.aqua-pill[aria-current="date"]:active {
+  box-shadow: inset 0 0 0 2px var(--dos-btn-fill), inset 0 0 0 4px var(--dos-btn-text);
+}
+
+:root[data-theme="dos"] .calendar__day--workshop.aqua-pill {
+  --dos-mark-in: 1px;
+}
+
+/* A workshop that is over: dimmed in a dotted line (today's is solid). */
+:root[data-theme="dos"] .calendar__day--workshop.calendar__day--past {
+  border: 0;
+  background: none;
+  color: var(--dos-dim);
+  box-shadow: none;
+  outline: 2px dotted var(--dos-dim);
+  outline-offset: -2px;
+}
+
+/* The workshop's name: a strip in inverse video, edged in the fill to stand clear of
+   the days behind it. */
+:root[data-theme="dos"] .calendar__tip {
+  padding: 0 var(--dos-cw);
+  border: 2px solid var(--dos-fill);
+  background: var(--dos-ink);
+  color: var(--dos-fill);
+  box-shadow: none;
+  font-size: var(--dos-text);
+  line-height: var(--dos-ch);
+}
+
 /* ---------- Buttons on the page ---------- */
 
 /* The Workshops button, the paint roller and Move 414 stand on the page, the same
@@ -649,16 +891,41 @@
     -webkit-mask: none;
     mask: none;
   }
+
+  /* Today's line and the status light's block are drawn in system colours. */
+  :root[data-theme="dos"] .calendar__day[aria-current="date"] {
+    outline: 2px solid CanvasText;
+    outline-offset: -2px;
+  }
+
+  :root[data-theme="dos"] .calendar__day--workshop.calendar__day--past {
+    border: 2px solid GrayText;
+  }
+
+  :root[data-theme="dos"] .workshop__spots::before {
+    background: CanvasText;
+  }
+
+  :root[data-theme="dos"] .workshop__spots[data-state="unavailable"]::before,
+  :root[data-theme="dos"] .workshop__spots[data-state="gone"]::before {
+    border: 2px solid GrayText;
+    background: none;
+  }
 }
 
 /* ---------- Reduced motion ---------- */
 
-/* The cursor stops blinking, and a pressed button no longer moves. */
+/* The cursor and the status light stop blinking, and a pressed button no longer
+   moves. */
 @media (prefers-reduced-motion: reduce) {
   :root[data-theme="dos"] .aqua-field,
   :root[data-theme="dos"] .comments__input,
   :root[data-theme="dos"] .comments__textarea {
     caret-animation: manual;
+  }
+
+  :root[data-theme="dos"] .workshop__spots[data-state="loading"]::before {
+    animation: none;
   }
 
   :root[data-theme="dos"] .aqua-pill:not(:disabled):active,
