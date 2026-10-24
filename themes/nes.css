@@ -41,6 +41,13 @@
   --nes-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 7 6' shape-rendering='crispEdges'%3E%3Cpath d='M0 0h7v2H0zM1 2h5v2H1zM2 4h3v1H2zM3 5h1v1H3z'/%3E%3C/svg%3E");
   --nes-box: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 8' shape-rendering='crispEdges'%3E%3Cpath d='M0 0h8v1H0zM0 7h8v1H0zM0 1h1v6H0zM7 1h1v6H7z'/%3E%3C/svg%3E");
   --nes-tick: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 8' shape-rendering='crispEdges'%3E%3Cpath d='M0 0h7v1H0zM8 0h2v1H8zM0 1h1v1H0zM7 1h3v1H7zM0 2h1v1H0zM6 2h2v1H6zM0 3h2v1H0zM5 3h2v1H5zM0 4h3v1H0zM4 4h2v1H4zM7 4h1v1H7zM0 5h1v1H0zM2 5h3v1H2zM7 5h1v1H7zM0 6h1v1H0zM3 6h1v1H3zM7 6h1v1H7zM0 7h8v1H0z'/%3E%3C/svg%3E");
+  /* NES.css's list disc (4 x 4) and the arrow that points at a choice, as on its radio
+     buttons (4 x 7), as masks; the spots light (8 x 8), a round lamp in a black pixel
+     ring, NES.css's warning yellow while lit, grey when out. */
+  --nes-disc: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 4' shape-rendering='crispEdges'%3E%3Cpath d='M1 0h2v1H1zM0 1h4v2H0zM1 3h2v1H1z'/%3E%3C/svg%3E");
+  --nes-pointer: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 7' shape-rendering='crispEdges'%3E%3Cpath d='M0 0h1v7H0zM1 1h1v5H1zM2 2h1v3H2zM3 3h1v1H3z'/%3E%3C/svg%3E");
+  --nes-lamp: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8' shape-rendering='crispEdges'%3E%3Cpath fill='%23000' d='M2 0h4v1H2zM1 1h1v1H1zM6 1h1v1H6zM0 2h1v4H0zM7 2h1v4H7zM1 6h1v1H1zM6 6h1v1H6zM2 7h4v1H2z'/%3E%3Cpath fill='%23f7d51d' d='M2 1h4v1H2zM1 2h6v4H1zM2 6h4v1H2z'/%3E%3Cpath fill='%23fff' d='M2 2h2v1H2zM2 3h1v1H2z'/%3E%3C/svg%3E");
+  --nes-lamp-out: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8' shape-rendering='crispEdges'%3E%3Cpath fill='%23000' d='M2 0h4v1H2zM1 1h1v1H1zM6 1h1v1H6zM0 2h1v4H0zM7 2h1v4H7zM1 6h1v1H1zM6 6h1v1H6zM2 7h4v1H2z'/%3E%3Cpath fill='%23a3a3a3' d='M2 1h4v1H2zM1 2h6v4H1zM2 6h4v1H2z'/%3E%3Cpath fill='%23e6e6e6' d='M2 2h2v1H2zM2 3h1v1H2z'/%3E%3C/svg%3E");
 }
 
 @media (pointer: coarse) {
@@ -244,7 +251,9 @@
 
 :root[data-theme="nes"] .signup__label,
 :root[data-theme="nes"] .switcher__label,
-:root[data-theme="nes"] .comments__label {
+:root[data-theme="nes"] .comments__label,
+:root[data-theme="nes"] .workshop__label,
+:root[data-theme="nes"] .workshop__facts dt {
   font-family: var(--aqua-font);
   font-size: var(--nes-label);
   font-weight: 400;
@@ -448,13 +457,18 @@
 
 /* ---------- Display ---------- */
 
-/* ‹ and › at 16px, centred in the part the shade leaves, which moves when pressed. */
-:root[data-theme="nes"] .switcher__step {
+/* ‹ and › at 16px (here, in the calendar, and − and + in the sign-up window), centred
+   in the part the shade leaves, which moves when pressed. */
+:root[data-theme="nes"] .switcher__step,
+:root[data-theme="nes"] .calendar__step,
+:root[data-theme="nes"] .workshop__step {
   padding: 0 var(--nes-u) var(--nes-u) 0;
   font-size: 16px;
 }
 
-:root[data-theme="nes"] .switcher__step:not(:disabled):active {
+:root[data-theme="nes"] .switcher__step:not(:disabled):active,
+:root[data-theme="nes"] .calendar__step:not(:disabled):active,
+:root[data-theme="nes"] .workshop__step:not(:disabled):active {
   padding: var(--nes-u) 0 0 var(--nes-u);
 }
 
@@ -554,6 +568,347 @@
   padding: 0 12px;
 }
 
+/* ---------- Workshops window ---------- */
+
+/* Both windows: three frame pixels in from the frame, with room between the parts on
+   the font's 8px grid, and a scroll bar in the ink on the paper. */
+:root[data-theme="nes"] .workshop {
+  scrollbar-color: var(--nes-ink) var(--nes-paper);
+}
+
+:root[data-theme="nes"] .workshop__body {
+  gap: 16px;
+  padding: 12px;
+}
+
+/* The workshops as NES.css's list: a pixel disc before each, and in its place, under
+   the pointer or the focus, the arrow that points at a choice. Each link in the
+   colour's ink for links, as NES.css's primary text, with a pixel underline; muted
+   once its window has opened, red while pressed; focused, the dotted line. */
+:root[data-theme="nes"] .workshop__list {
+  padding: 0 0 0 16px;
+  list-style: none;
+}
+
+:root[data-theme="nes"] .workshop__list li {
+  position: relative;
+}
+
+:root[data-theme="nes"] .workshop__list li + li {
+  margin-top: 8px;
+}
+
+:root[data-theme="nes"] .workshop__list li::before {
+  content: "";
+  position: absolute;
+  top: calc((1.3em - 14px) / 2);
+  left: -16px;
+  width: 8px;
+  height: 14px;
+  background: var(--nes-ink);
+  -webkit-mask: var(--nes-disc) center / 8px 8px no-repeat;
+  mask: var(--nes-disc) center / 8px 8px no-repeat;
+}
+
+:root[data-theme="nes"] .workshop__list li:has(.workshop__link:focus-visible)::before {
+  background: var(--accent-ink);
+  -webkit-mask: var(--nes-pointer) center / 8px 14px no-repeat;
+  mask: var(--nes-pointer) center / 8px 14px no-repeat;
+}
+
+@media (hover: hover) {
+  :root[data-theme="nes"] .workshop__list li:has(.workshop__link:hover)::before {
+    background: var(--accent-ink);
+    -webkit-mask: var(--nes-pointer) center / 8px 14px no-repeat;
+    mask: var(--nes-pointer) center / 8px 14px no-repeat;
+  }
+}
+
+:root[data-theme="nes"] .workshop__link {
+  color: var(--accent-ink);
+  text-decoration-thickness: 2px;
+  text-decoration-skip-ink: none;
+  text-underline-offset: 4px;
+}
+
+:root[data-theme="nes"] .workshop__link[data-visited] {
+  color: var(--face-muted);
+}
+
+:root[data-theme="nes"] .workshop__link:active {
+  color: var(--error);
+}
+
+:root[data-theme="nes"] .workshop__link:focus-visible {
+  border-radius: 0;
+  outline: 2px dotted var(--nes-ink);
+  outline-offset: 2px;
+}
+
+/* "Try again" under the line saying the list couldn't be loaded, and "‹ All
+   workshops": buttons 32px tall (40px on touch screens), their words centred in the
+   part the shade leaves. */
+:root[data-theme="nes"] .workshop__retry,
+:root[data-theme="nes"] .workshop__back {
+  height: 32px;
+  padding: 0 20px var(--nes-u) 16px;
+}
+
+:root[data-theme="nes"] .workshop__retry {
+  margin: -8px 0 0;
+}
+
+:root[data-theme="nes"] .workshop__back {
+  gap: 8px;
+  margin: 0;
+}
+
+:root[data-theme="nes"] .workshop__back span {
+  font-size: 16px;
+}
+
+:root[data-theme="nes"] .workshop__retry:active,
+:root[data-theme="nes"] .workshop__back:active {
+  padding: var(--nes-u) 16px 0 20px;
+}
+
+@media (pointer: coarse) {
+  :root[data-theme="nes"] .workshop__retry,
+  :root[data-theme="nes"] .workshop__back {
+    height: 40px;
+  }
+}
+
+/* ---------- Calendar ---------- */
+
+/* The month at 16px in the ink, between ‹ and › a pixel from it, so the longest
+   ("September 2026") fits beside them at 375px. */
+:root[data-theme="nes"] .calendar {
+  gap: 16px;
+}
+
+:root[data-theme="nes"] .calendar__head {
+  gap: var(--nes-u);
+}
+
+:root[data-theme="nes"] .calendar__month {
+  color: var(--nes-ink);
+  font-family: var(--aqua-font);
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 24px;
+}
+
+:root[data-theme="nes"] .calendar__step {
+  width: 32px;
+  height: 32px;
+}
+
+@media (pointer: coarse) {
+  :root[data-theme="nes"] .calendar__step {
+    width: 36px;
+    height: 36px;
+  }
+}
+
+/* The month in a field: white in the notched line, the days a pixel apart, the
+   weekdays over a broken grey line, everything at 8px. */
+:root[data-theme="nes"] .calendar__grid {
+  padding: var(--nes-u);
+  border: 0;
+  border-spacing: var(--nes-u);
+  background:
+    var(--nes-ink-fill) var(--nes-u) 0 / calc(100% - 2 * var(--nes-u)) var(--nes-u) no-repeat,
+    var(--nes-ink-fill) var(--nes-u) 100% / calc(100% - 2 * var(--nes-u)) var(--nes-u) no-repeat,
+    var(--nes-ink-fill) 0 var(--nes-u) / var(--nes-u) calc(100% - 2 * var(--nes-u)) no-repeat,
+    var(--nes-ink-fill) 100% var(--nes-u) / var(--nes-u) calc(100% - 2 * var(--nes-u)) no-repeat,
+    linear-gradient(var(--field) 0 0) var(--nes-u) var(--nes-u) / calc(100% - 2 * var(--nes-u)) calc(100% - 2 * var(--nes-u)) no-repeat;
+  box-shadow: none;
+}
+
+:root[data-theme="nes"] .calendar__grid th {
+  padding: 8px 0;
+  border-bottom: 2px solid var(--shadow);
+  color: var(--field-text);
+  font-size: 8px;
+  font-weight: 400;
+  line-height: 8px;
+}
+
+:root[data-theme="nes"] .calendar__day {
+  height: 32px;
+  font-size: 8px;
+  font-weight: 400;
+}
+
+@media (pointer: coarse) {
+  :root[data-theme="nes"] .calendar__day {
+    height: 40px;
+  }
+}
+
+:root[data-theme="nes"] .calendar__day:not(.aqua-pill) {
+  border-radius: 0;
+}
+
+/* Today, and a workshop that has been: a square of 2px pixels with its corners left
+   out, in the ink round today, grey round a workshop that's over, which is filled
+   with the face and its figures muted, as a disabled button. */
+:root[data-theme="nes"] .calendar__day[aria-current="date"]:not(.aqua-pill),
+:root[data-theme="nes"] .calendar__day--workshop.calendar__day--past {
+  --nes-day-line: var(--field-text);
+  --nes-day-fill: transparent;
+  border: 0;
+  background:
+    linear-gradient(var(--nes-day-line) 0 0) 2px 0 / calc(100% - 4px) 2px no-repeat,
+    linear-gradient(var(--nes-day-line) 0 0) 2px 100% / calc(100% - 4px) 2px no-repeat,
+    linear-gradient(var(--nes-day-line) 0 0) 0 2px / 2px calc(100% - 4px) no-repeat,
+    linear-gradient(var(--nes-day-line) 0 0) 100% 2px / 2px calc(100% - 4px) no-repeat,
+    linear-gradient(var(--nes-day-fill) 0 0) 2px 2px / calc(100% - 4px) calc(100% - 4px) no-repeat;
+  box-shadow: none;
+  font-weight: 400;
+}
+
+:root[data-theme="nes"] .calendar__day--workshop.calendar__day--past {
+  --nes-day-line: var(--shadow);
+  --nes-day-fill: var(--nes-paper);
+  color: var(--face-muted);
+}
+
+/* A workshop coming up: a small primary button (2px pixels) in the title colour,
+   standing out from the white days on every colour; pressed, its figures move in.
+   Today as well, they are underlined with a pixel line. */
+:root[data-theme="nes"] .calendar__day--workshop.aqua-pill {
+  --nes-btn-u: 2px;
+  padding: 0 2px 2px 0;
+}
+
+:root[data-theme="nes"] .calendar__day--workshop.aqua-pill:active {
+  padding: 2px 0 0 2px;
+}
+
+:root[data-theme="nes"] .calendar__day--workshop.aqua-pill[aria-current="date"] {
+  box-shadow: none;
+  text-decoration: underline 2px;
+  text-underline-offset: 2px;
+}
+
+/* The workshop's name over its day: NES.css's speech balloon without its tail, white
+   in a notched line of 2px pixels, at 8px, wrapping long names. */
+:root[data-theme="nes"] .calendar__tip {
+  width: max-content;
+  max-width: 160px;
+  padding: 6px 8px;
+  border: 0;
+  background:
+    var(--nes-ink-fill) 2px 0 / calc(100% - 4px) 2px no-repeat,
+    var(--nes-ink-fill) 2px 100% / calc(100% - 4px) 2px no-repeat,
+    var(--nes-ink-fill) 0 2px / 2px calc(100% - 4px) no-repeat,
+    var(--nes-ink-fill) 100% 2px / 2px calc(100% - 4px) no-repeat,
+    linear-gradient(var(--field) 0 0) 2px 2px / calc(100% - 4px) calc(100% - 4px) no-repeat;
+  color: var(--field-text);
+  box-shadow: none;
+  font-size: 8px;
+  line-height: 12px;
+  text-align: left;
+  white-space: normal;
+}
+
+/* ---------- Sign-up window ---------- */
+
+/* Date, Time and Price, and the fields' labels, are labels in the pixel font (above);
+   the facts, the price and the − and + on the grid. */
+:root[data-theme="nes"] .workshop__facts,
+:root[data-theme="nes"] .workshop__price {
+  gap: 8px 16px;
+}
+
+:root[data-theme="nes"] .workshop__quantity {
+  gap: var(--nes-u);
+}
+
+/* − and +: buttons as ‹ and ›, their glyphs as the font's at 16px, 4px strokes on
+   whole pixels. */
+:root[data-theme="nes"] .workshop__step {
+  width: 32px;
+  height: 32px;
+}
+
+@media (pointer: coarse) {
+  :root[data-theme="nes"] .workshop__step {
+    width: 40px;
+    height: 40px;
+  }
+}
+
+:root[data-theme="nes"] .workshop__step svg {
+  width: 16px;
+  height: 16px;
+  shape-rendering: crispEdges;
+}
+
+:root[data-theme="nes"] .workshop__step svg path {
+  stroke-width: 2px;
+  stroke-linecap: butt;
+}
+
+/* The spots light: a pixel lamp, yellow while the spots are checked, grey when they
+   couldn't be or the workshop is gone. */
+:root[data-theme="nes"] .workshop__spots::before {
+  width: 16px;
+  height: 16px;
+  border: 0;
+  border-radius: 0;
+  background: var(--nes-lamp) 0 0 / 16px 16px no-repeat;
+  box-shadow: none;
+}
+
+:root[data-theme="nes"] .workshop__spots[data-state="unavailable"]::before,
+:root[data-theme="nes"] .workshop__spots[data-state="gone"]::before {
+  background-image: var(--nes-lamp-out);
+}
+
+/* Each label a font's line over its field, the fields 40px tall and a line apart. */
+:root[data-theme="nes"] .workshop__form,
+:root[data-theme="nes"] .workshop__friend {
+  gap: 16px;
+}
+
+:root[data-theme="nes"] .workshop__label {
+  margin-bottom: -8px;
+}
+
+:root[data-theme="nes"] .workshop__input {
+  height: 40px;
+  padding: 0 12px;
+}
+
+:root[data-theme="nes"] .workshop__check {
+  margin: 0;
+}
+
+/* Pay and OK: primary buttons 40px tall (48px on touch screens), on the right. */
+:root[data-theme="nes"] .workshop__pay {
+  min-width: 144px;
+  height: 40px;
+  margin: 0;
+  padding: 0 20px var(--nes-u) 16px;
+}
+
+:root[data-theme="nes"] .workshop__pay:not(:disabled):active {
+  padding: var(--nes-u) 16px 0 20px;
+}
+
+:root[data-theme="nes"] .workshop__ok {
+  min-width: 96px;
+}
+
+@media (pointer: coarse) {
+  :root[data-theme="nes"] .workshop__pay {
+    height: 48px;
+  }
+}
+
 /* ---------- High contrast ---------- */
 
 /* The gradients go: the transparent borders show as the frame, with a top line. */
@@ -598,11 +953,45 @@
     width: 16px;
     background: none;
   }
+
+  /* The calendar's field, a workshop that's over and the tip get lines; the links the
+     system's link colours, their disc and arrow its text and link colours. */
+  :root[data-theme="nes"] .calendar__grid,
+  :root[data-theme="nes"] .calendar__tip {
+    border: 2px solid CanvasText;
+  }
+
+  :root[data-theme="nes"] .calendar__day--workshop.calendar__day--past {
+    border: 2px solid GrayText;
+  }
+
+  :root[data-theme="nes"] .workshop__link {
+    color: LinkText;
+  }
+
+  :root[data-theme="nes"] .workshop__link[data-visited] {
+    color: VisitedText;
+  }
+
+  :root[data-theme="nes"] .workshop__link:active {
+    color: ActiveText;
+  }
+
+  :root[data-theme="nes"] .workshop__list li::before {
+    forced-color-adjust: none;
+    background: CanvasText;
+  }
+
+  :root[data-theme="nes"] .workshop__list li:has(.workshop__link:focus-visible)::before,
+  :root[data-theme="nes"] .workshop__list li:has(.workshop__link:hover)::before {
+    background: LinkText;
+  }
 }
 
 /* ---------- Reduced motion ---------- */
 
-/* Nothing here moves but the close box's ×, the ‹ and › and the roller while pressed. */
+/* Nothing here moves but the close box's ×, the roller and the words, glyphs and
+   figures on the buttons while pressed: they stay put. */
 @media (prefers-reduced-motion: reduce) {
   :root[data-theme="nes"] .box__close:active::after {
     translate: none;
@@ -613,7 +1002,19 @@
     translate: calc(var(--nes-u) / -2) calc(var(--nes-u) / -2);
   }
 
-  :root[data-theme="nes"] .switcher__step:not(:disabled):active {
+  :root[data-theme="nes"] .switcher__step:not(:disabled):active,
+  :root[data-theme="nes"] .calendar__step:not(:disabled):active,
+  :root[data-theme="nes"] .workshop__step:not(:disabled):active {
     padding: 0 var(--nes-u) var(--nes-u) 0;
+  }
+
+  :root[data-theme="nes"] .workshop__retry:active,
+  :root[data-theme="nes"] .workshop__back:active,
+  :root[data-theme="nes"] .workshop__pay:not(:disabled):active {
+    padding: 0 20px var(--nes-u) 16px;
+  }
+
+  :root[data-theme="nes"] .calendar__day--workshop.aqua-pill:active {
+    padding: 0 2px 2px 0;
   }
 }
