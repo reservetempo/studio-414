@@ -826,6 +826,45 @@
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32'%3E%3Ccircle fill='%23808080' cx='17' cy='17' r='14.5'/%3E%3Ccircle fill='%23f00' stroke='%23800000' cx='15.5' cy='15.5' r='14'/%3E%3Cpath stroke='%23fff' stroke-width='4' d='M10 10l11 11M21 10L10 21'/%3E%3C/svg%3E");
 }
 
+/* Sign in: a logon box, each label at 8 points with a colon above its sunken field,
+   the fields at Windows' height (touch screens keep the base's taller fields at 16px)
+   and grey while signing in. Sign in centred under them, as in the other boxes. */
+:root[data-theme="win98"] .admin-signin-form {
+  gap: 8px;
+}
+
+:root[data-theme="win98"] .admin-signin-field {
+  gap: 3px;
+}
+
+:root[data-theme="win98"] .admin-label {
+  font-size: 11px;
+  line-height: 14px;
+}
+
+:root[data-theme="win98"] .admin-label::after {
+  content: ":";
+}
+
+@media not (pointer: coarse) {
+  :root[data-theme="win98"] .admin-field {
+    min-height: 22px;
+    padding: 3px 4px;
+    font-size: 11px;
+    line-height: 14px;
+  }
+}
+
+:root[data-theme="win98"] .admin-field:disabled {
+  background: var(--face);
+  color: var(--face-muted);
+  opacity: 1;
+}
+
+:root[data-theme="win98"] .admin-signin-form .admin-actions {
+  margin-top: 6px;
+}
+
 /* Loading: Windows' progress bar, a 1px sunken edge round blocks of the colour's ink,
    which move along (still under reduced motion, as the base sets). */
 :root[data-theme="win98"] .admin-barber {

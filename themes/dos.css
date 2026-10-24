@@ -1066,6 +1066,49 @@
   max-width: 100%;
 }
 
+/* Sign in: each label in capitals with a colon on the row above its field, a strip a
+   row tall in the chrome font as in the workshop form (20px, so touch screens don't
+   zoom; there 40px tall); while signing in, the fields' own dim look (no fade). */
+:root[data-theme="dos"] .admin-signin-form {
+  gap: var(--dos-ch);
+}
+
+:root[data-theme="dos"] .admin-signin-field {
+  gap: 0;
+}
+
+:root[data-theme="dos"] .admin-label {
+  font-size: var(--dos-text);
+  line-height: var(--dos-ch);
+  text-transform: uppercase;
+}
+
+:root[data-theme="dos"] .admin-label::after {
+  content: ":";
+}
+
+:root[data-theme="dos"] .admin-field {
+  min-height: calc(var(--dos-ch) + 8px);
+  padding: 4px var(--dos-cw);
+  font-size: var(--dos-text);
+  line-height: var(--dos-ch);
+}
+
+@media (pointer: coarse) {
+  :root[data-theme="dos"] .admin-field {
+    min-height: 40px;
+    padding: 10px var(--dos-cw);
+  }
+}
+
+:root[data-theme="dos"] .admin-field:disabled {
+  opacity: 1;
+}
+
+:root[data-theme="dos"] .admin-signin-form .admin-actions {
+  margin-top: 0;
+}
+
 /* Loading: a text-mode bar, a row of ░ with blocks (█) that step along it a column at
    a time (still under reduced motion, below). */
 :root[data-theme="dos"] .admin-barber {

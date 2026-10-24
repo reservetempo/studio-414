@@ -1181,6 +1181,49 @@
   }
 }
 
+/* Sign in: 8px labels above the fields, which are 8px words in 32px strips as in the
+   workshop form (touch screens keep the base's 16px words, 40px tall); while signing
+   in, the fields' own grey (no fade on top). */
+:root[data-theme="nes"] .admin-signin-form {
+  gap: 16px;
+}
+
+:root[data-theme="nes"] .admin-signin-field {
+  gap: 8px;
+}
+
+:root[data-theme="nes"] .admin-label {
+  font-size: 8px;
+  line-height: 16px;
+}
+
+:root[data-theme="nes"] .admin-field {
+  padding: 8px 12px;
+  line-height: 16px;
+}
+
+@media not (pointer: coarse) {
+  :root[data-theme="nes"] .admin-field {
+    min-height: 32px;
+    font-size: 8px;
+  }
+}
+
+@media (pointer: coarse) {
+  :root[data-theme="nes"] .admin-field {
+    min-height: 40px;
+    line-height: 24px;
+  }
+}
+
+:root[data-theme="nes"] .admin-field:disabled {
+  opacity: 1;
+}
+
+:root[data-theme="nes"] .admin-signin-form .admin-actions {
+  margin-top: 0;
+}
+
 /* Loading: NES.css's progress bar, a pixel line round blocks in the ink for names,
    which crawl along a pixel at a time (standing still under reduced motion). */
 :root[data-theme="nes"] .admin-barber {

@@ -965,6 +965,34 @@
   backdrop-filter: blur(4px);
 }
 
+/* Sign in: the labels light capitals, as the workshop form's; the fields a little
+   taller so the dashed line clears the words (touch screens keep the base's 16px);
+   while signing in, the fields' own dim look (no fade on top). */
+:root[data-theme="psone"] .admin-signin-form {
+  gap: 12px;
+}
+
+:root[data-theme="psone"] .admin-label {
+  color: var(--ps-title-text);
+  font-size: var(--ps-label);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+:root[data-theme="psone"] .admin-field {
+  padding: 4px 8px 7px;
+}
+
+@media not (pointer: coarse) {
+  :root[data-theme="psone"] .admin-field {
+    min-height: 30px;
+  }
+}
+
+:root[data-theme="psone"] .admin-field:disabled {
+  opacity: 1;
+}
+
 /* Loading: a gauge as in the game's battle menu, a dark well with light and tinted
    stripes rolling along under a faint shine. */
 :root[data-theme="psone"] .admin-barber {

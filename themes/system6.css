@@ -783,6 +783,32 @@
   color: var(--error);
 }
 
+/* Sign in: each label in the chrome's face with a colon, above its field (in Geneva,
+   as all fields); while signing in, the fields grey out as the workshop form's. */
+:root[data-theme="system6"] .admin-signin-form {
+  gap: 12px;
+}
+
+:root[data-theme="system6"] .admin-label {
+  color: var(--s6-ink);
+  font-weight: var(--s6-chicago);
+}
+
+:root[data-theme="system6"] .admin-label::after {
+  content: ":";
+}
+
+:root[data-theme="system6"] .admin-field:disabled {
+  border-color: var(--shadow);
+  background: var(--s6-paper);
+  color: var(--face-muted);
+  opacity: 1;
+}
+
+:root[data-theme="system6"] .admin-signin-form .admin-actions {
+  margin-top: 8px;
+}
+
 /* The progress bar for a wait of unknown length: black and white stripes that roll
    along in a 1px frame (still under reduced motion, as in admin.css). */
 :root[data-theme="system6"] .admin-barber {
