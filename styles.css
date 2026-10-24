@@ -15,6 +15,12 @@
   --window-w: 0.3184;
   --window-h: 0.0964;
 
+  /* How wide the photo is, as a share of the hero's width. 1 is the full width; the
+     owners can make it smaller or larger on the preview page, and layout.js then sets
+     this on <html> from the saved site layout. The photo keeps its proportions and
+     stays centred. */
+  --photo-scale: 1;
+
   --phi: 1.618;
   /* How much of the big 414 and of the card lies over the photo, at its top and
      bottom edge: 1/phi^3 of their height, about a quarter. */
@@ -120,8 +126,8 @@ body {
 .hero {
   /* Size and offset of the photo in the hero. They are in cqw / cqh of the hero,
      so they only mean anything inside it (.hero::before, .big-414 and .signup). */
-  --photo-w: 100cqw;
-  --photo-h: 100cqw * var(--bg-height) / var(--bg-width);
+  --photo-w: 100cqw * var(--photo-scale);
+  --photo-h: var(--photo-w) * var(--bg-height) / var(--bg-width);
   --photo-x: (100cqw - var(--photo-w)) / 2;
   --photo-y: (100cqh - var(--photo-h)) / 2;
 
@@ -133,32 +139,41 @@ body {
   /* Lets .signup, .big-414 and .hero::before measure the hero (cqw / cqh) to find the
      photo in it. */
   container-type: size;
-  /* The photo always spans the full width at its own aspect ratio, centred vertically.
+  /* The photo spans the full width at its own aspect ratio (unless the site layout
+     scales it, --photo-scale: then it is that share of the width, still centred both
+     ways), centred vertically.
      On screens at least as wide as the photo (in proportion) that is exactly what
      background-size: cover did: it overflows the top and bottom and is cropped there.
      On narrower screens it keeps shrinking with the width instead of being cropped
-     at the sides, and the page background shows above and below it. */
+     at the sides, and the page background shows above and below it. (A percentage,
+     not cqw: the hero's own cqw would measure the viewport, not the hero.) */
   background-image: var(--bg-image);
-  background-size: 100% auto;
+  background-size: calc(var(--photo-scale) * 100%) auto;
   background-position: center;
   background-repeat: no-repeat;
 }
 
 /* Darkens the photo, and only the photo: the bands above and below it (on screens
-   narrower than the photo) stay exactly the page colour. Over that, the photo's edges
-   fade into the page colour, so it never ends in a line:
+   narrower than the photo), and beside it (when the site layout scales it down), stay
+   exactly the page colour. Over that, the photo's edges fade into the page colour, so
+   it never ends in a line:
    - the top edge once the photo is shorter than the hero, over a twelfth of its
      height at most and never more than the gap above it (while the photo fills the
      hero, its top is the top of the page);
    - the bottom edge always: the photo's own bottom edge, or the bottom of the hero
      where the photo runs past it, over a twelfth of the photo's height (an eighth of
-     the hero's at most). The page below the hero carries on in the same colour.
+     the hero's at most). The page below the hero carries on in the same colour;
+   - the left and right edges once the site layout makes the photo narrower than the
+     hero (--photo-scale below 1), over a twelfth of its width at most and never more
+     than the band beside it. At the full width they lie just outside the hero.
    Each fade reaches 1px out into the band, so no sliver of either layer can show
    between them where the edges fall between pixels. */
 .hero::before {
   --gap: max(0px, var(--photo-y));
+  --side: max(0px, var(--photo-x));
   --fade-top: min(var(--gap), var(--photo-h) / 12);
   --fade-bottom: min(var(--photo-h) / 12, 100cqh / 8);
+  --fade-side: min(var(--side), var(--photo-w) / 12);
   /* Eased rather than linear (a smoothstep, sampled in eighths so the steps between
      stops stay gentle over the short fade), so neither end of the fade shows as a line. */
   --fade-stops:
@@ -179,15 +194,21 @@ body {
   background-image:
     linear-gradient(to bottom, var(--fade-stops)),
     linear-gradient(to top, var(--fade-stops)),
+    linear-gradient(to right, var(--fade-stops)),
+    linear-gradient(to left, var(--fade-stops)),
     linear-gradient(rgba(0, 0, 0, 0.25), rgba(0, 0, 0, 0.35));
   background-size:
     100% calc(var(--fade-top) + 1px),
     100% calc(var(--fade-bottom) + 1px),
-    100% calc(var(--photo-h));
+    calc(var(--fade-side) + 1px) calc(var(--photo-h)),
+    calc(var(--fade-side) + 1px) calc(var(--photo-h)),
+    calc(var(--photo-w)) calc(var(--photo-h));
   background-position:
     0 calc(var(--gap) - 1px),
     0 calc(100% - var(--gap) + 1px),
-    0 calc(var(--photo-y));
+    calc(var(--side) - 1px) calc(var(--photo-y)),
+    calc(100% - var(--side) + 1px) calc(var(--photo-y)),
+    calc(var(--photo-x)) calc(var(--photo-y));
   background-repeat: no-repeat;
 }
 

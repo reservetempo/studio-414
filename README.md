@@ -111,6 +111,12 @@ To try a look without saving it, add `?theme=<id>&color=<n>` to either page's ad
 
 Visitors can change the page for themselves, on their own screen only, in Display, a plain panel at the very end of the public site, under the comments ([`switcher.js`](switcher.js)). **Colour** starts on "Site colour", which follows the owners' look; any other colour of the 21 stays with that visitor (kept in their browser) until they pick "Site colour" again or press the Styles **Reset**. **414 font** picks one of twenty faces for the big 414 and "Opening soon!" only; all other text keeps the theme's font. The owner page always shows the owners' colour, and `?color=` in the address wins over a visitor's own colour. If they have dragged or resized the mailing-list card or the big 414, a Layout **Reset** puts them back.
 
+## Set up the site layout
+
+Owners arrange the public site for every visitor: how big the photo is, and where the mailing-list card and the big 414 start. The public site reads that arrangement from Supabase in [`layout.js`](layout.js), which also describes the value; [`supabase/layout.sql`](supabase/layout.sql) describes the setting. Until a layout is saved, the site keeps the layout its CSS gives it. Set up the wallpaper upload first.
+
+1. **SQL Editor**: paste in [`supabase/layout.sql`](supabase/layout.sql) and click **Run** (after `wallpaper.sql`, which makes the settings table).
+
 ## Still to do
 
 - The "Join the mailing list" form isn't connected to any service yet: it only shows a thank-you message.
