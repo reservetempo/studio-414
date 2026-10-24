@@ -331,7 +331,6 @@ html.is-moving-414 * {
    (.aqua-pill, boxes.css) under the figures, which get a dotted frame. The arrow keys
    move the 414, as on the windows' title bars. */
 .big-414__handle {
-  position: absolute;
   top: calc(100% + 14px);
   left: 50%;
   translate: -50% 0;
@@ -343,6 +342,13 @@ html.is-moving-414 * {
   cursor: grab;
 }
 
+/* Out of the flow, just under the figures: the extra class outweighs .aqua-pill's
+   position: relative (boxes.css loads after this file), which would set it in the flow
+   below the heading's tall line box, far down the photo and over the card. */
+.big-414 > .big-414__handle {
+  position: absolute;
+}
+
 .big-414__handle:not(:focus) {
   width: 1px;
   height: 1px;
@@ -352,12 +358,19 @@ html.is-moving-414 * {
   clip-path: inset(50%);
 }
 
+/* Focused, it shows over the windows (boxes.js stacks them from z-index 1 up), though
+   the 414 itself stays under them. */
 .big-414__handle:focus {
+  z-index: 8;
   outline: 1px dotted var(--focus);
   outline-offset: -5px;
 }
 
+/* Its z-index 0 would keep the button under the windows too, so while the button has
+   the keyboard the 414 gives it up: z-index auto stacks the figures just as before,
+   but lets the button rise over the windows on its own. */
 .big-414:focus-within {
+  z-index: auto;
   outline: 2px dotted var(--page-text);
   outline-offset: 8px;
 }
