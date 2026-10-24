@@ -24,30 +24,30 @@ The first theme tasks ran over the 150k budget, so each theme is now split into 
 
 Every theme task: start from `themes/README.md` (the guide) and the shared facts above; copy the original library's look (credit it in the file header) and map its colours onto the palette tokens; preview with `?theme=<id>` plus a few `&color=` values and at 375px (no horizontal scroll), `?theme=aqua` unchanged; check contrast for all 21 colours with a scratchpad script (not committed). Done when that part reads as the original library in every colour. Keep it small: download the library CSS to the scratchpad and grep it (never print it whole); don't read base CSS files whole (the guide gives the selectors); prefer computed styles over screenshots and take at most about five, at half scale where detail isn't needed. If the task runs long, stop at a sensible point, push and report what's left. Owner-page previews need the stub described in the guide's section 5 (untracked copy, never committed, deleted after). If `git pull --rebase` refuses because another task's uncommitted files are in the working tree, run `git fetch origin`; if `origin/main` is already in HEAD's history, just push; otherwise stop and report.
 
-35. **Windows 98, part 2** (`win98`). Part 1 is done (`3b8fe41`): 98.css look, pixel "MS Sans Serif" (CC BY-SA 3.0, in `fonts/win98/`), tinted buttons became plain grey. Calendar still has Aqua details (round "today" ring, field-well grid); upcoming workshop days are set apart only by bold text and a button edge, so give them something stronger in the Windows idiom (e.g. the selection highlight in the title colour, like the Windows date picker). Disabled buttons use etched grey text (~3:1, authentic; exempt).
-36. **Mac System 6, part 2** (`system6`). Part 1 is done (`a96e5c5`): system.css look, Pixelify Sans (OFL, in `fonts/system6/`) standing in for Chicago/Geneva, black lines and text on the tinted face. Tinted buttons such as the calendar's workshop days now look the same as plain ones (set them apart in the System 6 idiom, e.g. inverse video or a bold outline); the calendar is still mostly Aqua.
-37. **NES, part 1a** (`nes`). The look: after NES.css (npm `nes.css`): pixel-art frames with stepped corners, containers with the title sitting on the top border, chunky buttons with a bottom-right shade that presses in, pixel checkboxes, "Press Start 2P" (OFL) as the chrome font, sized so labels still fit at 375px.
 38. **PlayStation, part 1a** (`psone`). The look: after PSone.css (find it on npm/jsdelivr; if it can't be found, base it on the PS1 BIOS memory-card and CD-player menus): dark, slightly translucent panels with soft gradient bevels, glowing light text, rounded selection highlights; describe in the file header what was used as the reference.
 39. **DOS, part 1a** (`dos`). The look: after Bootstra.386 (GitHub kristopolous/BOOTSTRA.386; check its licence): VGA text mode: solid-colour windows with double-line borders and a solid offset shadow, title centred in the top border, monospace VGA-style font (self-host a free one, e.g. an OFL VGA/"Perfect DOS"-like font, or VT323), inverse-video buttons and selections, a blinking block cursor in fields (still under reduced motion).
-40. **NES, part 1b** (`nes`, after 37). Same look as task 37.
+40. **NES, part 1b** (`nes`). The look: after NES.css (npm `nes.css`): pixel-art frames with stepped corners, chunky buttons with a bottom-right shade that presses in, pixel checkboxes, Press Start 2P chrome font. Part 1a is done (`1148ad6`): font in `fonts/nes/`, 4px stepped gradient frames that tint with the face, title on the top line in a cleared box (16px titles, 8px labels), notched close box with a pixel ×, dotted triangle grip, gumdrops hidden. Notes from 1a: `--aqua-font` now reaches pills and pop-ups at 13px, off the font's 8px grid, so it renders soft (use 8px multiples); long font names in Display's Font pop-up would clip at phone width.
 41. **PlayStation, part 1b** (`psone`, after 38). Same look as task 38.
 42. **DOS, part 1b** (`dos`, after 39). Same look as task 39.
-43. **NES, part 2** (`nes`, after 40). Same look as task 37.
+43. **NES, part 2** (`nes`, after 40). Same look as task 40.
 44. **PlayStation, part 2** (`psone`, after 41). Same look as task 38.
 45. **DOS, part 2** (`dos`, after 42). Same look as task 39.
 46. **Windows 98, owner 1** (`win98`, after 35).
 47. **Mac System 6, owner 1** (`system6`, after 36).
-48. **NES, owner 1** (`nes`, after 43).
+48. **NES, owner 1** (`nes`, after 43). Same look as task 40.
 49. **PlayStation, owner 1** (`psone`, after 44).
 50. **DOS, owner 1** (`dos`, after 45).
 51. **Windows 98, owner 2** (`win98`, after 46).
 52. **Mac System 6, owner 2** (`system6`, after 47).
-53. **NES, owner 2** (`nes`, after 48).
+53. **NES, owner 2** (`nes`, after 48). Same look as task 40.
 54. **PlayStation, owner 2** (`psone`, after 49).
 55. **DOS, owner 2** (`dos`, after 50).
 
 ## Done
 
+- 37. NES, part 1a (font and windows): `1148ad6`. Press Start 2P (OFL, Fontsource) in `fonts/nes/`; 4px stepped gradient frames tinting with the face; title on the top line in a cleared box; notched close box with pixel ×; dotted grip; comment box gets a face fill (no blur). Contrast passes for all 21; on dark colours the black frame is under 3:1 against the page, but the face fill separates windows (as in Win98/System 6).
+- 36. Mac System 6, part 2: `86374f9`. Calendar: white grid, square today, upcoming workshop days in inverse video, past days disabled-looking, plain tooltip with hard shadow; links underlined black, grey once opened; dithered spots light; invalid fields doubled red line. Contrast passes for all 21.
+- 35. Windows 98, part 2: `f63b4be`. Calendar: sunken white grid, workshop days filled in the title colour with a black frame, square red today, pale yellow tooltip; 75px buttons; square lamp for spots; red line on invalid fields; 98.css check box (part 1 had none). Contrast passes for all 21.
 - 34. Mac System 6, public part 1: `a96e5c5`. system.css look on the card, Display, Sign up/Workshops, paint roller, Move 414; comment box became a framed window. Pixelify Sans (OFL) stands in for Chicago/Geneva: system.css's bundled fonts have no confirmed licence (user may swap if they can confirm one). Contrast passes for all 21.
 - 33. Windows 98, public part 1: `3b8fe41`. 98.css look (gradient title bar, min/max/× buttons, bevelled push buttons, sunken fields); comment box became a Win98 window. Pixel "MS Sans Serif" is CC BY-SA 3.0 (credited in `fonts/win98/LICENSE.txt`; delete the two `@font-face` rules and the folder to fall back to Tahoma). Card label and typed text keep the visitor's Display font. Contrast passes for all 21.
 - 32. Owner page Look section: `0704a81`. `admin-look.js` (first section): theme radios, 21 swatches, live switching, Preview the site, Save/Undo with ✓/⚠ notices, revert on sign-out. With `?theme=`/`?color=` on the owner page, Look starts from the preview and doesn't switch the page (so signed-in theme previews work). Guide's Look section filled in; `colors.css` comment fixed.
