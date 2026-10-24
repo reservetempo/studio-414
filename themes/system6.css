@@ -637,8 +637,7 @@
 
 /* ========== Owner page (admin.html; admin.css, admin-look.js) ==========
    The windows, buttons and fields above apply there too. Here: the menu bar, the
-   alerts, the notices and the Look section. The Wallpaper and Workshops sections'
-   insides are not styled yet. */
+   alerts, the notices, and the Look, Wallpaper and Workshops sections. */
 
 :root[data-theme="system6"] {
   /* The alerts' icons, 32px, black on white as in the original. A document with a
@@ -931,6 +930,324 @@
   box-shadow: 0 0 0 1px var(--face), 0 0 0 4px var(--shadow);
 }
 
+/* ---------- Wallpaper and Workshops: buttons ---------- */
+
+/* The default buttons (Choose photo, Save, Add workshop, Try again): the thick
+   outline, greyed while they're disabled. */
+:root[data-theme="system6"] .wallpaper .admin-button-primary,
+:root[data-theme="system6"] .workshops .admin-button-primary {
+  box-shadow: var(--s6-default-ring);
+}
+
+:root[data-theme="system6"] .wallpaper .admin-button-primary:disabled,
+:root[data-theme="system6"] .workshops .admin-button-primary:disabled {
+  box-shadow: 0 0 0 1px var(--face), 0 0 0 4px var(--shadow);
+}
+
+/* A workshop's button that can't be used yet: greyed as a disabled one, not faded,
+   and it does not press. */
+:root[data-theme="system6"] .workshops .admin-button[aria-disabled="true"],
+:root[data-theme="system6"] .workshops .admin-button[aria-disabled="true"]:active {
+  border-color: var(--shadow);
+  background: var(--s6-paper);
+  color: var(--face-muted);
+  opacity: 1;
+}
+
+/* ---------- Wallpaper section ---------- */
+
+:root[data-theme="system6"] .wallpaper {
+  /* Marching ants: a 1px line of 4px black and 4px white dashes, so it shows on any
+     photo (one layer for each side, in the box's border). */
+  --s6-ants-x: linear-gradient(to right, var(--face-text) 50%, var(--field) 50%);
+  --s6-ants-y: linear-gradient(to bottom, var(--face-text) 50%, var(--field) 50%);
+}
+
+/* The photo in a plain 1px black frame (an outline, so the spot's sums stay on the
+   photo itself). */
+:root[data-theme="system6"] .wallpaper-figure {
+  background: var(--field);
+  box-shadow: 0 0 0 1px var(--face-text);
+}
+
+:root[data-theme="system6"] .wallpaper-figure::after {
+  content: none;
+}
+
+/* The spot: a selection rectangle in marching ants, with nothing over the photo
+   inside it. The box being moved marches (still under reduced motion). */
+:root[data-theme="system6"] .wallpaper-spot,
+:root[data-theme="system6"] .wallpaper-box,
+:root[data-theme="system6"] .wallpaper-box.is-dragging {
+  border-color: transparent;
+  background:
+    var(--s6-ants-x) 0 0 / 8px 1px repeat-x,
+    var(--s6-ants-x) 0 100% / 8px 1px repeat-x,
+    var(--s6-ants-y) 0 0 / 1px 8px repeat-y,
+    var(--s6-ants-y) 100% 0 / 1px 8px repeat-y;
+  background-origin: border-box;
+  box-shadow: none;
+}
+
+:root[data-theme="system6"] .wallpaper-box {
+  animation: s6-ants 0.8s steps(8) infinite;
+}
+
+@keyframes s6-ants {
+  from {
+    background-position: 0 0, 0 100%, 0 0, 100% 0;
+  }
+  to {
+    background-position: 8px 0, -8px 100%, 0 -8px, 100% 8px;
+  }
+}
+
+/* Focused: a white and a black line round the ants. */
+:root[data-theme="system6"] .wallpaper-box:focus-visible {
+  box-shadow: 0 0 0 1px var(--field), 0 0 0 2px var(--face-text);
+}
+
+/* The handles: small black squares on the corners, edged in white for dark photos;
+   on touch screens bigger, just outside the corners. */
+:root[data-theme="system6"] .wallpaper-handle {
+  width: 9px;
+  height: 9px;
+  border: 1px solid var(--field);
+  border-radius: 0;
+  background: var(--face-text);
+  box-shadow: none;
+}
+
+:root[data-theme="system6"] .wallpaper-handle-nw { left: -5px; top: -5px; }
+:root[data-theme="system6"] .wallpaper-handle-ne { right: -5px; top: -5px; }
+:root[data-theme="system6"] .wallpaper-handle-sw { left: -5px; bottom: -5px; }
+:root[data-theme="system6"] .wallpaper-handle-se { right: -5px; bottom: -5px; }
+
+@media (pointer: coarse) {
+  :root[data-theme="system6"] .wallpaper-handle {
+    width: 15px;
+    height: 15px;
+  }
+
+  :root[data-theme="system6"] .wallpaper-handle-nw { left: -15px; top: -15px; }
+  :root[data-theme="system6"] .wallpaper-handle-ne { right: -15px; top: -15px; }
+  :root[data-theme="system6"] .wallpaper-handle-sw { left: -15px; bottom: -15px; }
+  :root[data-theme="system6"] .wallpaper-handle-se { right: -15px; bottom: -15px; }
+}
+
+:root[data-theme="system6"] .wallpaper-editor-title {
+  font-weight: var(--s6-chicago);
+}
+
+/* The progress bar: white in a 1px black frame, filling with black from the left.
+   Until the size is known it is the barber pole: black and white stripes rolling
+   along (still under reduced motion). */
+:root[data-theme="system6"] .wallpaper-progress-bar {
+  border: 1px solid var(--s6-ink);
+  border-radius: 0;
+  background: var(--field);
+  color: var(--s6-ink);
+}
+
+:root[data-theme="system6"] .wallpaper-progress-bar::-webkit-progress-bar {
+  background: var(--field);
+  box-shadow: none;
+}
+
+:root[data-theme="system6"] .wallpaper-progress-bar::-webkit-progress-value {
+  background: var(--s6-ink);
+  box-shadow: none;
+  animation: none;
+}
+
+:root[data-theme="system6"] .wallpaper-progress-bar::-moz-progress-bar {
+  background: var(--s6-ink);
+  box-shadow: none;
+  animation: none;
+}
+
+:root[data-theme="system6"] .wallpaper-progress-bar:indeterminate {
+  background: linear-gradient(-45deg, var(--s6-ink) 25%, var(--field) 25% 50%,
+    var(--s6-ink) 50% 75%, var(--field) 75%) 0 0 / 12px 12px;
+  animation: s6-progress 0.8s linear infinite;
+}
+
+:root[data-theme="system6"] .wallpaper-progress-bar:indeterminate::-webkit-progress-bar {
+  background: transparent;
+}
+
+:root[data-theme="system6"] .wallpaper-progress-bar:indeterminate::-moz-progress-bar {
+  background: transparent;
+}
+
+@keyframes s6-progress {
+  to {
+    background-position: 12px 0;
+  }
+}
+
+/* ---------- Workshops section ---------- */
+
+/* A Finder list: white rows with a 1px line between them, no alternating tint. */
+:root[data-theme="system6"] .workshops {
+  --workshops-row: var(--field);
+  --workshops-rule: var(--s6-ink);
+}
+
+:root[data-theme="system6"] .workshops-list,
+:root[data-theme="system6"] .workshops-signups-wrap {
+  border: 1px solid var(--s6-ink);
+  box-shadow: none;
+}
+
+:root[data-theme="system6"] .workshops-item + .workshops-item {
+  border-top: 1px solid var(--workshops-rule);
+}
+
+:root[data-theme="system6"] .workshops-item-name,
+:root[data-theme="system6"] .workshops-signups-title,
+:root[data-theme="system6"] .workshops-signups-total,
+:root[data-theme="system6"] .workshops-form-title {
+  font-weight: var(--s6-chicago);
+}
+
+/* The row being worked on (focus in it): its name in inverse video, as a selected
+   item in the Finder. */
+:root[data-theme="system6"] .workshops-item:focus-within > .workshops-item-head > .workshops-item-name {
+  margin: 0 -2px;
+  padding: 0 2px;
+  background: var(--face-text);
+  color: var(--field);
+}
+
+/* "Hidden" and "Past": small square-cornered tags in a 1px line; "Past" greyed, as a
+   disabled button is. */
+:root[data-theme="system6"] .workshops-badge {
+  padding: 0 4px;
+  border: 1px solid var(--s6-ink);
+  border-radius: 0;
+  background: var(--field);
+  color: var(--field-text);
+  font-size: 11px;
+  font-weight: var(--s6-chicago);
+  line-height: 13px;
+  box-shadow: none;
+}
+
+:root[data-theme="system6"] .workshops-badge-past {
+  border-color: var(--shadow);
+  color: var(--face-muted);
+}
+
+/* "Past workshops": the Finder's black disclosure triangle, pointing right while
+   folded and down when open (swapped, not turned). */
+:root[data-theme="system6"] .workshops-past-toggle {
+  border-radius: 0;
+  color: var(--s6-ink);
+  font-weight: var(--s6-chicago);
+}
+
+:root[data-theme="system6"] .workshops-past-toggle::before {
+  content: "";
+  flex: none;
+  width: 9px;
+  height: 9px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='9' viewBox='0 0 9 9'%3E%3Cpath d='M2 0h1v1h1v1h1v1h1v1h1v1h-1v1h-1v1h-1v1h-1v1h-1z' fill='%23000'/%3E%3C/svg%3E") center / 9px 9px no-repeat;
+  transform: none;
+  transition: none;
+}
+
+:root[data-theme="system6"] .workshops-past-toggle[aria-expanded="true"]::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='9' viewBox='0 0 9 9'%3E%3Cpath d='M0 2h9v1h-1v1h-1v1h-1v1h-1v1h-1v-1h-1v-1h-1v-1h-1v-1h-1z' fill='%23000'/%3E%3C/svg%3E");
+}
+
+:root[data-theme="system6"] .workshops-past-toggle:focus-visible {
+  outline: 2px dotted var(--s6-ink);
+  outline-offset: 0;
+  box-shadow: none;
+}
+
+/* The sign-ups table: white, a bold header over a 1px line, 1px lines between the
+   columns' headings and between the rows. */
+:root[data-theme="system6"] .workshops-signups-table th {
+  border-bottom-color: var(--s6-ink);
+  border-left-color: var(--s6-ink);
+  background: var(--field);
+  color: var(--field-text);
+  font-size: 12px;
+  font-weight: var(--s6-chicago);
+}
+
+@media (min-width: 561px) {
+  :root[data-theme="system6"] .workshops-signups-table tbody tr + tr td {
+    border-top: 1px solid var(--workshops-rule);
+  }
+}
+
+/* The form: a group box, a 1px line with its title in a gap cleared on the top line. */
+:root[data-theme="system6"] .workshops-form {
+  --s6-group-pad: 14px;
+  margin-top: 10px;
+  border: 1px solid var(--s6-ink);
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+
+:root[data-theme="system6"] .workshops-form-title {
+  width: fit-content;
+  max-width: 100%;
+  margin: calc(-1 * var(--s6-group-pad) - 0.5px - 0.65em) 0 10px -5px;
+  padding: 0 5px;
+  background: var(--s6-paper);
+}
+
+@media (max-width: 560px) {
+  :root[data-theme="system6"] .workshops-form {
+    --s6-group-pad: 12px;
+  }
+}
+
+:root[data-theme="system6"] .workshops-label,
+:root[data-theme="system6"] .workshops-price-symbol {
+  color: var(--s6-ink);
+  font-weight: var(--s6-chicago);
+}
+
+/* Dates and times: in the inverse-video focused field, the picker's icon goes white
+   and the part being typed is white with black words. */
+:root[data-theme="system6"] .workshops-input:focus-visible::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+}
+
+:root[data-theme="system6"] .workshops-input::-webkit-datetime-edit-year-field:focus,
+:root[data-theme="system6"] .workshops-input::-webkit-datetime-edit-month-field:focus,
+:root[data-theme="system6"] .workshops-input::-webkit-datetime-edit-day-field:focus,
+:root[data-theme="system6"] .workshops-input::-webkit-datetime-edit-hour-field:focus,
+:root[data-theme="system6"] .workshops-input::-webkit-datetime-edit-minute-field:focus,
+:root[data-theme="system6"] .workshops-input::-webkit-datetime-edit-ampm-field:focus {
+  background: var(--field);
+  color: var(--field-text);
+}
+
+/* A field to fix: its line doubled in the error red, as on the site; focused
+   (inverse video), the inner line is white. */
+:root[data-theme="system6"] .workshops-input[aria-invalid="true"] {
+  border-color: var(--error);
+  box-shadow: inset 0 0 0 1px var(--error);
+}
+
+:root[data-theme="system6"] .workshops-input[aria-invalid="true"]:focus-visible {
+  border-color: var(--error);
+  box-shadow: inset 0 0 0 1px var(--field);
+}
+
+:root[data-theme="system6"] .workshops-input:disabled {
+  border-color: var(--shadow);
+  background: var(--s6-paper);
+  color: var(--face-muted);
+}
+
 @media (forced-colors: active) {
   :root[data-theme="system6"] .admin-header {
     border-bottom-color: CanvasText;
@@ -939,10 +1256,28 @@
   :root[data-theme="system6"] .look-color-input:focus-visible ~ .look-color-chip {
     outline-color: CanvasText;
   }
+
+  /* The ants and handles in system colours. */
+  :root[data-theme="system6"] .wallpaper-spot,
+  :root[data-theme="system6"] .wallpaper-box {
+    border: 1px dashed Highlight;
+  }
+
+  :root[data-theme="system6"] .wallpaper-box:focus-visible {
+    outline: 2px solid Highlight;
+  }
+
+  :root[data-theme="system6"] .wallpaper-handle {
+    border-color: Canvas;
+    background: Highlight;
+    forced-color-adjust: none;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  :root[data-theme="system6"] .admin-barber::before {
+  :root[data-theme="system6"] .admin-barber::before,
+  :root[data-theme="system6"] .wallpaper-box,
+  :root[data-theme="system6"] .wallpaper-progress-bar:indeterminate {
     animation: none;
   }
 }
