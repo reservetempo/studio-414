@@ -8,7 +8,9 @@
    Colours: NES.css's white is the colour's --face and its black the fixed
    --face-text, so the whole look tints with the chosen colour. Pairs from the palette
    (README section 2): --face-text on --face (4.5:1 and up), --shadow on --face for the
-   close box's shade (3:1).
+   shades inside buttons (3:1), --title-text on --title for the primary buttons,
+   --field-text on --field in fields and menus, --page-text on the page for the buttons
+   that stand on it.
 
    Font: Press Start 2P by Cody "CodeMan38" Boisclair (SIL Open Font License 1.1,
    fonts/nes/LICENSE.txt), as NES.css uses, from Fontsource (latin subset). It is drawn
@@ -34,6 +36,11 @@
   /* A pixel × (5 x 5) and the resize grip's triangle of dots, as masks for currentColor. */
   --nes-x: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 5 5' shape-rendering='crispEdges'%3E%3Cpath d='M0 0h1v1H0zM4 0h1v1H4zM1 1h1v1H1zM3 1h1v1H3zM2 2h1v1H2zM1 3h1v1H1zM3 3h1v1H3zM0 4h1v1H0zM4 4h1v1H4z'/%3E%3C/svg%3E");
   --nes-dots: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 5 5' shape-rendering='crispEdges'%3E%3Cpath d='M4 0h1v1H4zM2 2h1v1H2zM4 2h1v1H4zM0 4h1v1H0zM2 4h1v1H2zM4 4h1v1H4z'/%3E%3C/svg%3E");
+  /* NES.css's pop-up arrow (7 x 6) and check box, empty and ticked (10 x 8, the tick
+     reaching out of the box's top right), in the ink, which is always black. */
+  --nes-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 7 6' shape-rendering='crispEdges'%3E%3Cpath d='M0 0h7v2H0zM1 2h5v2H1zM2 4h3v1H2zM3 5h1v1H3z'/%3E%3C/svg%3E");
+  --nes-box: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 8' shape-rendering='crispEdges'%3E%3Cpath d='M0 0h8v1H0zM0 7h8v1H0zM0 1h1v6H0zM7 1h1v6H7z'/%3E%3C/svg%3E");
+  --nes-tick: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 8' shape-rendering='crispEdges'%3E%3Cpath d='M0 0h7v1H0zM8 0h2v1H8zM0 1h1v1H0zM7 1h3v1H7zM0 2h1v1H0zM6 2h2v1H6zM0 3h2v1H0zM5 3h2v1H5zM0 4h3v1H0zM4 4h2v1H4zM7 4h1v1H7zM0 5h1v1H0zM2 5h3v1H2zM7 5h1v1H7zM0 6h1v1H0zM3 6h1v1H3zM7 6h1v1H7zM0 7h8v1H0z'/%3E%3C/svg%3E");
 }
 
 @media (pointer: coarse) {
@@ -51,6 +58,11 @@
   --nes-ink-fill: linear-gradient(var(--nes-ink) 0 0);
   --nes-paper-fill: linear-gradient(var(--nes-paper) 0 0);
   --nes-shade-fill: linear-gradient(var(--nes-shade) 0 0);
+  /* NES.css's primary button: the title colour, its shade a step towards the title
+     text (darker on light titles, lighter on deep ones, so it always shows). */
+  --nes-tint: var(--title);
+  --nes-tint-text: var(--title-text);
+  --nes-tint-shade: color-mix(in srgb, var(--title) 65%, var(--title-text));
 }
 
 /* ---------- Windows ---------- */
@@ -241,6 +253,253 @@
   text-transform: none;
 }
 
+/* ---------- Buttons ---------- */
+
+/* NES.css's button: a line one pixel (--nes-btn-u, 4px) thick with the corners left
+   out, and a shade inside along the bottom and right that swaps to the top and left
+   while pressed (or while what it opens is open: the paint roller), and widens under
+   the pointer. Plain buttons are the face; the tinted ones (the default buttons, the
+   Workshops button) NES.css's primary, in the title colour. Text at 8px, on the font's
+   grid. "Post comment" is one too. */
+:root[data-theme="nes"] .aqua-pill,
+:root[data-theme="nes"] .comments__submit {
+  --nes-btn-u: var(--nes-u);
+  --nes-btn-fill: var(--nes-paper);
+  --nes-btn-edge: var(--nes-ink);
+  --nes-btn-shade: var(--nes-shade);
+  --nes-btn-sw: var(--nes-btn-u);
+  --nes-btn-at: calc(100% - var(--nes-btn-u));
+  border: 0;
+  border-radius: 0;
+  background:
+    /* the line, round the four sides */
+    linear-gradient(var(--nes-btn-edge) 0 0) var(--nes-btn-u) 0 / calc(100% - 2 * var(--nes-btn-u)) var(--nes-btn-u) no-repeat,
+    linear-gradient(var(--nes-btn-edge) 0 0) var(--nes-btn-u) 100% / calc(100% - 2 * var(--nes-btn-u)) var(--nes-btn-u) no-repeat,
+    linear-gradient(var(--nes-btn-edge) 0 0) 0 var(--nes-btn-u) / var(--nes-btn-u) calc(100% - 2 * var(--nes-btn-u)) no-repeat,
+    linear-gradient(var(--nes-btn-edge) 0 0) 100% var(--nes-btn-u) / var(--nes-btn-u) calc(100% - 2 * var(--nes-btn-u)) no-repeat,
+    /* the shade, along the bottom and right (--nes-btn-at) */
+    linear-gradient(var(--nes-btn-shade) 0 0) var(--nes-btn-u) var(--nes-btn-at) / calc(100% - 2 * var(--nes-btn-u)) var(--nes-btn-sw) no-repeat,
+    linear-gradient(var(--nes-btn-shade) 0 0) var(--nes-btn-at) var(--nes-btn-u) / var(--nes-btn-sw) calc(100% - 2 * var(--nes-btn-u)) no-repeat,
+    /* the fill inside the line */
+    linear-gradient(var(--nes-btn-fill) 0 0) var(--nes-btn-u) var(--nes-btn-u) / calc(100% - 2 * var(--nes-btn-u)) calc(100% - 2 * var(--nes-btn-u)) no-repeat;
+  color: var(--nes-ink);
+  box-shadow: none;
+  font-family: var(--aqua-font);
+  font-size: 8px;
+  font-weight: 400;
+  letter-spacing: 0;
+  line-height: 1;
+  text-decoration: none;
+  text-shadow: none;
+}
+
+:root[data-theme="nes"] .aqua-pill--tint,
+:root[data-theme="nes"] .comments__submit {
+  --nes-btn-fill: var(--nes-tint);
+  --nes-btn-shade: var(--nes-tint-shade);
+  color: var(--nes-tint-text);
+}
+
+/* No shine and no pulse. */
+:root[data-theme="nes"] .aqua-pill::after,
+:root[data-theme="nes"] .aqua-pill--pulse::before {
+  content: none;
+  animation: none;
+}
+
+@media (hover: hover) {
+  :root[data-theme="nes"] .aqua-pill:not(:disabled):hover,
+  :root[data-theme="nes"] .comments__submit:not(:disabled):hover {
+    --nes-btn-sw: calc(1.5 * var(--nes-btn-u));
+  }
+}
+
+:root[data-theme="nes"] .aqua-pill:not(:disabled):active,
+:root[data-theme="nes"] .aqua-pill[aria-expanded="true"],
+:root[data-theme="nes"] .comments__submit:not(:disabled):active {
+  --nes-btn-at: var(--nes-btn-u);
+  --nes-btn-sw: var(--nes-btn-u);
+}
+
+:root[data-theme="nes"] .aqua-pill:focus-visible,
+:root[data-theme="nes"] .comments__submit:focus-visible {
+  outline: 2px dotted var(--nes-ink);
+  outline-offset: 2px;
+}
+
+/* Disabled (Pay until the form is ready, Post comment while posting): no shade, the
+   line greyed, the words muted (still 4.5:1 on the face), even on a tinted one. */
+:root[data-theme="nes"] .aqua-pill:disabled,
+:root[data-theme="nes"] .comments__submit:disabled {
+  --nes-btn-fill: var(--nes-paper);
+  --nes-btn-edge: var(--nes-shade);
+  --nes-btn-shade: transparent;
+  color: var(--face-muted);
+}
+
+/* ---------- Text fields ---------- */
+
+/* NES.css's input: the same line with its corners left out, round the white field. */
+:root[data-theme="nes"] .aqua-field,
+:root[data-theme="nes"] .comments__input,
+:root[data-theme="nes"] .comments__textarea {
+  --nes-field-edge: var(--nes-ink);
+  --nes-field-fill: var(--field);
+  border: 0;
+  border-radius: 0;
+  background:
+    linear-gradient(var(--nes-field-edge) 0 0) var(--nes-u) 0 / calc(100% - 2 * var(--nes-u)) var(--nes-u) no-repeat,
+    linear-gradient(var(--nes-field-edge) 0 0) var(--nes-u) 100% / calc(100% - 2 * var(--nes-u)) var(--nes-u) no-repeat,
+    linear-gradient(var(--nes-field-edge) 0 0) 0 var(--nes-u) / var(--nes-u) calc(100% - 2 * var(--nes-u)) no-repeat,
+    linear-gradient(var(--nes-field-edge) 0 0) 100% var(--nes-u) / var(--nes-u) calc(100% - 2 * var(--nes-u)) no-repeat,
+    linear-gradient(var(--nes-field-fill) 0 0) var(--nes-u) var(--nes-u) / calc(100% - 2 * var(--nes-u)) calc(100% - 2 * var(--nes-u)) no-repeat;
+  color: var(--field-text);
+  box-shadow: none;
+}
+
+:root[data-theme="nes"] .aqua-field::placeholder,
+:root[data-theme="nes"] .comments__input::placeholder,
+:root[data-theme="nes"] .comments__textarea::placeholder {
+  color: var(--placeholder);
+}
+
+/* Wrong: the line goes red, as NES.css's error field. */
+:root[data-theme="nes"] .aqua-field[aria-invalid="true"],
+:root[data-theme="nes"] .comments__input[aria-invalid="true"],
+:root[data-theme="nes"] .comments__textarea[aria-invalid="true"] {
+  --nes-field-edge: var(--error);
+  box-shadow: none;
+}
+
+:root[data-theme="nes"] .aqua-field:disabled {
+  --nes-field-edge: var(--nes-shade);
+  --nes-field-fill: var(--nes-paper);
+  color: var(--face-muted);
+}
+
+/* Focused, a dotted line round the field (and the menu); it shows in high contrast. */
+:root[data-theme="nes"] .aqua-field:focus-visible,
+:root[data-theme="nes"] .aqua-popup:focus-visible,
+:root[data-theme="nes"] .comments__input:focus-visible,
+:root[data-theme="nes"] .comments__textarea:focus-visible {
+  border: 0;
+  outline: 2px dotted var(--nes-ink);
+  outline-offset: 2px;
+  box-shadow: none;
+}
+
+/* ---------- Pop-up menus ---------- */
+
+/* NES.css's select: a field with its pixel arrow at the right. 8px text, so the
+   longest names fit; on iPhones and iPads it stays 16px, so they do not zoom in when
+   it opens, and the names end in an ellipsis. */
+:root[data-theme="nes"] .aqua-popup {
+  border: 0;
+  border-radius: 0;
+  background:
+    var(--nes-arrow) right 10px center / 14px 12px no-repeat,
+    var(--nes-ink-fill) var(--nes-u) 0 / calc(100% - 2 * var(--nes-u)) var(--nes-u) no-repeat,
+    var(--nes-ink-fill) var(--nes-u) 100% / calc(100% - 2 * var(--nes-u)) var(--nes-u) no-repeat,
+    var(--nes-ink-fill) 0 var(--nes-u) / var(--nes-u) calc(100% - 2 * var(--nes-u)) no-repeat,
+    var(--nes-ink-fill) 100% var(--nes-u) / var(--nes-u) calc(100% - 2 * var(--nes-u)) no-repeat,
+    linear-gradient(var(--field) 0 0) var(--nes-u) var(--nes-u) / calc(100% - 2 * var(--nes-u)) calc(100% - 2 * var(--nes-u)) no-repeat;
+  color: var(--field-text);
+  box-shadow: none;
+  font-family: var(--aqua-font);
+  font-size: 8px;
+  line-height: 1;
+  text-overflow: ellipsis;
+}
+
+@supports (-webkit-touch-callout: none) {
+  :root[data-theme="nes"] .aqua-popup {
+    font-size: 16px;
+  }
+}
+
+:root[data-theme="nes"] .aqua-popup option {
+  background: var(--field);
+  color: var(--field-text);
+}
+
+/* ---------- Check box ---------- */
+
+/* NES.css's: a square of 2px pixels, ticked with a blocky tick that reaches out of
+   its top right. */
+:root[data-theme="nes"] .workshop__check input {
+  width: 20px;
+  height: 16px;
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  background: var(--nes-box) 0 0 / 20px 16px no-repeat;
+  box-shadow: none;
+}
+
+:root[data-theme="nes"] .workshop__check input:checked {
+  background-image: var(--nes-tick);
+}
+
+:root[data-theme="nes"] .workshop__check input:focus-visible {
+  outline: 2px dotted var(--nes-ink);
+  outline-offset: 2px;
+  box-shadow: none;
+}
+
+/* ---------- Display ---------- */
+
+/* ‹ and › at 16px, centred in the part the shade leaves, which moves when pressed. */
+:root[data-theme="nes"] .switcher__step {
+  padding: 0 var(--nes-u) var(--nes-u) 0;
+  font-size: 16px;
+}
+
+:root[data-theme="nes"] .switcher__step:not(:disabled):active {
+  padding: var(--nes-u) 0 0 var(--nes-u);
+}
+
+:root[data-theme="nes"] .switcher__select {
+  padding: 0 28px 0 10px;
+}
+
+/* ---------- Buttons on the page ---------- */
+
+/* Workshops, the paint roller and Move 414 stand on the page or the photo. The
+   Workshops button's line is in the page's text colour, so it shows round the title
+   colour on the page; their focus lines are in it too, outside. */
+:root[data-theme="nes"] .workshop-button {
+  --nes-btn-edge: var(--page-text);
+  padding: 0 16px;
+  letter-spacing: 0;
+}
+
+:root[data-theme="nes"] .workshop-button:focus-visible,
+:root[data-theme="nes"] .switcher-toggle:focus-visible {
+  outline: 2px dotted var(--page-text);
+  outline-offset: 3px;
+}
+
+/* The roller sits in the part the shade leaves, and moves with it while Display is
+   open. */
+:root[data-theme="nes"] .switcher-toggle svg {
+  translate: calc(var(--nes-u) / -2) calc(var(--nes-u) / -2);
+}
+
+:root[data-theme="nes"] .switcher-toggle:active svg,
+:root[data-theme="nes"] .switcher-toggle[aria-expanded="true"] svg {
+  translate: calc(var(--nes-u) / 2) calc(var(--nes-u) / 2);
+}
+
+/* Shown only while focused, so its focus line is inside it. */
+:root[data-theme="nes"] .big-414__handle:focus {
+  outline: 2px dotted var(--nes-ink);
+  outline-offset: -8px;
+}
+
+:root[data-theme="nes"] .big-414__handle:not(:focus) {
+  background: none;
+}
+
 /* ---------- Comment box ---------- */
 
 /* A window like the others, its heading as the title on the frame. Inside, the page
@@ -261,6 +520,38 @@
   max-width: 100%;
   /* Centred on the frame's top line, as a window title is in its bar. */
   margin: calc((var(--nes-bar) - var(--nes-title)) / 2) 0 0;
+}
+
+/* Fields (above) with room inside their line; the text area a line's width taller. */
+:root[data-theme="nes"] .comments__input {
+  padding-inline: 12px;
+}
+
+:root[data-theme="nes"] .comments__textarea {
+  height: calc(3 * 1.4em + 18px);
+  padding: 8px 12px;
+}
+
+/* "Post comment": a primary button (above), as Sign up. */
+:root[data-theme="nes"] .comments__submit {
+  min-height: 32px;
+  padding: 0 16px;
+}
+
+:root[data-theme="nes"] .comments__submit:disabled {
+  text-decoration: none;
+}
+
+:root[data-theme="nes"] .comments__pane:focus-visible,
+:root[data-theme="nes"] .comments__link:focus-visible {
+  outline: 2px dotted var(--nes-ink);
+  outline-offset: 2px;
+}
+
+/* ---------- Mailing-list card ---------- */
+
+:root[data-theme="nes"] .signup__input {
+  padding: 0 12px;
 }
 
 /* ---------- High contrast ---------- */
@@ -287,13 +578,42 @@
   :root[data-theme="nes"] .box__grip::after {
     background: CanvasText;
   }
+
+  /* Buttons, fields and menus get plain lines; the check box is the system's. */
+  :root[data-theme="nes"] .aqua-pill,
+  :root[data-theme="nes"] .comments__submit {
+    border: 2px solid ButtonText;
+  }
+
+  :root[data-theme="nes"] .aqua-field,
+  :root[data-theme="nes"] .aqua-popup,
+  :root[data-theme="nes"] .comments__input,
+  :root[data-theme="nes"] .comments__textarea {
+    border: 2px solid CanvasText;
+  }
+
+  :root[data-theme="nes"] .workshop__check input {
+    -webkit-appearance: auto;
+    appearance: auto;
+    width: 16px;
+    background: none;
+  }
 }
 
 /* ---------- Reduced motion ---------- */
 
-/* Nothing here moves but the close box's × while pressed. */
+/* Nothing here moves but the close box's ×, the ‹ and › and the roller while pressed. */
 @media (prefers-reduced-motion: reduce) {
   :root[data-theme="nes"] .box__close:active::after {
     translate: none;
+  }
+
+  :root[data-theme="nes"] .switcher-toggle:active svg,
+  :root[data-theme="nes"] .switcher-toggle[aria-expanded="true"] svg {
+    translate: calc(var(--nes-u) / -2) calc(var(--nes-u) / -2);
+  }
+
+  :root[data-theme="nes"] .switcher__step:not(:disabled):active {
+    padding: 0 var(--nes-u) var(--nes-u) 0;
   }
 }
