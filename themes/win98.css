@@ -1021,6 +1021,324 @@
   outline-offset: 1px;
 }
 
+/* ---------- Wallpaper section ---------- */
+
+/* Windows' 8-point type here too (admin.css sets 12px and 13px). */
+:root[data-theme="win98"] .wallpaper-caption,
+:root[data-theme="win98"] .wallpaper-readout,
+:root[data-theme="win98"] .wallpaper-note,
+:root[data-theme="win98"] .wallpaper-hint,
+:root[data-theme="win98"] .wallpaper-progress-text {
+  font-size: 11px;
+}
+
+:root[data-theme="win98"] .wallpaper-editor-title {
+  margin-bottom: 6px;
+  font-size: 11px;
+  line-height: 14px;
+}
+
+/* The photo in a sunken frame, drawn over its edge (::after), so the spot's
+   percentages and the drag maths stay on the photo itself. */
+:root[data-theme="win98"] .wallpaper-figure {
+  box-shadow: none;
+}
+
+:root[data-theme="win98"] .wallpaper-figure::after {
+  box-shadow: var(--w98-sunken);
+}
+
+/* The spot: Paint's selection, a dashed line round a light wash of the colour. The
+   dashes are the title colour's text over the title colour, so they show on any
+   photo; the border stays (transparent) for high-contrast modes. */
+:root[data-theme="win98"] .wallpaper-spot,
+:root[data-theme="win98"] .wallpaper-box {
+  --wallpaper-wash: color-mix(in srgb, var(--title) 22%, transparent);
+  --wallpaper-dash-x: repeating-linear-gradient(90deg,
+    var(--title-text) 0 4px, var(--title) 4px 8px);
+  --wallpaper-dash-y: repeating-linear-gradient(180deg,
+    var(--title-text) 0 4px, var(--title) 4px 8px);
+  border: 1px solid transparent;
+  background:
+    var(--wallpaper-dash-x) left top / 100% 1px no-repeat border-box,
+    var(--wallpaper-dash-x) left bottom / 100% 1px no-repeat border-box,
+    var(--wallpaper-dash-y) left top / 1px 100% no-repeat border-box,
+    var(--wallpaper-dash-y) right top / 1px 100% no-repeat border-box,
+    linear-gradient(var(--wallpaper-wash), var(--wallpaper-wash)) padding-box;
+  box-shadow: none;
+}
+
+:root[data-theme="win98"] .wallpaper-box.is-dragging {
+  --wallpaper-wash: color-mix(in srgb, var(--title) 36%, transparent);
+}
+
+/* Focused: Windows' dotted line round the box, on a light line so it shows on a dark
+   photo too. */
+:root[data-theme="win98"] .wallpaper-box:focus-visible {
+  outline: 1px dotted var(--focus);
+  outline-offset: 1px;
+  box-shadow: 0 0 0 2px var(--hilight);
+}
+
+/* The handles: Paint's small square handles, in the title colour with a line of its
+   text round them. */
+:root[data-theme="win98"] .wallpaper-handle {
+  border: 1px solid var(--title-text);
+  border-radius: 0;
+  background: var(--title);
+  box-shadow: none;
+}
+
+@media not (pointer: coarse) {
+  :root[data-theme="win98"] .wallpaper-handle {
+    width: 8px;
+    height: 8px;
+  }
+
+  :root[data-theme="win98"] .wallpaper-handle-nw { left: -5px; top: -5px; }
+  :root[data-theme="win98"] .wallpaper-handle-ne { right: -5px; top: -5px; }
+  :root[data-theme="win98"] .wallpaper-handle-sw { left: -5px; bottom: -5px; }
+  :root[data-theme="win98"] .wallpaper-handle-se { right: -5px; bottom: -5px; }
+}
+
+/* The upload: Windows' progress bar, as in the Loading box: a 1px sunken edge round
+   blocks of the colour's ink, filling from the left. Until the size is known the
+   blocks move along (still under reduced motion). */
+:root[data-theme="win98"] .wallpaper-progress-bar {
+  --w98-blocks: repeating-linear-gradient(90deg, var(--accent-ink) 0 8px, transparent 8px 10px);
+  height: 18px;
+  margin: 1px;
+  border: 2px solid var(--face);
+  border-radius: 0;
+  background: var(--face);
+  box-shadow: -1px -1px 0 var(--shadow), 1px 1px 0 var(--hilight);
+  color: var(--accent-ink);
+}
+
+:root[data-theme="win98"] .wallpaper-progress-bar::-webkit-progress-bar {
+  background: var(--face);
+  box-shadow: none;
+}
+
+:root[data-theme="win98"] .wallpaper-progress-bar::-webkit-progress-value {
+  background: var(--w98-blocks);
+  box-shadow: none;
+  animation: none;
+}
+
+:root[data-theme="win98"] .wallpaper-progress-bar::-moz-progress-bar {
+  background: var(--w98-blocks);
+  box-shadow: none;
+  animation: none;
+}
+
+:root[data-theme="win98"] .wallpaper-progress-bar:indeterminate {
+  background: var(--w98-blocks) 0 0 / 10px 100%, var(--face);
+  animation: w98-wallpaper-progress 0.5s linear infinite;
+}
+
+:root[data-theme="win98"] .wallpaper-progress-bar:indeterminate::-webkit-progress-bar {
+  background: transparent;
+}
+
+:root[data-theme="win98"] .wallpaper-progress-bar:indeterminate::-moz-progress-bar {
+  background: transparent;
+}
+
+@keyframes w98-wallpaper-progress {
+  from {
+    background-position: 0 0, 0 0;
+  }
+  to {
+    background-position: 10px 0, 0 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root[data-theme="win98"] .wallpaper-progress-bar:indeterminate {
+    animation: none;
+  }
+}
+
+/* ---------- Workshops section ---------- */
+
+/* Windows' list views have no alternate rows: white throughout, a grey line between
+   rows (and between sign-ups on phones). */
+:root[data-theme="win98"] .workshops {
+  --workshops-row: var(--field);
+  --workshops-rule: var(--shadow);
+}
+
+/* The list: a sunken white list view. */
+:root[data-theme="win98"] .workshops-list {
+  padding: 2px;
+  border: 0;
+  box-shadow: var(--w98-sunken);
+}
+
+:root[data-theme="win98"] .workshops-item {
+  padding: 6px 8px 8px;
+}
+
+:root[data-theme="win98"] .workshops-item + .workshops-item {
+  border-top: 1px solid var(--workshops-rule);
+}
+
+/* The name, in bold at 8 points; while anything in its row has focus, highlighted in
+   the title colour, as the selected item of a list view. */
+:root[data-theme="win98"] .workshops-item-name {
+  margin: 0 -2px;
+  padding: 0 2px;
+  font-size: 11px;
+  line-height: 14px;
+}
+
+:root[data-theme="win98"] .workshops-item:focus-within .workshops-item-name {
+  background: var(--title);
+  color: var(--title-text);
+}
+
+:root[data-theme="win98"] .workshops-item-when,
+:root[data-theme="win98"] .workshops-item-meta {
+  font-size: 11px;
+}
+
+/* "Hidden" and "Past": a small square box of the face, framed in grey. */
+:root[data-theme="win98"] .workshops-badge {
+  padding: 0 4px;
+  border: 1px solid var(--shadow);
+  border-radius: 0;
+  background: var(--face);
+  color: var(--face-text);
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 13px;
+  box-shadow: none;
+}
+
+:root[data-theme="win98"] .workshops-badge-past {
+  color: var(--face-muted);
+}
+
+/* Busy (aria-disabled): greyed, etched words, as a disabled button; no press. */
+:root[data-theme="win98"] .workshops .admin-button[aria-disabled="true"] {
+  opacity: 1;
+  color: var(--shadow);
+  text-shadow: 1px 1px 0 var(--hilight);
+}
+
+:root[data-theme="win98"] .workshops .admin-button[aria-disabled="true"]:active {
+  box-shadow: var(--w98-raised);
+}
+
+/* "Past workshops (N)": a tree view's box, + while folded and − when open; focused,
+   the dotted line. */
+:root[data-theme="win98"] .workshops-past-toggle {
+  gap: 5px;
+  padding: 1px 3px 1px 2px;
+  border-radius: 0;
+  font-size: 11px;
+  line-height: 14px;
+}
+
+:root[data-theme="win98"] .workshops-past-toggle::before,
+:root[data-theme="win98"] .workshops-past-toggle[aria-expanded="true"]::before {
+  content: "";
+  flex: none;
+  box-sizing: border-box;
+  width: 9px;
+  height: 9px;
+  border: 1px solid var(--shadow);
+  background:
+    linear-gradient(var(--field-text), var(--field-text)) center / 5px 1px no-repeat,
+    linear-gradient(var(--field-text), var(--field-text)) center / 1px 5px no-repeat,
+    var(--field);
+  transform: none;
+  transition: none;
+}
+
+:root[data-theme="win98"] .workshops-past-toggle[aria-expanded="true"]::before {
+  background:
+    linear-gradient(var(--field-text), var(--field-text)) center / 5px 1px no-repeat,
+    var(--field);
+}
+
+:root[data-theme="win98"] .workshops-past-toggle:focus-visible {
+  outline: 1px dotted var(--focus);
+  outline-offset: -1px;
+  box-shadow: none;
+}
+
+/* The sign-ups: a sunken white table under raised column headers. */
+:root[data-theme="win98"] .workshops-signups-title,
+:root[data-theme="win98"] .workshops-signups-status,
+:root[data-theme="win98"] .workshops-signups-total,
+:root[data-theme="win98"] .workshops-signups-table {
+  font-size: 11px;
+}
+
+:root[data-theme="win98"] .workshops-signups-wrap {
+  padding: 2px;
+  border: 0;
+  box-shadow: var(--w98-sunken);
+}
+
+:root[data-theme="win98"] .workshops-signups-table th {
+  padding: 3px 8px;
+  border: 0;
+  background: var(--face);
+  color: var(--face-text);
+  box-shadow: var(--w98-raised);
+  font-size: 11px;
+}
+
+/* The form: Windows' etched group box, its title on the frame (in the flow, so a long
+   title wraps inside the box). */
+:root[data-theme="win98"] .workshops-form {
+  padding: 14px 10px 10px;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: inset -1px -1px var(--hilight), inset 1px 1px var(--shadow),
+    inset -2px -2px var(--shadow), inset 2px 2px var(--hilight);
+}
+
+:root[data-theme="win98"] .workshops-form-title {
+  width: fit-content;
+  max-width: 100%;
+  margin: -21px 0 10px -4px;
+  padding: 0 3px;
+  background: var(--face);
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 14px;
+}
+
+:root[data-theme="win98"] .workshops-label {
+  font-size: 11px;
+  line-height: 14px;
+}
+
+/* The fields at 8 points and Windows' height (touch screens keep the base's taller
+   fields at 16px). A field to fix: a red line inside the sunken edge. */
+@media not (pointer: coarse) {
+  :root[data-theme="win98"] .workshops-input {
+    min-height: 22px;
+    padding: 3px 4px;
+    font-size: 11px;
+    line-height: 14px;
+  }
+
+  :root[data-theme="win98"] .workshops-textarea {
+    min-height: 6.5rem;
+  }
+}
+
+:root[data-theme="win98"] .workshops-input[aria-invalid="true"],
+:root[data-theme="win98"] .workshops-input[aria-invalid="true"]:focus-visible {
+  box-shadow: var(--w98-sunken), inset 0 0 0 4px var(--error);
+}
+
 /* ---------- Owner page, high contrast ---------- */
 
 @media (forced-colors: active) {
@@ -1029,7 +1347,15 @@
   }
 
   :root[data-theme="win98"] .admin-account-text,
-  :root[data-theme="win98"] .look-field {
+  :root[data-theme="win98"] .look-field,
+  :root[data-theme="win98"] .workshops-list,
+  :root[data-theme="win98"] .workshops-signups-wrap,
+  :root[data-theme="win98"] .workshops-signups-table th,
+  :root[data-theme="win98"] .workshops-form {
     border: 1px solid CanvasText;
+  }
+
+  :root[data-theme="win98"] .wallpaper-figure {
+    outline: 1px solid CanvasText;
   }
 }
