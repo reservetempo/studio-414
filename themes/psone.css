@@ -80,6 +80,7 @@
   --ps-dim: #b4b4b4;
   --ps-placeholder: #bdbdbd;
   --ps-band: rgb(255 255 255 / 0.06);
+  --ps-gauge: color-mix(in srgb, var(--title) 30%, #b0b0b0);
 }
 
 /* Then the tints, where relative colours work. */
@@ -106,6 +107,7 @@
     --ps-dim: oklch(from var(--title) 0.74 min(c, 0.03) h);
     --ps-placeholder: oklch(from var(--title) 0.72 min(c, 0.06) h);
     --ps-band: rgb(255 255 255 / 0.12);
+    --ps-gauge: oklch(from var(--title) 0.66 min(c, 0.14) h);
   }
 }
 
@@ -1139,10 +1141,392 @@
   }
 }
 
+/* ---------- Wallpaper section ---------- */
+
+/* Captions and readouts in the muted light tint; the editor's title as a label, in
+   light capitals. */
+:root[data-theme="psone"] .wallpaper-caption,
+:root[data-theme="psone"] .wallpaper-readout {
+  color: var(--ps-muted);
+}
+
+:root[data-theme="psone"] .wallpaper-editor-title {
+  margin-bottom: 6px;
+  color: var(--ps-title-text);
+  font-size: var(--ps-label);
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-shadow: var(--ps-drop-small), 0 0 6px var(--ps-glow);
+}
+
+/* The photo framed as a window: the white rim round it, the grey line outside that
+   and a soft shade under it; the rim's shade falls over the photo's edge (::after),
+   so the spot's percentages and the drag maths stay on the photo itself. */
+:root[data-theme="psone"] .wallpaper-figure {
+  background: var(--ps-deep);
+  box-shadow:
+    0 0 0 2px var(--ps-rim),
+    0 0 0 3px var(--ps-line),
+    0 4px 12px rgb(0 0 0 / 0.5);
+}
+
+:root[data-theme="psone"] .wallpaper-figure::after {
+  box-shadow: inset 0 0 3px 2px rgb(0 0 0 / 0.45);
+}
+
+/* The spot: the rounded menu selection laid on the photo, a light rim with a dark
+   line either side (so it shows on any photo), PSone.css's band across a faint wash
+   of the colour, and a soft glow. Stronger while dragged. */
+:root[data-theme="psone"] .wallpaper-spot,
+:root[data-theme="psone"] .wallpaper-box {
+  --wallpaper-wash: color-mix(in srgb, var(--ps-tint-top) 30%, transparent);
+  --wallpaper-lines:
+    0 0 0 1px rgb(0 0 0 / 0.7),
+    inset 0 0 0 1px rgb(0 0 0 / 0.55),
+    0 0 8px var(--ps-glow);
+  border: 1px solid var(--ps-rim);
+  border-radius: 6px;
+  background:
+    linear-gradient(to right, transparent, var(--ps-band), transparent),
+    var(--wallpaper-wash);
+  box-shadow: var(--wallpaper-lines);
+}
+
+:root[data-theme="psone"] .wallpaper-box.is-dragging {
+  --wallpaper-wash: color-mix(in srgb, var(--ps-tint-top) 50%, transparent);
+}
+
+/* Focused: a second light ring outside a dark line, glowing. */
+:root[data-theme="psone"] .wallpaper-box:focus-visible {
+  box-shadow:
+    var(--wallpaper-lines),
+    0 0 0 3px var(--ps-rim),
+    0 0 0 4px rgb(0 0 0 / 0.7),
+    0 0 12px 3px var(--ps-glow);
+}
+
+/* The handles: small dark controller buttons, shaded top to bottom with a soft shine,
+   in a light rim with a dark line round it. */
+:root[data-theme="psone"] .wallpaper-handle {
+  border: 1px solid var(--ps-rim);
+  border-radius: 3px;
+  background:
+    linear-gradient(rgb(255 255 255 / 0.25), rgb(255 255 255 / 0) 50%),
+    linear-gradient(var(--ps-btn-top), var(--ps-btn-bottom));
+  box-shadow: 0 0 0 1px rgb(0 0 0 / 0.75), 0 0 6px var(--ps-glow);
+}
+
+@media not (pointer: coarse) {
+  :root[data-theme="psone"] .wallpaper-handle {
+    width: 10px;
+    height: 10px;
+  }
+
+  :root[data-theme="psone"] .wallpaper-handle-nw { left: -6px; top: -6px; }
+  :root[data-theme="psone"] .wallpaper-handle-ne { right: -6px; top: -6px; }
+  :root[data-theme="psone"] .wallpaper-handle-sw { left: -6px; bottom: -6px; }
+  :root[data-theme="psone"] .wallpaper-handle-se { right: -6px; bottom: -6px; }
+}
+
+/* The upload: PSone.css's gauge, a dark well round a bar shaded from the colour to
+   its light tint, left to right. Until the size is known, a short bar sweeps along
+   the well (standing still under reduced motion). */
+:root[data-theme="psone"] .wallpaper-progress-bar {
+  --ps-gauge-bar: linear-gradient(to right, var(--ps-gauge), var(--ps-ink));
+  height: 14px;
+  padding: 2px;
+  border: 1px solid var(--ps-line);
+  border-radius: 3px;
+  background: var(--ps-deep);
+  color: var(--ps-ink);
+  box-shadow: inset 0 1px 3px rgb(0 0 0 / 0.7);
+}
+
+:root[data-theme="psone"] .wallpaper-progress-bar::-webkit-progress-bar {
+  border-radius: 1px;
+  background: transparent;
+  box-shadow: none;
+}
+
+:root[data-theme="psone"] .wallpaper-progress-bar::-webkit-progress-value {
+  border-radius: 1px;
+  background: var(--ps-gauge-bar);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.35);
+  animation: none;
+}
+
+:root[data-theme="psone"] .wallpaper-progress-bar::-moz-progress-bar {
+  border-radius: 1px;
+  background: var(--ps-gauge-bar);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.35);
+  animation: none;
+}
+
+:root[data-theme="psone"] .wallpaper-progress-bar:indeterminate {
+  background:
+    var(--ps-gauge-bar) 0 50% / 30% 100% no-repeat content-box,
+    var(--ps-deep);
+  animation: ps-wallpaper-progress 1.2s ease-in-out infinite alternate;
+}
+
+:root[data-theme="psone"] .wallpaper-progress-bar:indeterminate::-webkit-progress-bar {
+  background: transparent;
+}
+
+:root[data-theme="psone"] .wallpaper-progress-bar:indeterminate::-moz-progress-bar {
+  background: transparent;
+}
+
+@keyframes ps-wallpaper-progress {
+  from {
+    background-position: 0% 50%, 0 0;
+  }
+
+  to {
+    background-position: 100% 50%, 0 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root[data-theme="psone"] .wallpaper-progress-bar:indeterminate {
+    animation: none;
+  }
+}
+
+/* ---------- Workshops section ---------- */
+
+/* The list: a game menu in a dark well, as the calendar's grid. Every other row a
+   faint lighter band; faint grey lines between sign-ups on phones. */
+:root[data-theme="psone"] .workshops {
+  --workshops-row: rgb(255 255 255 / 0.05);
+  --workshops-rule: color-mix(in srgb, var(--ps-line) 35%, transparent);
+}
+
+:root[data-theme="psone"] .workshops-list {
+  padding: 3px;
+  border: 1px solid var(--ps-line);
+  border-radius: 6px;
+  background: var(--ps-deep);
+  color: var(--ps-text);
+  box-shadow: inset 0 1px 3px rgb(0 0 0 / 0.7);
+}
+
+/* Each row has a gutter for the glove, which points at the row under the pointer or
+   with the keyboard focus; that row lights up as the rounded menu selection. */
+:root[data-theme="psone"] .workshops-item {
+  position: relative;
+  padding: 8px 10px 9px 28px;
+  border-radius: 5px;
+}
+
+:root[data-theme="psone"] .workshops-item::before {
+  content: "";
+  position: absolute;
+  top: 13px;
+  left: 6px;
+  width: 16px;
+  height: 10px;
+  background: var(--ps-glove) center / 16px 10px no-repeat;
+  filter: drop-shadow(1px 1px 0 rgb(0 0 0 / 0.6));
+  visibility: hidden;
+}
+
+:root[data-theme="psone"] .workshops-item:focus-within {
+  background: linear-gradient(to right, transparent, var(--ps-band), transparent);
+  box-shadow: inset 0 0 0 1px var(--ps-rim), 0 0 6px var(--ps-glow);
+}
+
+:root[data-theme="psone"] .workshops-item:focus-within::before {
+  visibility: visible;
+}
+
+@media (hover: hover) {
+  :root[data-theme="psone"] .workshops-item:hover::before {
+    visibility: visible;
+  }
+}
+
+:root[data-theme="psone"] .workshops-item.is-past {
+  color: var(--ps-dim);
+}
+
+:root[data-theme="psone"] .workshops-item-name {
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  text-shadow: var(--ps-drop-small);
+}
+
+:root[data-theme="psone"] .workshops-item:focus-within .workshops-item-name {
+  text-shadow: var(--ps-drop-small), 0 0 6px var(--ps-glow);
+}
+
+:root[data-theme="psone"] .workshops-item-when,
+:root[data-theme="psone"] .workshops-item-meta,
+:root[data-theme="psone"] .workshops-field-hint,
+:root[data-theme="psone"] .workshops-signups-table td::before {
+  color: var(--ps-muted);
+}
+
+/* "Hidden" and "Past": small capsules of the panel, light capitals in a grey line
+   with a faint rim; "Hidden" in the tinted buttons' tones, "Past" flat and grey as a
+   disabled button. */
+:root[data-theme="psone"] .workshops-badge {
+  padding: 0 7px;
+  border: 1px solid var(--ps-line);
+  border-radius: 999px;
+  background: linear-gradient(var(--ps-tint-top), var(--ps-tint-bottom));
+  color: var(--ps-text);
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-shadow: var(--ps-drop-small);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.3);
+}
+
+:root[data-theme="psone"] .workshops-badge-past {
+  border-color: color-mix(in srgb, var(--ps-line) 60%, transparent);
+  background: linear-gradient(var(--ps-off-top), var(--ps-off-bottom));
+  color: var(--ps-dim);
+  box-shadow: none;
+}
+
+/* Busy (aria-disabled): a disabled button, flat and dark, its words grey (still
+   4.5:1); no selection and no press. */
+:root[data-theme="psone"] .workshops .admin-button[aria-disabled="true"],
+:root[data-theme="psone"] .workshops .admin-button[aria-disabled="true"]:hover,
+:root[data-theme="psone"] .workshops .admin-button[aria-disabled="true"]:active {
+  --ps-face-top: var(--ps-off-top);
+  --ps-face-bottom: var(--ps-off-bottom);
+  --ps-edge: transparent;
+  --ps-hi: transparent;
+  --ps-halo: 0 0 transparent;
+  --ps-sink: inset 0 0 2px 2px rgb(0 0 0 / 0.3);
+  opacity: 1;
+  background: linear-gradient(var(--ps-off-top), var(--ps-off-bottom));
+  color: var(--ps-dim);
+}
+
+/* "Past workshops (N)": light capitals behind the colour's light triangle (with the
+   hard shadow), lit up as the menu selection under the pointer or focused, the words
+   then white (for 4.5:1 on the band). */
+:root[data-theme="psone"] .workshops-past-toggle {
+  padding: 2px 8px 2px 4px;
+  border-radius: 4px;
+  color: var(--ps-title-text);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-shadow: var(--ps-drop-small);
+}
+
+:root[data-theme="psone"] .workshops-past-toggle::before {
+  color: var(--ps-ink);
+  text-shadow: var(--ps-drop-small);
+}
+
+:root[data-theme="psone"] .workshops-past-toggle:focus-visible {
+  background: linear-gradient(to right, transparent, var(--ps-band), transparent);
+  color: var(--ps-text);
+  outline: 2px solid var(--ps-rim);
+  outline-offset: 1px;
+  box-shadow: 0 0 8px var(--ps-glow);
+  text-shadow: var(--ps-drop-small), 0 0 6px var(--ps-glow);
+}
+
+@media (hover: hover) {
+  :root[data-theme="psone"] .workshops-past-toggle:hover {
+    background: linear-gradient(to right, transparent, var(--ps-band), transparent);
+    color: var(--ps-text);
+    text-shadow: var(--ps-drop-small), 0 0 6px var(--ps-glow);
+  }
+}
+
+/* The sign-ups: a dark well like the list, under column headers drawn as small
+   panels (the buttons' shades, light capitals); addresses in the light link tint. */
+:root[data-theme="psone"] .workshops-signups {
+  color: var(--ps-text);
+}
+
+:root[data-theme="psone"] .workshops-signups-title {
+  color: var(--ps-title-text);
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+:root[data-theme="psone"] .workshops-signups-wrap {
+  border: 1px solid var(--ps-line);
+  border-radius: 6px;
+  background: var(--ps-deep);
+  box-shadow: inset 0 1px 3px rgb(0 0 0 / 0.7);
+}
+
+:root[data-theme="psone"] .workshops-signups-table th {
+  border-bottom: 1px solid var(--ps-line);
+  border-left: 1px solid var(--workshops-rule);
+  background: linear-gradient(var(--ps-btn-top), var(--ps-btn-bottom));
+  color: var(--ps-title-text);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-shadow: var(--ps-drop-small);
+}
+
+:root[data-theme="psone"] .workshops-signups-email {
+  color: var(--ps-ink);
+}
+
+/* The form: a small window inside the window (the grey line, a faint rim and the
+   shade inside it, over a darker wash), its title as a window title over the faint
+   line that fades at both ends; the labels in light capitals. */
+:root[data-theme="psone"] .workshops-form {
+  border: 1px solid var(--ps-line);
+  border-radius: var(--ps-radius);
+  background: rgb(0 0 0 / 0.25);
+  box-shadow:
+    inset 0 0 0 1px rgb(255 255 255 / 0.35),
+    inset 0 0 3px 3px rgb(0 0 0 / 0.3);
+}
+
+:root[data-theme="psone"] .workshops-form-title {
+  padding-bottom: 6px;
+  background: linear-gradient(to right, transparent, rgb(255 255 255 / 0.3), transparent)
+    50% 100% / 100% 1px no-repeat;
+  color: var(--ps-title-text);
+  font-size: var(--ps-title);
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-shadow: var(--ps-drop), 0 0 8px var(--ps-glow);
+}
+
+:root[data-theme="psone"] .workshops-label {
+  color: var(--ps-title-text);
+  font-size: var(--ps-label);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* The fields a little taller, so the dashed line clears the words (touch screens keep
+   the base's 40px at 16px). */
+@media not (pointer: coarse) {
+  :root[data-theme="psone"] .workshops-input {
+    min-height: 30px;
+    padding: 4px 8px 7px;
+  }
+
+  :root[data-theme="psone"] .workshops-label {
+    padding-top: 7px;
+  }
+}
+
+:root[data-theme="psone"] .workshops-price-symbol {
+  color: var(--ps-title-text);
+}
+
 /* ---------- Owner page, high contrast ---------- */
 
 /* The system's own radio buttons again, and no glove beside the picked colour (its
-   name is highlighted). */
+   name is highlighted). The photo keeps a frame, and the picked workshop a ring. */
 @media (forced-colors: active) {
   :root[data-theme="psone"] .look-theme-input,
   :root[data-theme="psone"] .look-theme-input:focus-visible {
@@ -1155,5 +1539,13 @@
 
   :root[data-theme="psone"] .look-color-input:checked ~ .look-color-chip::before {
     content: none;
+  }
+  :root[data-theme="psone"] .wallpaper-figure {
+    outline: 1px solid CanvasText;
+  }
+
+  :root[data-theme="psone"] .workshops-item:focus-within {
+    outline: 2px solid Highlight;
+    outline-offset: -2px;
   }
 }
