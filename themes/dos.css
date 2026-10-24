@@ -288,8 +288,13 @@
   padding-bottom: calc(clamp(16px, 5cqw, 24px) + var(--dos-ch));
 }
 
+/* Where even the address no longer fits the card, it breaks after the "@", with
+   "gmail.com." on the frame line: the font's letters are all one width (1ch), so the
+   link narrows to the 21 of "plazastudioceramique@" (and its padding); the clamp is
+   0 or the rest of the width, as the 31 letters fit or not. */
 :root[data-theme="dos"] .signup__email {
   width: min-content;
+  max-width: min(100cqw, 21ch + 8px + clamp(0px, (100cqw - 31ch - 8px) * 1000, 100cqw));
   padding: 0 4px;
   background: var(--dos-fill);
   color: var(--dos-dim);

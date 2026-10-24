@@ -253,6 +253,15 @@
 
 /* ---------- Labels in the windows ---------- */
 
+/* "Email us": the font's letters are all one width (1ch), so where the address
+   (31 letters with the full stop) no longer fits the card, the link narrows to the
+   21 of "plazastudioceramique@" and the address breaks after the "@", with
+   "gmail.com." under it. The clamp is 0 or the rest of the width, as the address
+   fits or not; where it fits, this is styles.css's 100cqw. */
+:root[data-theme="nes"] .signup__email {
+  max-width: min(100cqw, 21ch + clamp(0px, (100cqw - 31ch) * 1000, 100cqw));
+}
+
 :root[data-theme="nes"] .signup__label,
 :root[data-theme="nes"] .switcher__label,
 :root[data-theme="nes"] .comments__label,

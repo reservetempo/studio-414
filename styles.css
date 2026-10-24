@@ -512,11 +512,14 @@ html.is-moving-414 * {
    in the body's bottom padding, and its left edge (left: auto, its static position) is
    the body's content edge, under the label. It is never wider than the content
    (100cqw: the body is its container), so it stops short of the grip; in a wide
-   theme font it then wraps after "at", the short first line beside the button. */
+   theme font it then wraps after "at", the short first line beside the button. On a
+   card too narrow even for the address, the address breaks rather than spill out of
+   the card (break-word, so it still counts as one word in a min-content width). */
 .signup__email {
   position: absolute;
   bottom: 3px;
   max-width: 100cqw;
+  overflow-wrap: break-word;
   font-size: 0.75rem;
   line-height: 1.2;
   color: var(--face-muted);
