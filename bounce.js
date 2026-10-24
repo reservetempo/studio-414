@@ -8,8 +8,17 @@
     the left or the right. Its speed follows the screen: it covers the hero's width
     in about SECONDS_ACROSS, but never goes slower than MIN_SPEED.
   - It stays wholly inside the hero: it turns back on the left and right edges, and
-    on the top and bottom ones (both at once in a corner). Where it is wider (or
-    taller) than the hero it stays centred that way and only moves the other.
+    on the top and bottom ones (both at once in a corner), however fast it goes (a
+    frame's step longer than the room is folded back and forth, never out). Where it
+    is wider (or taller) than the hero it stays centred that way and only moves the
+    other.
+  - A tap on it (or Enter or Space on "Move 414") adds TAP_BOOST gentle speeds to its
+    speed, in the same direction; taps add up, to TOP_BOOST gentle speeds at most. A
+    throw (picked up, flung and let go) sends it off the way it was thrown, at the
+    throw's speed: no slower than the gentle speed, no faster than TOP_BOOST of it. A
+    throw slower than STILL px/s is a plain drop: it carries on as it was. Anything
+    above the gentle speed fades smoothly (exponentially): it is back to its gentle
+    drift within about EASE_SECONDS.
   - The motion is in px per second, the same at any frame rate; a frame counts for
     MAX_FRAME at most, so it doesn't jump after the tab was hidden. The sizes are
     measured only when they can change (boxes.js calls measure() on a resize, a font
@@ -18,7 +27,8 @@
     (a transform would make the 414 a stacking context and keep it under them).
   - boxes.js still drags it (see the top of that file): it frees the 414 through
     window.studio414Sign.free(hooks), stops it while it is pressed and dragged, and
-    lets it carry on from where it is dropped, at the speed and direction it had.
+    lets it carry on from where it is dropped, at the speed and direction it had,
+    unless the press was a tap (hooks.tap) or a throw (hooks.fling).
   - Not with "reduce motion" (prefers-reduced-motion: reduce): then it holds still
     and boxes.js places it as before. A change of that setting while the page is
     open stops it where it is, or starts it from there. Nor with ?edit=1 (the owners'
@@ -32,8 +42,10 @@
     velocity()         { x, y }, px/s (y down)
     setVelocity(x, y)  a new speed and direction at once (the edges only turn it)
     setSpeed(s)        a new speed, px/s, in the same direction
+    tap()              as a tap: TAP_BOOST gentle speeds quicker, to TOP_BOOST
+    fling(x, y)        as a throw at x, y px/s (see above)
   A speed is kept in proportion to baseSpeed(), so it stays as quick for the screen
-  when the window is resized.
+  when the window is resized. Anything quicker than baseSpeed() eases back to it.
 */
 (function () {
   'use strict';
@@ -47,6 +59,13 @@
   var MAX_ANGLE = 35;
   // The longest a frame may count for (s).
   var MAX_FRAME = 0.05;
+  // A tap adds TAP_BOOST gentle speeds to its speed, up to TOP_BOOST of them (a throw
+  // is capped there too). Above the gentle speed it eases back to it within about
+  // EASE_SECONDS. A throw slower than STILL (px/s) is a plain drop.
+  var TAP_BOOST = 1.5;
+  var TOP_BOOST = 10;
+  var EASE_SECONDS = 4;
+  var STILL = 20;
 
   var el = document.getElementById('big-414');
   var hero = el && (el.closest('.hero') || el.parentElement);
@@ -108,27 +127,23 @@
     var r = el.getBoundingClientRect();
     w = r.width;
     h = r.height;
-    base =Math.max(MIN_SPEED, roomW / SECONDS_ACROSS);
+    base = Math.max(MIN_SPEED, roomW / SECONDS_ACROSS);
     x = limit(x, w, roomW);
     y = limit(y, h, roomH);
     draw();
     kick();
   }
 
-  // Moves along one axis by d, turning back at either end. Returns the new place and
-  // direction sign.
+  // Moves along one axis by d (the same sign as dir), turning back at either end, as
+  // often as it takes: unfolded, the way there and back is 2 * far long. Returns the
+  // new place and direction.
   function along(p, d, dir, size, room) {
     var far = room - size;
     if (far <= 0) return [far / 2, dir];
-    p += d;
-    if (p < 0) {
-      p = -p;
-      dir = Math.abs(dir);
-    } else if (p > far) {
-      p = 2 * far - p;
-      dir = -Math.abs(dir);
-    }
-    return [clamp(p, 0, far), dir];
+    var span = 2 * far;
+    var q = (clamp(p, 0, far) + d) % span;
+    if (q < 0) q += span;
+    return q <= far ? [q, dir] : [span - q, -dir];
   }
 
   // Whether it can move at all: bouncing, not held, with a speed and room to move.
@@ -141,6 +156,12 @@
     if (!canMove()) return;
     var dt = last === null ? 0 : Math.min(MAX_FRAME, Math.max(0, now - last) / 1000);
     last = now;
+    if (boost > 1) {
+      // The extra speed shrinks by e every EASE_SECONDS / 5: under 1% is left after
+      // EASE_SECONDS.
+      boost = 1 + (boost - 1) * Math.exp(-dt * 5 / EASE_SECONDS);
+      if (boost < 1.001) boost = 1;
+    }
     var v = base * boost;
     var ax = along(x, dirX * v * dt, dirX, w, roomW);
     var ay = along(y, dirY * v * dt, dirY, h, roomH);
@@ -187,7 +208,21 @@
         h: r.h
       };
     },
-    measure: measure
+    measure: measure,
+    // A tap: quicker, the same way.
+    tap: function () {
+      boost = Math.max(boost, Math.min(boost + TAP_BOOST, TOP_BOOST));
+      kick();
+    },
+    // A throw at vx, vy px/s: off that way, between the gentle and the top speed.
+    fling: function (vx, vy) {
+      var speed = Math.sqrt(vx * vx + vy * vy);
+      if (!isFinite(speed) || speed < STILL) return;
+      dirX = vx / speed;
+      dirY = vy / speed;
+      boost = clamp(speed / base, 1, TOP_BOOST);
+      kick();
+    }
   };
 
   function start(home) {
@@ -232,7 +267,9 @@
       if (!isFinite(s) || s < 0) return;
       boost = s / base;
       kick();
-    }
+    },
+    tap: hooks.tap,
+    fling: hooks.fling
   };
 
   var query = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : null;

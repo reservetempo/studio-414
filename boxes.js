@@ -64,9 +64,13 @@
     around the hero, the first screen (bounce.js). bounce.js frees it from the layout
     with window.studio414Sign.free(hooks): from then on bounce.js moves it, and this
     file only stops it (hooks.stop) when it is pressed and lets it carry on (hooks.go)
-    when that is over: a finger's tap or swipe, a drop (a drag keeps it inside the
-    hero, hooks.keep) or Escape (back where it was picked up). The arrow keys nudge it
-    on its way. A resize or a font or layout change only sizes it (hooks.measure keeps
+    when that is over: a tap, a finger's swipe, a drop (a drag keeps it inside the
+    hero, hooks.keep) or Escape (back where it was picked up). A tap speeds it up
+    (hooks.tap): a press and release that wanders no more than SLOP and ends within
+    HOLD (for a finger, before it lifts the 414), or Enter or Space on "Move 414". A
+    throw sends it off (hooks.fling): when a drag that went past SLOP is let go, the
+    pointer's speed over its last FLING ms (bounce.js keeps a still release a plain
+    drop). The arrow keys nudge it on its way. A resize or a font or layout change only sizes it (hooks.measure keeps
     it in the hero). Meanwhile its stored spot is neither read nor written (it stays
     in storage as it was), it doesn't count as moved for the Layout row, and Reset
     only puts the card back. free(null) stops it: it is placed where it stopped.
@@ -80,6 +84,8 @@
   // wander meanwhile (px); moving further is a swipe, which scrolls the page.
   var HOLD = 450;
   var SLOP = 10;
+  // A throw of the bouncing 414 goes at the pointer's speed over its last FLING ms.
+  var FLING = 100;
   var KEYS = {
     ArrowLeft: [-1, 0],
     ArrowRight: [1, 0],
@@ -410,7 +416,10 @@
       y: y,
       before: before,
       start: start,
-      rect: start
+      rect: start,
+      since: performance.now(),
+      far: false,                      // gone past SLOP
+      trail: [{ t: performance.now(), x: x, y: y }]
     };
     try {
       target.setPointerCapture(pointerId);
@@ -429,13 +438,35 @@
     if (!gesture || event.pointerId !== gesture.pointerId) return;
     var dx = event.clientX - gesture.x;
     var dy = event.clientY - gesture.y;
+    note(gesture, event.clientX, event.clientY);
     gesture.rect = gesture.kind === 'move'
       ? moved(gesture.box, gesture.start, dx, dy)
       : resized(gesture.box, gesture.start, dx, dy);
     render(gesture.box, gesture.rect);
   }
 
-  function finish(cancel) {
+  // Keeps the pointer's places over the last FLING ms (and the one before), for a
+  // throw, and whether it has gone past SLOP.
+  function note(g, x, y) {
+    var now = performance.now();
+    g.trail.push({ t: now, x: x, y: y });
+    while (g.trail.length > 2 && g.trail[1].t <= now - FLING) g.trail.shift();
+    if (Math.abs(x - g.x) > SLOP || Math.abs(y - g.y) > SLOP) g.far = true;
+  }
+
+  // The pointer's speed over the last FLING ms, px/s: none if it held still.
+  function flingOf(g) {
+    var now = performance.now();
+    var from = now - FLING;
+    var a = g.trail[0];
+    for (var i = 1; i < g.trail.length && g.trail[i].t <= from; i++) a = g.trail[i];
+    var b = g.trail[g.trail.length - 1];
+    var dt = Math.max(16, now - Math.max(a.t, from)) / 1000;
+    return { x: (b.x - a.x) / dt, y: (b.y - a.y) / dt };
+  }
+
+  // up: the pointerup that ends it, if it does.
+  function finish(cancel, up) {
     var g = gesture;
     if (!g) return;
     gesture = null;
@@ -448,8 +479,19 @@
     }
 
     if (motion && g.box === sign) {
-      // Bouncing: it carries on from where it was let go (cancelled, picked up).
-      if (cancel) render(sign, g.start);
+      // Bouncing: it carries on from where it was let go (cancelled, picked up),
+      // quicker after a tap, or the way it was thrown.
+      if (cancel) {
+        render(sign, g.start);
+      } else if (up) {
+        note(g, up.clientX, up.clientY);
+        if (g.far) {
+          var v = flingOf(g);
+          motion.fling(v.x, v.y);
+        } else if (!g.held && performance.now() - g.since < HOLD) {
+          motion.tap();
+        }
+      }
       motion.go();
       return;
     }
@@ -472,7 +514,9 @@
   }
 
   function end(event) {
-    if (gesture && event.pointerId === gesture.pointerId) finish(false);
+    if (gesture && event.pointerId === gesture.pointerId) {
+      finish(false, event.type === 'pointerup' ? event : null);
+    }
   }
 
   /* ---------- Keyboard ---------- */
@@ -577,6 +621,7 @@
       if (!h || gesture) return;
       // Its shadow (styles.css) says it has been picked up.
       lift(sign, 'move', h.target, h.pointerId, h.x, h.y);
+      gesture.held = true;             // too late for a tap
     }, HOLD);
   }
 
@@ -636,7 +681,16 @@
 
   // On the preview page (?edit=1) edit.js drags the 414, into the owners' layout.
   if (sign && !editing) {
-    signHandle.addEventListener('keydown', function (event) { nudge(sign, 'move', event); });
+    signHandle.addEventListener('keydown', function (event) {
+      var mod = event.altKey || event.ctrlKey || event.metaKey;
+      if (motion && !gesture && !mod && (event.key === 'Enter' || event.key === ' ')) {
+        // Bouncing: Enter or Space is a tap.
+        event.preventDefault();
+        if (!event.repeat) motion.tap();
+        return;
+      }
+      nudge(sign, 'move', event);
+    });
 
     // A mouse or pen picks it up at once; a finger after a long press.
     // Bouncing, a press stops it at once, so it can be caught.
@@ -655,7 +709,13 @@
     });
     ['pointerup', 'pointercancel'].forEach(function (type) {
       signEl.addEventListener(type, function (event) {
-        if (hold && event.pointerId === hold.pointerId) holdCancel();
+        if (hold && event.pointerId === hold.pointerId) {
+          // A finger let go before the 414 lifted, within SLOP: a tap.
+          var tap = type === 'pointerup' &&
+            Math.abs(event.clientX - hold.x0) <= SLOP && Math.abs(event.clientY - hold.y0) <= SLOP;
+          holdCancel();
+          if (tap && motion) motion.tap();
+        }
         end(event);
         settle();
       });
