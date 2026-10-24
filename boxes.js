@@ -32,9 +32,10 @@
     title bar stays inside the visible viewport. So a layout made on a wide window is
     squeezed onto a narrow one and comes back as it was when the window widens again.
   - "Reset" on Display's Layout row sends "studio414:layoutreset", which puts the card
-    and the 414 back in the default layout (the owners', else the CSS's). Every change
-    sends "studio414:layoutchange" ({ detail: { custom } }: whether the visitor has
-    moved anything), which shows or hides that row.
+    and the 414 (unless it is bouncing, below) back in the default layout (the
+    owners', else the CSS's). Every change sends "studio414:layoutchange"
+    ({ detail: { custom } }: whether the visitor has moved anything), which shows or
+    hides that row.
   - With ?edit=1 in the URL (the owners' preview page frames the site so) the
     visitor's "studio414.layout" is neither read nor written: the page starts from the
     owners' layout, and the preview page places the boxes through
@@ -59,6 +60,16 @@
     big414, their width (no wider than the screen). Its height follows its font, so
     that width is set as a font size: width / --big-w (the advance width of "414" in
     em, styles.css and fonts.css), worked out again when the font changes.
+  - Unless the visitor asks for reduced motion (and never with ?edit=1) it bounces
+    around the hero, the first screen (bounce.js). bounce.js frees it from the layout
+    with window.studio414Sign.free(hooks): from then on bounce.js moves it, and this
+    file only stops it (hooks.stop) when it is pressed and lets it carry on (hooks.go)
+    when that is over: a finger's tap or swipe, a drop (a drag keeps it inside the
+    hero, hooks.keep) or Escape (back where it was picked up). The arrow keys nudge it
+    on its way. A resize or a font or layout change only sizes it (hooks.measure keeps
+    it in the hero). Meanwhile its stored spot is neither read nor written (it stays
+    in storage as it was), it doesn't count as moved for the Layout row, and Reset
+    only puts the card back. free(null) stops it: it is placed where it stopped.
 */
 (function () {
   'use strict';
@@ -105,6 +116,8 @@
   var order = DEFAULT_ORDER.slice();   // back to front (the boxes only)
   var gesture = null;
   var hold = null;                     // a finger resting on the 414, until it lifts
+  var motion = null;                   // while the 414 bounces: bounce.js's hooks
+  var kept414 = null;                  // meanwhile, its stored spot, kept as it was
 
   /* ---------- localStorage, always optional ---------- */
 
@@ -143,8 +156,13 @@
 
   function save() {
     if (editing) return;
+    var stored = placed;
+    if (kept414) {
+      stored = { '414': kept414 };
+      Object.keys(placed).forEach(function (id) { stored[id] = placed[id]; });
+    }
     try {
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify({ version: 1, boxes: placed, order: order }));
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify({ version: 1, boxes: stored, order: order }));
     } catch (error) {
       // Storage is optional: the layout still holds for this visit.
     }
@@ -253,6 +271,8 @@
       w = el.offsetWidth;
       h = el.offsetHeight;
     }
+    // Bouncing, the 414 stays inside the hero.
+    if (motion && box === sign) return motion.keep({ x: r.x, y: r.y, w: w, h: h });
     var x = clamp(r.x, 0, Math.max(0, vp.width - w));
     var top = live ? vp.top : 0;
     var bottom = (live ? vp.top + vp.height : pageBottom()) - grabBottom(box);
@@ -319,6 +339,11 @@
   function refit(item) {
     var owner = ownerRect(item);
     if (item === sign) sizeSign(owner);
+    // Bouncing, it is only sized: bounce.js keeps it in the hero, wherever it is.
+    if (item === sign && motion) {
+      motion.measure();
+      return;
+    }
     var r = placed[item.id] || owner;
     if (!r) {
       unplace(item);
@@ -422,6 +447,13 @@
       // Already released.
     }
 
+    if (motion && g.box === sign) {
+      // Bouncing: it carries on from where it was let go (cancelled, picked up).
+      if (cancel) render(sign, g.start);
+      motion.go();
+      return;
+    }
+
     var r = g.rect;
     var unchanged = r.x === g.start.x && r.y === g.start.y && r.w === g.start.w && r.h === g.start.h;
     if (cancel || unchanged) {
@@ -454,6 +486,12 @@
     var r = box.grip && (kind === 'size' || event.shiftKey)
       ? resized(box, start, d[0] * STEP, d[1] * STEP)
       : moved(box, start, d[0] * STEP, d[1] * STEP);
+    if (motion && box === sign) {
+      // Bouncing: nudged on its way.
+      render(box, r);
+      motion.go();
+      return;
+    }
     placed[box.id] = r;
     render(box, r);
     save();
@@ -546,13 +584,43 @@
     if (!hold || event.pointerId !== hold.pointerId) return;
     hold.x = event.clientX;
     hold.y = event.clientY;
-    if (Math.abs(hold.x - hold.x0) > SLOP || Math.abs(hold.y - hold.y0) > SLOP) holdCancel();
+    if (Math.abs(hold.x - hold.x0) > SLOP || Math.abs(hold.y - hold.y0) > SLOP) {
+      holdCancel();
+      settle();
+    }
   }
 
   function holdCancel() {
     if (!hold) return;
     window.clearTimeout(hold.timer);
     hold = null;
+  }
+
+  // Bouncing, it carries on once nothing holds it any more.
+  function settle() {
+    if (motion && !hold && !(gesture && gesture.box === sign)) motion.go();
+  }
+
+  // For bounce.js (see the top of this file). hooks: { stop(), go(), keep(r),
+  // measure() }; home: it starts from its default spot, else from where it is.
+  function free(hooks, home) {
+    holdCancel();
+    if (gesture && gesture.box === sign) finish(false);
+    if (hooks) {
+      if (!motion) {
+        kept414 = placed['414'] || null;
+        delete placed['414'];
+        if (home) refit(sign);
+      }
+      motion = hooks;
+    } else if (motion) {
+      motion = null;
+      kept414 = null;
+      placed['414'] = rectOf(sign);
+      save();
+    }
+    announce();
+    return true;
   }
 
   if (sign) {
@@ -571,12 +639,15 @@
     signHandle.addEventListener('keydown', function (event) { nudge(sign, 'move', event); });
 
     // A mouse or pen picks it up at once; a finger after a long press.
+    // Bouncing, a press stops it at once, so it can be caught.
     signEl.addEventListener('pointerdown', function (event) {
+      if (motion) motion.stop();
       if (event.pointerType === 'touch') {
         holdStart(event);
       } else {
         begin(sign, 'move', event);
       }
+      settle();
     });
     signEl.addEventListener('pointermove', function (event) {
       holdMove(event);
@@ -586,6 +657,7 @@
       signEl.addEventListener(type, function (event) {
         if (hold && event.pointerId === hold.pointerId) holdCancel();
         end(event);
+        settle();
       });
     });
     signEl.addEventListener('lostpointercapture', end);
@@ -600,6 +672,8 @@
     signEl.addEventListener('contextmenu', function (event) {
       if (hold || (gesture && gesture.box === sign)) event.preventDefault();
     });
+
+    window.studio414Sign = { free: free };
   }
 
   if (sign) {
@@ -623,8 +697,10 @@
     placed = {};
     order = DEFAULT_ORDER.slice();
     applyAll();
-    forget();
+    // Bouncing, the 414's stored spot stays.
+    if (kept414) save(); else forget();
     announce();
+    settle();
   });
 
   // The owners' layout changed (fetched, or apply() from the preview page): what the

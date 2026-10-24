@@ -245,7 +245,9 @@ body {
    of its figures; the heading's line box reaches past it): that is what boxes.js
    moves, so the 414 can be dragged like the windows. A mouse or pen drags it at once;
    a finger after a long press, so a swipe over it still scrolls the page. Its
-   "Move 414" button (below) takes the arrow keys. */
+   "Move 414" button (below) takes the arrow keys. Unless the visitor asks for reduced
+   motion, bounce.js also lets it drift and bounce around the hero from the spot given
+   here (or by the owners' layout). */
 .big-414 {
   /* The lowest its foot (the baseline) may come: just above the window. */
   --sill: calc(var(--photo-y) + var(--photo-h) * (var(--window-bottom) - var(--window-h))
@@ -323,7 +325,8 @@ body {
   }
 }
 
-/* Moved: boxes.js sets left and top in px, from the corner of the hero. */
+/* Moved: boxes.js (and, while it bounces, bounce.js) sets left and top in px, from the
+   corner of the hero. */
 .big-414.is-placed {
   right: auto;
   margin: 0;

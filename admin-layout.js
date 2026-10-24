@@ -58,7 +58,8 @@
     var intro = el('p', 'admin-hint layout-intro',
       'In the preview, drag the photo\'s edges to resize it, the mailing list window by ' +
       'its title bar or a corner, and the 414 to move it or by a corner to resize it. ' +
-      'Visitors see the new layout once you save.');
+      'Visitors see the new layout once you save. On the site the 414 starts where ' +
+      'you place it here, then drifts and bounces around the first screen.');
     var state = el('p', 'admin-status layout-state');
     state.setAttribute('aria-live', 'polite');
 
