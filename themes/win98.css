@@ -419,6 +419,206 @@
   outline-offset: 2px;
 }
 
+/* ---------- The Workshops window ---------- */
+
+/* Both dialogs scroll in Windows' grey. */
+:root[data-theme="win98"] .workshop {
+  scrollbar-color: var(--shadow) var(--face);
+}
+
+/* The workshop links keep the early web's blue and purple; focused, Windows' dotted
+   line instead of a ring. */
+:root[data-theme="win98"] .workshop__link:focus-visible {
+  border-radius: 0;
+  outline: 1px dotted var(--focus);
+  outline-offset: 1px;
+}
+
+/* "Try again", "All workshops", "OK": Windows' 75 by 23 push buttons (taller on touch
+   screens, as the base sets). */
+:root[data-theme="win98"] .workshop__retry,
+:root[data-theme="win98"] .workshop__back,
+:root[data-theme="win98"] .workshop__ok {
+  min-width: 75px;
+}
+
+@media not (pointer: coarse) {
+  :root[data-theme="win98"] .workshop__retry,
+  :root[data-theme="win98"] .workshop__back {
+    height: 23px;
+  }
+}
+
+/* ---------- The calendar ---------- */
+
+/* As the Windows 98 calendar draws a month: a sunken white grid, the weekdays in the
+   colour over a line, the days in the pixel font. The cells sit 2px apart by their
+   padding, so the weekdays' line runs unbroken. */
+:root[data-theme="win98"] .calendar__grid {
+  padding: 3px 4px 4px;
+  border: 0;
+  border-spacing: 0;
+  background: var(--field);
+  box-shadow: var(--w98-sunken);
+  -webkit-font-smoothing: none;
+}
+
+:root[data-theme="win98"] .calendar__grid th {
+  border-bottom: 1px solid var(--shadow);
+  color: var(--accent-ink);
+  font-weight: 400;
+}
+
+:root[data-theme="win98"] .calendar__grid td {
+  padding: 1px;
+}
+
+:root[data-theme="win98"] .calendar__grid tr:first-child td {
+  padding-top: 3px;
+}
+
+:root[data-theme="win98"] .calendar__day {
+  font-size: 11px;
+}
+
+:root[data-theme="win98"] .calendar__day:not(.aqua-pill) {
+  border-radius: 0;
+}
+
+/* ‹ and › stay large enough to hit and read, as in Display. */
+:root[data-theme="win98"] .calendar__step {
+  font-size: 16px;
+}
+
+/* Today: a square red frame, after the red ring round today in Windows' calendar. */
+:root[data-theme="win98"] .calendar__day[aria-current="date"]:not(.aqua-pill) {
+  background: none;
+  box-shadow: inset 0 0 0 1px var(--error);
+}
+
+/* A workshop coming up: picked out as a selected day is, in the colour, bold, with a
+   black frame so it stands out from the white on every colour. Pressed, it sinks. */
+:root[data-theme="win98"] .calendar__day--workshop.aqua-pill {
+  background: var(--title);
+  color: var(--title-text);
+  box-shadow: inset 0 0 0 1px var(--dk-shadow);
+  font-weight: 700;
+}
+
+:root[data-theme="win98"] .calendar__day--workshop.aqua-pill[aria-current="date"] {
+  box-shadow: inset 0 0 0 1px var(--error), inset 0 0 0 2px var(--field);
+}
+
+:root[data-theme="win98"] .calendar__day--workshop.aqua-pill:active {
+  padding: 1px 0 0 1px;
+  background: var(--title);
+  box-shadow: inset 0 0 0 1px var(--dk-shadow), inset 2px 2px var(--dk-shadow);
+}
+
+:root[data-theme="win98"] .calendar__day--workshop.aqua-pill:focus-visible {
+  outline: 1px dotted var(--title-text);
+  outline-offset: -3px;
+}
+
+/* A workshop that has been: no fill, grey figures in a grey frame. */
+:root[data-theme="win98"] .calendar__day--workshop.calendar__day--past {
+  border-color: var(--shadow);
+  background: none;
+  color: var(--placeholder);
+}
+
+/* The tip: Windows' pale yellow tooltip, a black line round it, no shadow. */
+:root[data-theme="win98"] .calendar__tip {
+  border-color: var(--dk-shadow);
+  background: #ffffe1;
+  box-shadow: none;
+  -webkit-font-smoothing: none;
+}
+
+/* ---------- The sign-up window ---------- */
+
+/* − and +: the glyphs drawn on whole pixels, 2px thick, square-ended; etched when
+   greyed at the limits. */
+:root[data-theme="win98"] .workshop__step svg {
+  width: 8px;
+  height: 8px;
+  shape-rendering: crispEdges;
+}
+
+:root[data-theme="win98"] .workshop__step svg path {
+  stroke-width: 2px;
+  stroke-linecap: butt;
+}
+
+:root[data-theme="win98"] .workshop__step:disabled svg {
+  filter: drop-shadow(1px 1px 0 var(--hilight));
+}
+
+/* The status light while the spots are checked: a small square lamp, yellow, grey
+   when they couldn't be or the workshop is gone. */
+:root[data-theme="win98"] .workshop__spots::before {
+  --drop: #ffff00;
+  width: 10px;
+  height: 10px;
+  border: 1px solid var(--dk-shadow);
+  border-radius: 0;
+  background: var(--drop);
+  box-shadow: inset -1px -1px rgb(0 0 0 / 0.25), inset 1px 1px rgb(255 255 255 / 0.6);
+}
+
+:root[data-theme="win98"] .workshop__spots[data-state="unavailable"]::before,
+:root[data-theme="win98"] .workshop__spots[data-state="gone"]::before {
+  --drop: #808080;
+}
+
+/* A field with something wrong: a red line inside the sunken edge. Greyed: the face. */
+:root[data-theme="win98"] .workshop__input[aria-invalid="true"] {
+  box-shadow: var(--w98-sunken), inset 0 0 0 4px var(--error);
+}
+
+:root[data-theme="win98"] .workshop__input:disabled {
+  background: var(--face);
+  color: var(--face-muted);
+}
+
+/* "Buying for a friend": 98.css's check box, a 13px sunken white square with a black
+   pixel tick; grey while pressed or greyed (its tick grey too). Focused, the dotted
+   line goes round the box and its words. */
+:root[data-theme="win98"] .workshop__check input {
+  width: 13px;
+  height: 13px;
+  border: 0;
+  border-radius: 0;
+  background: var(--field) no-repeat center / 7px 7px;
+  box-shadow: var(--w98-sunken);
+}
+
+:root[data-theme="win98"] .workshop__check input:checked {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='7' height='7'%3E%3Cpath fill='%23000' d='M7 0H6v1H5v1H4v1H3v1H2V3H1V2H0v3h1v1h1v1h1V6h1V5h1V4h1V3h1V0z'/%3E%3C/svg%3E");
+}
+
+:root[data-theme="win98"] .workshop__check input:active:not(:disabled),
+:root[data-theme="win98"] .workshop__check input:disabled {
+  background-color: var(--face);
+}
+
+:root[data-theme="win98"] .workshop__check input:disabled {
+  opacity: 1;
+}
+
+:root[data-theme="win98"] .workshop__check input:checked:disabled {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='7' height='7'%3E%3Cpath fill='%23808080' d='M7 0H6v1H5v1H4v1H3v1H2V3H1V2H0v3h1v1h1v1h1V6h1V5h1V4h1V3h1V0z'/%3E%3C/svg%3E");
+}
+
+:root[data-theme="win98"] .workshop__check input:focus-visible {
+  box-shadow: var(--w98-sunken);
+}
+
+:root[data-theme="win98"] .workshop__check:has(input:focus-visible) {
+  outline: 1px dotted var(--focus);
+  outline-offset: 2px;
+}
+
 /* ---------- High contrast ---------- */
 
 /* Forced colours drop the bevels (box shadows): draw plain frames instead. */
@@ -451,9 +651,14 @@
   :root[data-theme="win98"] .aqua-field,
   :root[data-theme="win98"] .aqua-popup,
   :root[data-theme="win98"] .comments__pane,
+  :root[data-theme="win98"] .calendar__grid,
   :root[data-theme="win98"] .comments__input,
   :root[data-theme="win98"] .comments__textarea {
     border: 1px solid CanvasText;
+  }
+
+  :root[data-theme="win98"] .workshop__input[aria-invalid="true"] {
+    border-width: 3px;
   }
 
   :root[data-theme="win98"] .box__grip::after {
