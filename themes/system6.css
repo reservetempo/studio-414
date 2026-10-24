@@ -191,7 +191,7 @@
   box-shadow: var(--s6-default-ring);
 }
 
-/* Pressed, or open (the paint roller): inverse video. */
+/* Pressed, or open (Show sign-ups): inverse video. */
 :root[data-theme="system6"] .aqua-pill:active:not(:disabled),
 :root[data-theme="system6"] .aqua-pill[aria-expanded="true"] {
   background: var(--face-text);
@@ -319,6 +319,9 @@
 
 /* ---------- Display ---------- */
 
+/* A plain panel at the end of the page, drawn as the comment box is (below): a window
+   with "Display" in its striped title bar. */
+
 :root[data-theme="system6"] .switcher__label {
   font-family: var(--aqua-font);
   font-size: 12px;
@@ -329,17 +332,11 @@
 
 /* ---------- Buttons on the page ---------- */
 
-/* Workshops, the paint roller and Move 414 sit on the page or the photo: their focus
-   ring goes outside, in the page's text colour (Move 414 keeps its dotted line). */
-:root[data-theme="system6"] .workshop-button:focus-visible,
-:root[data-theme="system6"] .switcher-toggle:focus-visible {
+/* Workshops and Move 414 sit on the page or the photo: their focus ring goes
+   outside, in the page's text colour (Move 414 keeps its dotted line). */
+:root[data-theme="system6"] .workshop-button:focus-visible {
   outline: 2px solid var(--page-text);
   outline-offset: 3px;
-}
-
-/* Open, the roller's paint goes inverse with the button. */
-:root[data-theme="system6"] .switcher-toggle[aria-expanded="true"] .switcher-toggle__paint {
-  fill: var(--face);
 }
 
 /* Still clipped to nothing until it is focused. */
@@ -351,8 +348,9 @@
 
 /* A window of its own: the face, a frame and drop shadow, and its heading as a striped
    title bar (the bar's line is the second background, 22px down). Inside, the page
-   colours give way to the face's. */
-:root[data-theme="system6"] .comments__inner {
+   colours give way to the face's. Display is drawn the same way. */
+:root[data-theme="system6"] .comments__inner,
+:root[data-theme="system6"] .switcher__inner {
   --page-text: var(--face-text);
   --page-text-muted: var(--face-muted);
   padding-top: 0;
@@ -370,7 +368,8 @@
   backdrop-filter: none;
 }
 
-:root[data-theme="system6"] .comments__title {
+:root[data-theme="system6"] .comments__title,
+:root[data-theme="system6"] .switcher__title {
   align-self: center;
   max-width: 100%;
   margin: 0 0 1px;
@@ -383,6 +382,11 @@
   line-height: 22px;
   white-space: nowrap;
   text-overflow: ellipsis;
+}
+
+/* Display's panel is a grid: its title is centred along the bar there. */
+:root[data-theme="system6"] .switcher__title {
+  justify-self: center;
 }
 
 :root[data-theme="system6"] .comments__label {
@@ -605,7 +609,8 @@
 
 @media (forced-colors: active) {
   :root[data-theme="system6"] .box__titlebar,
-  :root[data-theme="system6"] .comments__inner {
+  :root[data-theme="system6"] .comments__inner,
+  :root[data-theme="system6"] .switcher__inner {
     background: Canvas;
   }
 

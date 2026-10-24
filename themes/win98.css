@@ -162,7 +162,7 @@
   background-position: left 4px top 3px;
 }
 
-/* A real close (Display, the Workshops dialogs) draws the same × box; its own × is
+/* A real close (the Workshops dialogs) draws the same × box; its own × is
    not needed. Pressed, the edge sinks and the glyph moves down and right. */
 :root[data-theme="win98"] .box__close svg {
   display: none;
@@ -228,7 +228,7 @@
   box-shadow: var(--w98-default-pressed);
 }
 
-/* A button that stays down while what it opens is open (the paint roller): pressed,
+/* A button that stays down while what it opens is open (Show sign-ups): pressed,
    and lighter, as Windows' checkered fill reads. (A real 2px checker breaks the
    page's rendering in Chromium.) */
 :root[data-theme="win98"] .aqua-pill[aria-expanded="true"] {
@@ -306,6 +306,9 @@
 
 /* ---------- Display ---------- */
 
+/* A plain panel at the end of the page, drawn as the comment box is (below): a window
+   with "Display" as its title bar. */
+
 :root[data-theme="win98"] .switcher__label {
   font-size: 11px;
   letter-spacing: 0;
@@ -321,8 +324,10 @@
 /* ---------- The comment box ---------- */
 
 /* A window of its own on the page: the face, the raised edge, "Comments" as its
-   title bar, and the page's text colours swapped for the face's. */
-:root[data-theme="win98"] .comments__inner {
+   title bar, and the page's text colours swapped for the face's. Display is drawn
+   the same way. */
+:root[data-theme="win98"] .comments__inner,
+:root[data-theme="win98"] .switcher__inner {
   --page-text: var(--face-text);
   --page-text-muted: var(--face-muted);
   gap: 8px;
@@ -338,11 +343,13 @@
   backdrop-filter: none;
 }
 
-:root[data-theme="win98"] .comments__inner > :not(.comments__title) {
+:root[data-theme="win98"] .comments__inner > :not(.comments__title),
+:root[data-theme="win98"] .switcher__inner > :not(.switcher__title) {
   margin-inline: 5px;
 }
 
-:root[data-theme="win98"] .comments__title {
+:root[data-theme="win98"] .comments__title,
+:root[data-theme="win98"] .switcher__title {
   min-height: 18px;
   padding: 3px 3px 2px;
   background: var(--w98-titlebar);
@@ -624,12 +631,14 @@
 /* Forced colours drop the bevels (box shadows): draw plain frames instead. */
 @media (forced-colors: active) {
   :root[data-theme="win98"] .box,
-  :root[data-theme="win98"] .comments__inner {
+  :root[data-theme="win98"] .comments__inner,
+  :root[data-theme="win98"] .switcher__inner {
     border: 1px solid CanvasText;
   }
 
   :root[data-theme="win98"] .box__titlebar,
-  :root[data-theme="win98"] .comments__title {
+  :root[data-theme="win98"] .comments__title,
+  :root[data-theme="win98"] .switcher__title {
     border-bottom: 1px solid CanvasText;
   }
 

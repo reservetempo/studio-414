@@ -77,9 +77,11 @@
 /* The frame: a line one pixel (4px) thick, its corners stepped in by one more pixel,
    drawn over transparent side and bottom borders that keep the content clear of it.
    Its top line runs through the middle of the title bar (--nes-top down), so above it
-   the page shows, as round NES.css's titles. The comment box is framed the same way. */
+   the page shows, as round NES.css's titles. The comment box and Display are framed
+   the same way. */
 :root[data-theme="nes"] .box,
-:root[data-theme="nes"] .comments__inner {
+:root[data-theme="nes"] .comments__inner,
+:root[data-theme="nes"] .switcher__inner {
   --nes-top: calc((var(--nes-bar) - var(--nes-u)) / 2);
   border: solid transparent;
   border-width: 0 var(--nes-u) var(--nes-u);
@@ -105,7 +107,8 @@
 }
 
 :root[data-theme="nes"] .box ::selection,
-:root[data-theme="nes"] .comments__inner ::selection {
+:root[data-theme="nes"] .comments__inner ::selection,
+:root[data-theme="nes"] .switcher__inner ::selection {
   background: var(--nes-ink);
   color: var(--nes-paper);
 }
@@ -127,7 +130,8 @@
 }
 
 :root[data-theme="nes"] .box__title,
-:root[data-theme="nes"] .comments__title {
+:root[data-theme="nes"] .comments__title,
+:root[data-theme="nes"] .switcher__title {
   flex: 0 1 auto;
   min-width: 0;
   margin: 0;
@@ -266,7 +270,7 @@
 
 /* NES.css's button: a line one pixel (--nes-btn-u, 4px) thick with the corners left
    out, and a shade inside along the bottom and right that swaps to the top and left
-   while pressed (or while what it opens is open: the paint roller), and widens under
+   while pressed (or while what it opens is open: Show sign-ups), and widens under
    the pointer. Plain buttons are the face; the tinted ones (the default buttons, the
    Workshops button) NES.css's primary, in the title colour. Text at 8px, on the font's
    grid. "Post comment" is one too. */
@@ -478,7 +482,7 @@
 
 /* ---------- Buttons on the page ---------- */
 
-/* Workshops, the paint roller and Move 414 stand on the page or the photo. The
+/* Workshops and Move 414 stand on the page or the photo. The
    Workshops button's line is in the page's text colour, so it shows round the title
    colour on the page; their focus lines are in it too, outside. */
 :root[data-theme="nes"] .workshop-button {
@@ -487,21 +491,9 @@
   letter-spacing: 0;
 }
 
-:root[data-theme="nes"] .workshop-button:focus-visible,
-:root[data-theme="nes"] .switcher-toggle:focus-visible {
+:root[data-theme="nes"] .workshop-button:focus-visible {
   outline: 2px dotted var(--page-text);
   outline-offset: 3px;
-}
-
-/* The roller sits in the part the shade leaves, and moves with it while Display is
-   open. */
-:root[data-theme="nes"] .switcher-toggle svg {
-  translate: calc(var(--nes-u) / -2) calc(var(--nes-u) / -2);
-}
-
-:root[data-theme="nes"] .switcher-toggle:active svg,
-:root[data-theme="nes"] .switcher-toggle[aria-expanded="true"] svg {
-  translate: calc(var(--nes-u) / 2) calc(var(--nes-u) / 2);
 }
 
 /* Shown only while focused, so its focus line is inside it. */
@@ -568,8 +560,10 @@
 /* ---------- Comment box ---------- */
 
 /* A window like the others, its heading as the title on the frame. Inside, the page
-   colours give way to the face's, and the photo no longer shows through. */
-:root[data-theme="nes"] .comments__inner {
+   colours give way to the face's, and the photo no longer shows through. Display, at
+   the end of the page, is drawn the same way. */
+:root[data-theme="nes"] .comments__inner,
+:root[data-theme="nes"] .switcher__inner {
   --page-text: var(--face-text);
   --page-text-muted: var(--face-muted);
   padding: 0 12px 14px;
@@ -580,11 +574,17 @@
   backdrop-filter: none;
 }
 
-:root[data-theme="nes"] .comments__title {
+:root[data-theme="nes"] .comments__title,
+:root[data-theme="nes"] .switcher__title {
   align-self: flex-start;
   max-width: 100%;
   /* Centred on the frame's top line, as a window title is in its bar. */
   margin: calc((var(--nes-bar) - var(--nes-title)) / 2) 0 0;
+}
+
+/* Display's panel is a grid: its title keeps to the left there. */
+:root[data-theme="nes"] .switcher__title {
+  justify-self: start;
 }
 
 /* Fields (above) with room inside their line; the text area a line's width taller. */
@@ -979,7 +979,8 @@
 /* The gradients go: the transparent borders show as the frame, with a top line. */
 @media (forced-colors: active) {
   :root[data-theme="nes"] .box,
-  :root[data-theme="nes"] .comments__inner {
+  :root[data-theme="nes"] .comments__inner,
+  :root[data-theme="nes"] .switcher__inner {
     border-top-width: var(--nes-u);
   }
 
@@ -1055,16 +1056,11 @@
 
 /* ---------- Reduced motion ---------- */
 
-/* Nothing here moves but the close box's ×, the roller and the words, glyphs and
+/* Nothing here moves but the close box's × and the words, glyphs and
    figures on the buttons while pressed: they stay put. */
 @media (prefers-reduced-motion: reduce) {
   :root[data-theme="nes"] .box__close:active::after {
     translate: none;
-  }
-
-  :root[data-theme="nes"] .switcher-toggle:active svg,
-  :root[data-theme="nes"] .switcher-toggle[aria-expanded="true"] svg {
-    translate: calc(var(--nes-u) / -2) calc(var(--nes-u) / -2);
   }
 
   :root[data-theme="nes"] .switcher__step:not(:disabled):active,
