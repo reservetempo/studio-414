@@ -64,7 +64,7 @@ The code is written but not deployed. Do everything in Stripe **test mode** firs
 
 ## Set up the owner page
 
-The owners' page is at `/admin.html` (for example `https://your-site-address/admin.html`). Nothing on the site links to it, and search engines are asked not to list it. Owners sign in with an email and password. An owner is someone with a user in Supabase **Authentication** whose email is also in the `site_owners` list; you add both by hand, and nobody can sign themselves up. Anyone who signs in but isn't in `site_owners` is told their account isn't an owner account. The Wallpaper and Workshops sections are still to come.
+The owners' page is at `/admin.html` (for example `https://your-site-address/admin.html`). Nothing on the site links to it, and search engines are asked not to list it. Owners sign in with an email and password. An owner is someone with a user in Supabase **Authentication** whose email is also in the `site_owners` list; you add both by hand, and nobody can sign themselves up. Anyone who signs in but isn't in `site_owners` is told their account isn't an owner account.
 
 1. In the Supabase dashboard, **Authentication → Sign In / Providers**: make sure **Email** is turned on (it is by default), and turn **off** **Allow new users to sign up**, then save. Owners are only ever added by hand (step 3).
 2. **SQL Editor**: paste in [`supabase/owners.sql`](supabase/owners.sql) and click **Run** (if it hasn't been run yet).
@@ -82,7 +82,7 @@ To change an owner's password, open **Authentication → Users** and use that us
 
 ## Set up the wallpaper upload
 
-Owners will upload a new wallpaper photo for the site from the owner page and mark where the mailing-list card sits on it (that part of the page is still to come). The photo goes to Cloudinary; the site reads which photo to show from Supabase ([`supabase/wallpaper.sql`](supabase/wallpaper.sql) describes the setting). Set up the owner page first.
+Owners upload a new wallpaper photo for the site from the Wallpaper section of the owner page and mark where the mailing-list card sits on it. The photo goes to Cloudinary; the site reads which photo to show from Supabase ([`supabase/wallpaper.sql`](supabase/wallpaper.sql) describes the setting). Set up the owner page first.
 
 1. Create a free account at [Cloudinary](https://cloudinary.com/).
 2. In the Cloudinary Console, copy the **cloud name** (on the dashboard), then the **API key** and **API secret** (**Settings → API Keys**).
@@ -103,7 +103,7 @@ Owners will upload a new wallpaper photo for the site from the owner page and ma
 
 ## Set up the site look
 
-Owners will pick one theme and one colour for both the public site and the owner page, on the owner page (that part of the page is still to come). Both pages read it from Supabase in [`look.js`](look.js); [`supabase/look.sql`](supabase/look.sql) describes the setting, and [`themes/README.md`](themes/README.md) how a theme is written. Until a look is saved, the site stays Aqua in Classic. Set up the wallpaper upload first.
+Owners pick one theme and one colour for both the public site and the owner page, in the Look section of the owner page. Both pages read it from Supabase in [`look.js`](look.js); [`supabase/look.sql`](supabase/look.sql) describes the setting, and [`themes/README.md`](themes/README.md) how a theme is written. Until a look is saved, the site stays Aqua in Classic. Set up the wallpaper upload first.
 
 1. **SQL Editor**: paste in [`supabase/look.sql`](supabase/look.sql) and click **Run** (after `wallpaper.sql`, which makes the settings table).
 
