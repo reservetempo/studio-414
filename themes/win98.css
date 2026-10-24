@@ -665,3 +665,371 @@
     background: CanvasText;
   }
 }
+
+/* ======================================================================================
+   Owner page (admin.html, admin.css)
+   ====================================================================================== */
+
+/* ---------- Page ---------- */
+
+/* Windows' 8-point type throughout: the pixel font at its own size. The page scrolls
+   in Windows' grey. */
+:root[data-theme="win98"] .admin-header,
+:root[data-theme="win98"] .admin {
+  font-size: 11px;
+  line-height: 1.35;
+  -webkit-font-smoothing: auto;
+  -moz-osx-font-smoothing: auto;
+}
+
+:root[data-theme="win98"]:has(> body > .admin) {
+  scrollbar-color: var(--shadow) var(--face);
+}
+
+/* ---------- The menu bar: a taskbar docked at the top ---------- */
+
+/* The face, flat, with the taskbar's raised edge along its bottom; the account in the
+   tray's sunken box at the right, beside Sign out. */
+:root[data-theme="win98"] .admin-header {
+  gap: 4px 8px;
+  min-height: 28px;
+  padding: 2px 4px 4px 8px;
+  border-bottom: 0;
+  background: var(--face);
+  box-shadow: inset 0 -1px var(--dk-shadow), inset 0 -2px var(--shadow);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  color: var(--face-text);
+}
+
+:root[data-theme="win98"] .admin-title,
+:root[data-theme="win98"] .admin-account-text {
+  font-size: 11px;
+  line-height: 14px;
+}
+
+:root[data-theme="win98"] .admin-account {
+  gap: 4px;
+}
+
+:root[data-theme="win98"] .admin-account-text {
+  padding: 3px 8px;
+  box-shadow: inset 1px 1px var(--shadow), inset -1px -1px var(--hilight);
+}
+
+/* ---------- Windows and push buttons ---------- */
+
+:root[data-theme="win98"] .admin-section-body {
+  padding: 12px 12px 14px;
+}
+
+/* Windows' 75 by 23 push buttons (the base keeps them taller on touch screens). */
+:root[data-theme="win98"] .admin-button {
+  min-width: 75px;
+}
+
+@media not (pointer: coarse) {
+  :root[data-theme="win98"] .admin-button {
+    min-height: 23px;
+    padding: 3px 12px;
+  }
+
+  :root[data-theme="win98"] .admin-header .admin-button {
+    min-height: 22px;
+  }
+}
+
+:root[data-theme="win98"] .admin-header .admin-button {
+  min-width: 0;
+}
+
+/* The main button of a dialog (Save): the default button's dark line. */
+:root[data-theme="win98"] .admin-button-primary:not(:disabled) {
+  box-shadow: var(--w98-default);
+}
+
+:root[data-theme="win98"] .admin-button-primary:not(:disabled):active {
+  box-shadow: var(--w98-default-pressed);
+}
+
+/* "Sign in with Google": the G (Google's own colours) straight on the button. */
+:root[data-theme="win98"] .admin-google {
+  gap: 6px;
+  padding-left: 8px;
+}
+
+:root[data-theme="win98"] .admin-google-mark {
+  width: 16px;
+  height: 16px;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+
+:root[data-theme="win98"] .admin-message {
+  border-radius: 0;
+}
+
+/* ---------- Alerts: Windows message boxes ---------- */
+
+/* Only the close box in the title bar; the icon 32px at the top left, the words beside
+   it (not bold), the buttons centred under the whole box. */
+:root[data-theme="win98"] .admin-dialog .box__light--min,
+:root[data-theme="win98"] .admin-dialog .box__light--zoom {
+  display: none;
+}
+
+:root[data-theme="win98"] .admin-dialog-body {
+  min-height: 56px;
+  padding: 12px 12px 12px 56px;
+}
+
+:root[data-theme="win98"] .admin-dialog-lead {
+  font-weight: 400;
+}
+
+:root[data-theme="win98"] .admin-dialog .admin-actions {
+  justify-content: center;
+  gap: 6px;
+  margin: 14px 0 0 -44px;
+}
+
+/* An error in a message box: a plain red line, no panel. */
+:root[data-theme="win98"] .admin-dialog .admin-message-error {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--error);
+}
+
+/* The icons. Loading: the program's icon, "414" on a square of the colour. Sign in:
+   Windows' information balloon. Not an owner: the warning triangle. Something went
+   wrong: the red stop sign. (Decoration: the words say it all.) */
+:root[data-theme="win98"] .admin-dialog-body::before {
+  top: 12px;
+  left: 12px;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--dk-shadow);
+  border-radius: 0;
+  background: var(--title);
+  box-shadow: none;
+  color: var(--title-text);
+  font-size: 11px;
+  letter-spacing: 0;
+  text-shadow: none;
+}
+
+:root[data-theme="win98"] #admin-signin .admin-dialog-body::before,
+:root[data-theme="win98"] #admin-denied .admin-dialog-body::before,
+:root[data-theme="win98"] #admin-error .admin-dialog-body::before {
+  content: "";
+  border: 0;
+  background: no-repeat center / 32px 32px;
+}
+
+:root[data-theme="win98"] #admin-signin .admin-dialog-body::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32'%3E%3Cpath fill='%23808080' d='M16 26A14.5 11 0 1 0 11 24.6L8 31z'/%3E%3Cpath fill='%23fff' stroke='%23000' d='M14 23.9A14.5 11 0 1 0 9 22.6L6 30z'/%3E%3Ccircle fill='%2300f' cx='16' cy='7.5' r='2'/%3E%3Cpath fill='%2300f' d='M13 11h5v8h2v2h-8v-2h2v-6h-1z'/%3E%3C/svg%3E");
+}
+
+:root[data-theme="win98"] #admin-denied .admin-dialog-body::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32'%3E%3Cpath fill='%23808080' d='M17.5 3.5L31 30.5H4z'/%3E%3Cpath fill='%23ff0' stroke='%23000' stroke-linejoin='round' d='M15.5 1.5L29.5 28.5H1.5z'/%3E%3Cpath d='M14 9h3v11h-3zM14 22h3v3h-3z'/%3E%3C/svg%3E");
+}
+
+:root[data-theme="win98"] #admin-error .admin-dialog-body::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32'%3E%3Ccircle fill='%23808080' cx='17' cy='17' r='14.5'/%3E%3Ccircle fill='%23f00' stroke='%23800000' cx='15.5' cy='15.5' r='14'/%3E%3Cpath stroke='%23fff' stroke-width='4' d='M10 10l11 11M21 10L10 21'/%3E%3C/svg%3E");
+}
+
+/* Loading: Windows' progress bar, a 1px sunken edge round blocks of the colour's ink,
+   which move along (still under reduced motion, as the base sets). */
+:root[data-theme="win98"] .admin-barber {
+  --barber-step: 10px;
+  height: 18px;
+  border: 2px solid var(--face);
+  border-radius: 0;
+  background: var(--face);
+  box-shadow: -1px -1px 0 var(--shadow), 1px 1px 0 var(--hilight);
+}
+
+:root[data-theme="win98"] .admin-barber::before {
+  background: repeating-linear-gradient(90deg, var(--accent-ink) 0 8px, transparent 8px 10px);
+  animation-duration: 0.5s;
+}
+
+:root[data-theme="win98"] .admin-barber::after {
+  content: none;
+}
+
+/* ---------- Notices (every section) ---------- */
+
+/* A plain line beside Windows' small icon: the warning triangle for a problem, the
+   information balloon when something is done. Errors in red. */
+:root[data-theme="win98"] .look .admin-message,
+:root[data-theme="win98"] .wallpaper .admin-message,
+:root[data-theme="win98"] .workshops .admin-message {
+  min-height: 16px;
+  padding: 1px 0 1px 22px;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  font-size: 11px;
+  line-height: 14px;
+}
+
+:root[data-theme="win98"] .look .admin-message::before,
+:root[data-theme="win98"] .wallpaper .admin-message::before,
+:root[data-theme="win98"] .workshops .admin-message::before {
+  content: "";
+  top: 0;
+  left: 0;
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  border-radius: 0;
+  background: no-repeat center / 16px 16px;
+  box-shadow: none;
+  clip-path: none;
+}
+
+:root[data-theme="win98"] .look .admin-message-error::before,
+:root[data-theme="win98"] .wallpaper .admin-message-error::before,
+:root[data-theme="win98"] .workshops .admin-message-error::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath fill='%23ff0' stroke='%23000' stroke-linejoin='round' d='M8 1.5L14.5 14.5H1.5z'/%3E%3Cpath d='M7 5h2v5H7zM7 11h2v2H7z'/%3E%3C/svg%3E");
+}
+
+:root[data-theme="win98"] .look .admin-message-ok::before,
+:root[data-theme="win98"] .wallpaper .admin-message-ok::before,
+:root[data-theme="win98"] .workshops .admin-message-ok::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath fill='%23fff' stroke='%23000' d='M7 11.9A7 5.5 0 1 0 4.5 11.3L3 15z'/%3E%3Cpath fill='%2300f' d='M7 2h2v2H7zM6 5h3v4h1v1H6V9h1V6H6z'/%3E%3C/svg%3E");
+}
+
+/* ---------- Look section ---------- */
+
+/* Each group in Windows' etched group box, its name on the frame. The edges and the
+   picked swatch's ring are taken here, so they are the page's, not each swatch's. */
+:root[data-theme="win98"] .look {
+  --look-selection-ring: var(--face-text);
+  --look-gap: var(--face);
+  --look-chip-edge: var(--w98-sunken);
+}
+
+:root[data-theme="win98"] .look-field {
+  display: block;
+  position: relative;
+  margin: 0 0 16px;
+  padding: 14px 10px 10px;
+  box-shadow: inset -1px -1px var(--hilight), inset 1px 1px var(--shadow),
+    inset -2px -2px var(--shadow), inset 2px 2px var(--hilight);
+}
+
+:root[data-theme="win98"] .look-label {
+  position: absolute;
+  top: -7px;
+  left: 6px;
+  margin: 0;
+  padding: 0 3px;
+  background: var(--face);
+  font-size: 11px;
+  line-height: 14px;
+  text-align: left;
+}
+
+:root[data-theme="win98"] .look-label::after {
+  content: none;
+}
+
+:root[data-theme="win98"] .look .admin-message,
+:root[data-theme="win98"] .look-actions {
+  margin-left: 0;
+}
+
+:root[data-theme="win98"] .look-actions {
+  gap: 6px;
+}
+
+/* The themes: 98.css's radio buttons, a white circle sunk two lines deep, with a
+   black dot when picked, grey while pressed. Focused, the dotted line goes round the
+   name. */
+:root[data-theme="win98"] .look-theme {
+  font-size: 11px;
+  line-height: 14px;
+}
+
+:root[data-theme="win98"] .look-theme-input,
+:root[data-theme="win98"] .look-theme-input:focus-visible {
+  border: 0;
+  background: var(--field) no-repeat;
+  box-shadow: var(--w98-sunken);
+}
+
+@media not (pointer: coarse) {
+  :root[data-theme="win98"] .look-theme-input {
+    width: 12px;
+    height: 12px;
+  }
+}
+
+:root[data-theme="win98"] .look-theme-input:checked {
+  background-image: radial-gradient(circle, var(--field-text) 0 2px, transparent 2.5px);
+}
+
+@media (pointer: coarse) {
+  :root[data-theme="win98"] .look-theme-input:checked {
+    background-image: radial-gradient(circle, var(--field-text) 0 3px, transparent 3.5px);
+  }
+}
+
+:root[data-theme="win98"] .look-theme-input:active {
+  background-color: var(--face);
+}
+
+:root[data-theme="win98"] .look-theme-name {
+  padding: 0 1px;
+}
+
+:root[data-theme="win98"] .look-theme-input:focus-visible + .look-theme-name {
+  outline: 1px dotted var(--focus);
+}
+
+/* The colours: square swatches sunk in the face. Picked: a black frame round the
+   swatch and the name highlighted, as a selected icon; focused, a dotted line round
+   the name. */
+:root[data-theme="win98"] .look-color-chip {
+  border-radius: 0;
+  background: linear-gradient(to bottom, var(--title) 0 66%, var(--face) 66%);
+  box-shadow: var(--look-chip-edge);
+}
+
+:root[data-theme="win98"] .look-color-input:focus-visible ~ .look-color-chip {
+  box-shadow: var(--look-chip-edge);
+}
+
+:root[data-theme="win98"] .look-color-input:checked ~ .look-color-chip,
+:root[data-theme="win98"] .look-color-input:checked:focus-visible ~ .look-color-chip {
+  box-shadow: var(--look-chip-edge), 0 0 0 2px var(--look-gap),
+    0 0 0 3px var(--look-selection-ring);
+}
+
+:root[data-theme="win98"] .look-color-name {
+  padding: 0 2px;
+  border-radius: 0;
+}
+
+:root[data-theme="win98"] .look-color-input:focus-visible ~ .look-color-name {
+  outline: 1px dotted var(--focus);
+  outline-offset: 1px;
+}
+
+/* ---------- Owner page, high contrast ---------- */
+
+@media (forced-colors: active) {
+  :root[data-theme="win98"] .admin-header {
+    border-bottom: 1px solid CanvasText;
+  }
+
+  :root[data-theme="win98"] .admin-account-text,
+  :root[data-theme="win98"] .look-field {
+    border: 1px solid CanvasText;
+  }
+}
