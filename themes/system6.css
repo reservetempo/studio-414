@@ -640,9 +640,10 @@
   }
 }
 
-/* ========== Owner page (admin.html; admin.css, admin-look.js) ==========
+/* ========== Owner pages (admin.html and preview.html; admin.css) ==========
    The windows, buttons and fields above apply there too. Here: the menu bar, the
-   alerts, the notices, and the Look, Wallpaper and Workshops sections. */
+   alerts, the notices, and the Look, Layout, Wallpaper and Workshops sections (Look
+   and Layout, from admin-look.js and admin-layout.js, are on preview.html). */
 
 :root[data-theme="system6"] {
   /* The alerts' icons, 32px, black on white as in the original. A document with a
@@ -848,6 +849,7 @@
    font) or the note balloon. Under a workshop and in its form an error stays a bare
    line. */
 :root[data-theme="system6"] .look .admin-message,
+:root[data-theme="system6"] .layout .admin-message,
 :root[data-theme="system6"] .wallpaper .admin-message,
 :root[data-theme="system6"] .workshops .admin-message {
   border: 1px solid var(--s6-ink);
@@ -863,6 +865,7 @@
 }
 
 :root[data-theme="system6"] .look .admin-message::before,
+:root[data-theme="system6"] .layout .admin-message::before,
 :root[data-theme="system6"] .wallpaper .admin-message::before,
 :root[data-theme="system6"] .workshops .admin-message::before {
   border-radius: 0;
@@ -873,6 +876,7 @@
 }
 
 :root[data-theme="system6"] .look .admin-message-error::before,
+:root[data-theme="system6"] .layout .admin-message-error::before,
 :root[data-theme="system6"] .wallpaper .admin-message-error::before,
 :root[data-theme="system6"] .workshops .admin-message-error::before {
   padding-bottom: 2px;
@@ -880,6 +884,7 @@
 }
 
 :root[data-theme="system6"] .look .admin-message-ok::before,
+:root[data-theme="system6"] .layout .admin-message-ok::before,
 :root[data-theme="system6"] .wallpaper .admin-message-ok::before,
 :root[data-theme="system6"] .workshops .admin-message-ok::before {
   content: "";
@@ -947,12 +952,15 @@
   box-shadow: inset 0 0 0 1px var(--face-text);
 }
 
-/* Save is the default button: the thick outline (greyed while it saves). */
-:root[data-theme="system6"] .look-actions .admin-button-primary {
+/* Save is the default button, in Look and Layout: the thick outline (greyed while it
+   saves). */
+:root[data-theme="system6"] .look-actions .admin-button-primary,
+:root[data-theme="system6"] .layout-actions .admin-button-primary {
   box-shadow: var(--s6-default-ring);
 }
 
-:root[data-theme="system6"] .look-actions .admin-button-primary:disabled {
+:root[data-theme="system6"] .look-actions .admin-button-primary:disabled,
+:root[data-theme="system6"] .layout-actions .admin-button-primary:disabled {
   box-shadow: 0 0 0 1px var(--face), 0 0 0 4px var(--shadow);
 }
 

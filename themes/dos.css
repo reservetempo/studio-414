@@ -1186,6 +1186,7 @@
 /* A line of text with a mark two columns wide at its left: a problem is a strip in
    inverse video with a "!", a saved change a pixel tick (DOS's √). */
 :root[data-theme="dos"] .look .admin-message,
+:root[data-theme="dos"] .layout .admin-message,
 :root[data-theme="dos"] .wallpaper .admin-message,
 :root[data-theme="dos"] .workshops .admin-message {
   padding: 0 0 0 calc(3 * var(--dos-cw));
@@ -1199,6 +1200,7 @@
 }
 
 :root[data-theme="dos"] .look .admin-message::before,
+:root[data-theme="dos"] .layout .admin-message::before,
 :root[data-theme="dos"] .wallpaper .admin-message::before,
 :root[data-theme="dos"] .workshops .admin-message::before {
   top: 0;
@@ -1215,6 +1217,7 @@
 }
 
 :root[data-theme="dos"] .look .admin-message-error,
+:root[data-theme="dos"] .layout .admin-message-error,
 :root[data-theme="dos"] .wallpaper .admin-message-error,
 :root[data-theme="dos"] .workshops .admin-message-error {
   width: fit-content;
@@ -1225,6 +1228,7 @@
 }
 
 :root[data-theme="dos"] .look .admin-message-error::before,
+:root[data-theme="dos"] .layout .admin-message-error::before,
 :root[data-theme="dos"] .wallpaper .admin-message-error::before,
 :root[data-theme="dos"] .workshops .admin-message-error::before {
   left: var(--dos-cw);
@@ -1233,6 +1237,7 @@
 }
 
 :root[data-theme="dos"] .look .admin-message-ok::before,
+:root[data-theme="dos"] .layout .admin-message-ok::before,
 :root[data-theme="dos"] .wallpaper .admin-message-ok::before,
 :root[data-theme="dos"] .workshops .admin-message-ok::before {
   content: "";
@@ -1790,6 +1795,7 @@
   }
 
   :root[data-theme="dos"] .look .admin-message-ok::before,
+  :root[data-theme="dos"] .layout .admin-message-ok::before,
   :root[data-theme="dos"] .wallpaper .admin-message-ok::before,
   :root[data-theme="dos"] .workshops .admin-message-ok::before,
   :root[data-theme="dos"] .workshops-past-toggle::before {

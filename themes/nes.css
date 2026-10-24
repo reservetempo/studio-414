@@ -1326,6 +1326,7 @@
 :root[data-theme="nes"] .admin-dialog .admin-message,
 :root[data-theme="nes"] #admin-signout-error,
 :root[data-theme="nes"] .look .admin-message,
+:root[data-theme="nes"] .layout .admin-message,
 :root[data-theme="nes"] .wallpaper .admin-message,
 :root[data-theme="nes"] .workshops .admin-message {
   position: relative;
@@ -1342,6 +1343,7 @@
 :root[data-theme="nes"] .admin-dialog .admin-message-error,
 :root[data-theme="nes"] #admin-signout-error,
 :root[data-theme="nes"] .look .admin-message-error,
+:root[data-theme="nes"] .layout .admin-message-error,
 :root[data-theme="nes"] .wallpaper .admin-message-error,
 :root[data-theme="nes"] .workshops .admin-message-error {
   color: var(--error);
@@ -1350,6 +1352,7 @@
 :root[data-theme="nes"] .admin-dialog .admin-message::before,
 :root[data-theme="nes"] #admin-signout-error::before,
 :root[data-theme="nes"] .look .admin-message::before,
+:root[data-theme="nes"] .layout .admin-message::before,
 :root[data-theme="nes"] .wallpaper .admin-message::before,
 :root[data-theme="nes"] .workshops .admin-message::before {
   content: "";
@@ -1366,6 +1369,7 @@
 }
 
 :root[data-theme="nes"] .look .admin-message-ok::before,
+:root[data-theme="nes"] .layout .admin-message-ok::before,
 :root[data-theme="nes"] .wallpaper .admin-message-ok::before,
 :root[data-theme="nes"] .workshops .admin-message-ok::before {
   background-image: var(--nes-lamp-ok);
@@ -2014,6 +2018,7 @@
   :root[data-theme="nes"] .admin-dialog .admin-message,
   :root[data-theme="nes"] #admin-signout-error,
   :root[data-theme="nes"] .look .admin-message,
+  :root[data-theme="nes"] .layout .admin-message,
   :root[data-theme="nes"] .wallpaper .admin-message,
   :root[data-theme="nes"] .workshops .admin-message {
     border: 2px solid CanvasText;

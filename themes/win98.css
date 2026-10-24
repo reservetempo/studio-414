@@ -899,6 +899,7 @@
 /* A plain line beside Windows' small icon: the warning triangle for a problem, the
    information balloon when something is done. Errors in red. */
 :root[data-theme="win98"] .look .admin-message,
+:root[data-theme="win98"] .layout .admin-message,
 :root[data-theme="win98"] .wallpaper .admin-message,
 :root[data-theme="win98"] .workshops .admin-message {
   min-height: 16px;
@@ -912,6 +913,7 @@
 }
 
 :root[data-theme="win98"] .look .admin-message::before,
+:root[data-theme="win98"] .layout .admin-message::before,
 :root[data-theme="win98"] .wallpaper .admin-message::before,
 :root[data-theme="win98"] .workshops .admin-message::before {
   content: "";
@@ -927,12 +929,14 @@
 }
 
 :root[data-theme="win98"] .look .admin-message-error::before,
+:root[data-theme="win98"] .layout .admin-message-error::before,
 :root[data-theme="win98"] .wallpaper .admin-message-error::before,
 :root[data-theme="win98"] .workshops .admin-message-error::before {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath fill='%23ff0' stroke='%23000' stroke-linejoin='round' d='M8 1.5L14.5 14.5H1.5z'/%3E%3Cpath d='M7 5h2v5H7zM7 11h2v2H7z'/%3E%3C/svg%3E");
 }
 
 :root[data-theme="win98"] .look .admin-message-ok::before,
+:root[data-theme="win98"] .layout .admin-message-ok::before,
 :root[data-theme="win98"] .wallpaper .admin-message-ok::before,
 :root[data-theme="win98"] .workshops .admin-message-ok::before {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath fill='%23fff' stroke='%23000' d='M7 11.9A7 5.5 0 1 0 4.5 11.3L3 15z'/%3E%3Cpath fill='%2300f' d='M7 2h2v2H7zM6 5h3v4h1v1H6V9h1V6H6z'/%3E%3C/svg%3E");
@@ -978,7 +982,8 @@
   margin-left: 0;
 }
 
-:root[data-theme="win98"] .look-actions {
+:root[data-theme="win98"] .look-actions,
+:root[data-theme="win98"] .layout-actions {
   gap: 6px;
 }
 

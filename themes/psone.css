@@ -1042,6 +1042,7 @@
    words light (an error in the light red). The icons keep their colours, the tick's
    orb glowing. In the Workshops form and list, an error stays a bare line. */
 :root[data-theme="psone"] .look .admin-message,
+:root[data-theme="psone"] .layout .admin-message,
 :root[data-theme="psone"] .wallpaper .admin-message,
 :root[data-theme="psone"] .workshops .admin-message {
   border: 1px solid var(--ps-line);
@@ -1056,6 +1057,7 @@
 }
 
 :root[data-theme="psone"] .look .admin-message-error,
+:root[data-theme="psone"] .layout .admin-message-error,
 :root[data-theme="psone"] .wallpaper .admin-message-error,
 :root[data-theme="psone"] .workshops .admin-message-error {
   color: var(--ps-error);
@@ -1070,6 +1072,7 @@
 }
 
 :root[data-theme="psone"] .look .admin-message-ok::before,
+:root[data-theme="psone"] .layout .admin-message-ok::before,
 :root[data-theme="psone"] .wallpaper .admin-message-ok::before,
 :root[data-theme="psone"] .workshops .admin-message-ok::before {
   box-shadow: inset 0 0 0 1px var(--aqua-green-rim), 0 0 6px var(--aqua-green-glow);

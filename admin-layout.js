@@ -20,8 +20,6 @@
   - With unsaved changes, leaving the page asks first: the browser's own warning
     (beforeunload), and a confirm on the "Owner page" link.
   - On sign-out the frame goes back to the saved layout.
-  The root carries "look" too, for the Look section's notices and buttons (admin.css and
-  each theme style them under .look; .look itself only sets custom properties).
 */
 (function () {
   'use strict';
@@ -52,7 +50,7 @@
     var busy = false;       // saving or deleting
     var leaving = false;    // the owner confirmed leaving by the "Owner page" link
 
-    var root = el('div', 'layout look');
+    var root = el('div', 'layout');
     var loading = el('p', 'admin-status layout-loading', 'Loading the saved layout…');
 
     var form = el('div', 'layout-form');
@@ -71,7 +69,7 @@
     var saveButton = button('Save', true);
     var undoButton = button('Undo changes');
     var defaultButton = button('Back to the default layout');
-    var actions = el('div', 'admin-actions look-actions layout-actions');
+    var actions = el('div', 'admin-actions layout-actions');
     actions.append(saveButton, undoButton, defaultButton);
 
     form.append(intro, state, loadError, error, ok, actions);
