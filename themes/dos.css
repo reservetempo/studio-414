@@ -281,8 +281,17 @@
   color: var(--dos-fill);
 }
 
-/* "Email us" sits on the frame's bottom line, so it clears the line behind it. */
+/* "Email us" sits on the frame's bottom line, so it clears the line behind it. At
+   20px it is too wide for most cards, so it always wraps after "at", only as wide as
+   the address (it clears no more of the line), with the address alone on the frame
+   line and "Or email us at" beside the button; the body keeps a row more at its
+   foot, which lifts the button so the address clears its shadow. */
+:root[data-theme="dos"] .signup__body {
+  padding-bottom: calc(clamp(16px, 5cqw, 24px) + var(--dos-ch));
+}
+
 :root[data-theme="dos"] .signup__email {
+  width: min-content;
   padding: 0 4px;
   background: var(--dos-fill);
   color: var(--dos-dim);
@@ -294,6 +303,40 @@
 
 :root[data-theme="dos"] .signup__email:focus-visible {
   outline-color: var(--dos-ink);
+}
+
+/* ---------- Page text ----------
+   The page text takes the theme's font (styles.css), and VT323 is drawn as pixels:
+   the running text (the comments, the card, the font credit, the Workshops windows)
+   and the typed words are 20px on 20px rows, whole pixels, as the chrome is, and the
+   names of a workshop twice that. */
+:root[data-theme="dos"] .comments__note,
+:root[data-theme="dos"] .comment__name,
+:root[data-theme="dos"] .comment__body,
+:root[data-theme="dos"] .comments__state,
+:root[data-theme="dos"] .comments__identity,
+:root[data-theme="dos"] .comments__message,
+:root[data-theme="dos"] .comments__input,
+:root[data-theme="dos"] .comments__textarea,
+:root[data-theme="dos"] .switcher-credit,
+:root[data-theme="dos"] .signup__message,
+:root[data-theme="dos"] .signup__email,
+:root[data-theme="dos"] .signup__input,
+:root[data-theme="dos"] .workshop,
+:root[data-theme="dos"] .workshop__result-title,
+:root[data-theme="dos"] .workshop__description,
+:root[data-theme="dos"] .workshop__facts dd,
+:root[data-theme="dos"] .workshop__spots,
+:root[data-theme="dos"] .workshop__check,
+:root[data-theme="dos"] .workshop__input,
+:root[data-theme="dos"] .workshop__note {
+  font-size: var(--dos-text);
+  line-height: var(--dos-ch);
+}
+
+:root[data-theme="dos"] .workshop__name {
+  font-size: calc(2 * var(--dos-text));
+  line-height: calc(2 * var(--dos-ch));
 }
 
 /* ---------- Comment box ---------- */
@@ -386,7 +429,7 @@
 
 /* dBase's input fields: a strip in inverse video, no edge, with a block cursor that
    blinks (still with reduced motion, below). Wrong, the strip gets an inner line in
-   the fill; focused, a dotted line round it. The typed words keep the page's font. */
+   the fill; focused, a dotted line round it. The typed words are page text (above). */
 :root[data-theme="dos"] .aqua-field,
 :root[data-theme="dos"] .comments__input,
 :root[data-theme="dos"] .comments__textarea {

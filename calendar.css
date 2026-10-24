@@ -3,9 +3,10 @@
    name between two small round plain pills, ‹ and › (.aqua-pill, as in Display), and
    the month on a white panel with a thin grey edge, as Aqua's lists and fields have,
    Sunday first. The weekdays and the days are in Lucida Grande, like Aqua's own
-   calendar; the month's name keeps the Display font. A workshop's day is a glossy pill
-   in the colour (.aqua-pill--tint, added by calendar.js), with the workshop's name in
-   a pale yellow Aqua tooltip over it under the pointer or the keyboard focus. Days
+   calendar, and so is the month's name (--aqua-font, the theme's font). A workshop's
+   day is a glossy pill in the colour (.aqua-pill--tint, added by calendar.js), with
+   the workshop's name in a pale yellow Aqua tooltip over it under the pointer or the
+   keyboard focus. Days
    gone by are greyed out, a workshop that is over is a faded pill that doesn't press,
    and today is ringed in the colour. The colours and fonts are the tokens in
    aqua.css and styles.css, so it follows the style switcher like everything else. */
@@ -29,9 +30,9 @@
   min-width: 0;
   margin: 0;
   color: var(--accent-ink);
-  font-family: var(--display-font);
-  font-size: calc(1.375rem * var(--display-name-size));
-  font-weight: var(--display-weight);
+  font-family: var(--aqua-font);
+  font-size: 1.125rem;
+  font-weight: normal;
   line-height: 1.1;
   text-align: center;
 }

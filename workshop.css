@@ -6,7 +6,7 @@
    drag handle, and the pills and fields; the colours and fonts are the tokens in
    styles.css, so all of it follows the style switcher like everything else, but for
    the links, which keep the early web's blue and purple. The title bars and the
-   buttons are always in Lucida Grande; the rest takes the Display font. With reduced
+   buttons are always in Lucida Grande; the rest takes the theme's font (--aqua-font). With reduced
    motion nothing moves.
 
    Where the button sits: the top-right corner, 16px in (8px on phones), over the
@@ -246,9 +246,8 @@
 
 .workshop__result-title {
   margin: 0 0 2px;
-  font-family: var(--display-font);
-  font-size: calc(1.25rem * var(--display-name-size));
-  font-weight: var(--display-weight);
+  font-size: 1.125rem;
+  font-weight: normal;
   line-height: 1.2;
 }
 
@@ -260,9 +259,8 @@
 .workshop__name {
   margin: 0;
   color: var(--accent-ink);
-  font-family: var(--display-font);
-  font-size: calc(2.25rem * var(--display-name-size));
-  font-weight: var(--display-weight);
+  font-size: 1.75rem;
+  font-weight: normal;
   line-height: 1;
 }
 
@@ -287,11 +285,10 @@
 /* Small spaced capitals, as the labels on the card and in the comments. */
 .workshop__facts dt,
 .workshop__label {
-  font-family: var(--display-font);
-  font-size: calc(0.75rem * var(--display-size));
-  font-weight: var(--display-weight);
+  font-size: 0.75rem;
+  font-weight: normal;
   line-height: 1.2;
-  letter-spacing: calc(0.22em * var(--display-tracking));
+  letter-spacing: 0.22em;
   text-transform: uppercase;
 }
 

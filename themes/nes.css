@@ -514,6 +514,57 @@
   background: none;
 }
 
+/* ---------- Page text ----------
+   The page text takes the theme's font (styles.css), and Press Start 2P is drawn on
+   an 8px grid: the running text (the comments, the card, the font credit, the
+   Workshops windows) is 8px on 16px lines, as on the owner page, and the names of a
+   workshop 16px on 24px. The fields are 8px too, but keep 16px on touch screens, so
+   iOS doesn't zoom. */
+:root[data-theme="nes"] .comments__note,
+:root[data-theme="nes"] .comment__name,
+:root[data-theme="nes"] .comment__body,
+:root[data-theme="nes"] .comments__state,
+:root[data-theme="nes"] .comments__identity,
+:root[data-theme="nes"] .comments__message,
+:root[data-theme="nes"] .switcher-credit,
+:root[data-theme="nes"] .signup__message,
+:root[data-theme="nes"] .signup__email,
+:root[data-theme="nes"] .workshop,
+:root[data-theme="nes"] .workshop__description,
+:root[data-theme="nes"] .workshop__facts dd,
+:root[data-theme="nes"] .workshop__spots,
+:root[data-theme="nes"] .workshop__check,
+:root[data-theme="nes"] .workshop__note {
+  font-size: 8px;
+  line-height: 16px;
+}
+
+:root[data-theme="nes"] .workshop__name,
+:root[data-theme="nes"] .workshop__result-title {
+  font-size: 16px;
+  line-height: 24px;
+}
+
+@media not (pointer: coarse) {
+  :root[data-theme="nes"] .comments__input,
+  :root[data-theme="nes"] .comments__textarea,
+  :root[data-theme="nes"] .signup__input,
+  :root[data-theme="nes"] .workshop__input {
+    font-size: 8px;
+    line-height: 16px;
+  }
+}
+
+@media (pointer: coarse) {
+  :root[data-theme="nes"] .comments__input,
+  :root[data-theme="nes"] .comments__textarea,
+  :root[data-theme="nes"] .signup__input,
+  :root[data-theme="nes"] .workshop__input {
+    font-size: 16px;
+    line-height: 24px;
+  }
+}
+
 /* ---------- Comment box ---------- */
 
 /* A window like the others, its heading as the title on the frame. Inside, the page
@@ -546,6 +597,13 @@
   padding: 8px 12px;
 }
 
+/* Three of its 16px lines where the text is 8px (Page text, above). */
+@media not (pointer: coarse) {
+  :root[data-theme="nes"] .comments__textarea {
+    height: calc(3 * 16px + 16px);
+  }
+}
+
 /* "Post comment": a primary button (above), as Sign up. */
 :root[data-theme="nes"] .comments__submit {
   min-height: 32px;
@@ -566,6 +624,13 @@
 
 :root[data-theme="nes"] .signup__input {
   padding: 0 12px;
+}
+
+/* Room for "you@example.com" at 16px (Page text, above) on a phone's card. */
+@media (pointer: coarse) {
+  :root[data-theme="nes"] .signup__input {
+    padding: 0 8px;
+  }
 }
 
 /* ---------- Workshops window ---------- */

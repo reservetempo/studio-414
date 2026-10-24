@@ -62,23 +62,17 @@
 
 :root,
 [data-font="1"] {
-  /* The body face sets running text and the fields; the display face sets the spaced
-     capitals (labels, buttons), the title bars and names. --display-size and
-     --display-tracking scale the capitals, and --display-name-size the upper- and
-     lower-case display text (title bars, names), for faces drawn larger, smaller,
-     wider or narrower than EB Garamond.
+  /* The display face, Display's Font (fonts.css, switcher.js), sets only the big 414
+     and "Opening soon!" (opening-soon.css). All other page text is in the theme's
+     font, --aqua-font (aqua.css: Lucida Grande; each themes/<id>.css sets its own),
+     from body below. --display-name-size scales "Opening soon!", which is in upper and
+     lower case, for faces drawn larger or smaller than EB Garamond.
      The style switcher (fonts.css, switcher.css) only changes these tokens.
      These are font 1, EB Garamond, so they are declared for [data-font="1"] as well
-     as :root: a window carrying data-font="1" is set in it even when <html> has
-     another face (fonts.css). --display-italic is the "Commenting as" line; the
-     other faces have no italic and set it to normal. */
-  --body-font: "EB Garamond", Garamond, "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
-  --display-font: var(--body-font);
+     as :root (fonts.css). */
+  --display-font: "EB Garamond", Garamond, "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
   --display-weight: 500;
-  --display-size: 1;
-  --display-tracking: 1;
   --display-name-size: 1;
-  --display-italic: italic;
 
   /* The big 414 (below), measured per face so it can be fitted to the room it has:
      --big-weight  the weight it is set in (EB Garamond has an 800; the display faces
@@ -105,7 +99,7 @@ body {
 }
 
 body {
-  font-family: var(--body-font);
+  font-family: var(--aqua-font);
   color: var(--page-text);
   background-color: var(--page-bg);
 }
@@ -441,11 +435,10 @@ html.is-moving-414 * {
   display: block;
   margin-bottom: clamp(8px, 3cqw, 14px);
   color: var(--face-text);
-  font-family: var(--display-font);
-  font-size: calc(clamp(0.75rem, 3.4cqw, 0.9375rem) * var(--display-size));
-  font-weight: var(--display-weight);
+  font-size: clamp(0.75rem, 3.4cqw, 0.9375rem);
+  font-weight: normal;
   line-height: 1.2;
-  letter-spacing: calc(0.22em * var(--display-tracking));
+  letter-spacing: 0.22em;
   text-transform: uppercase;
 }
 
@@ -464,7 +457,7 @@ html.is-moving-414 * {
   margin: 0;
 }
 
-/* An Aqua text field (.aqua-field, boxes.css) in the body face; 17px text at least,
+/* An Aqua text field (.aqua-field, boxes.css) in the theme's font; 17px text at least,
    so iOS does not zoom in on focus. */
 .signup__input {
   flex: 1 1 11em;
@@ -475,8 +468,10 @@ html.is-moving-414 * {
 }
 
 /* The default button, a glossy pill in the colour that pulses gently
-   (.aqua-pill--tint and --pulse, boxes.css). */
+   (.aqua-pill--tint and --pulse, boxes.css). Over the email link below, which can
+   reach up beside it when it wraps. */
 .signup__button {
+  z-index: 1;
   flex: none;
   min-width: 96px;
   padding: 0 20px;
@@ -503,10 +498,13 @@ html.is-moving-414 * {
 /* A small "Email us" link in the bottom-left corner, level with the resize grip on the
    right. Taken out of the flow so it never moves the centred field and button: it sits
    in the body's bottom padding, and its left edge (left: auto, its static position) is
-   the body's content edge, under the label. */
+   the body's content edge, under the label. It is never wider than the content
+   (100cqw: the body is its container), so it stops short of the grip; in a wide
+   theme font it then wraps after "at", the short first line beside the button. */
 .signup__email {
   position: absolute;
   bottom: 3px;
+  max-width: 100cqw;
   font-size: 0.75rem;
   line-height: 1.2;
   color: var(--face-muted);

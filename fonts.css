@@ -5,28 +5,20 @@
    data-font="0" (or no attribute) is Terminal Grotesque, the default;
    data-font="1" is EB Garamond, the original face, whose tokens are the ones in
    styles.css (declared there for :root and [data-font="1"]); data-font="2" to
-   data-font="20" pick the others. On <html> it sets the page and every window. On a
-   window (#signup, the Workshops dialogs #workshops and #workshop, #switcher and
-   .switcher-toggle) it sets that window alone, over the page's face: a window
-   inherits these tokens from <html> unless it carries its own data-font. The big
-   414, "Opening soon!", the Workshops link and the comment section sit on the page,
-   so they follow <html> alone.
-   Unlike the bevels (see styles.css), nothing here needs declaring again on a
-   window: the tokens the windows use are plain values, and the one built from
-   another, --big-weight, is worked out on the element carrying data-font anyway and
-   is only used by the 414.
+   data-font="20" pick the others. The face sets only the big 414 and "Opening soon!",
+   which sit on the page and follow <html>'s data-font. All other page text (the
+   card, the comment section, the font credit, the Workshops windows) is in the
+   theme's font, --aqua-font (aqua.css: Lucida Grande; each themes/<id>.css sets its
+   own), whatever face is picked.
+   The one token built from another, --big-weight, is worked out on the element
+   carrying data-font and is only used by the 414.
    These rules have the same specificity as styles.css's :root and win by coming
    after it (fonts.css loads later); html:not([data-font]) is the default.
    Each option only sets the display tokens from styles.css:
      --display-font      the family, with fallbacks
      --display-weight    the weight of the one face loaded
-     --display-size      scales the spaced capitals (labels, buttons), so they
-                         come out about as tall as EB Garamond's, or a little taller
-     --display-tracking  scales their letter-spacing (wide faces need less)
-     --display-name-size scales the names (comment authors, "Commenting as") and the
-                         title bars, which are in upper and lower case, so they follow
-                         the x-height instead
-     --display-italic    the "Commenting as" line; none of these faces has an italic
+     --display-name-size scales "Opening soon!", which is in upper and lower case,
+                         so it follows the x-height
      --big-*             the big 414 (styles.css): its weight, and the face's "414"
                          measured, so it is fitted to the same room in every face
    Browsers only download a face once something on the page uses it. */
@@ -213,7 +205,6 @@ html:not([data-font]),
 [data-font="18"],
 [data-font="19"],
 [data-font="20"] {
-  --display-italic: normal;
   --big-weight: var(--display-weight);
 }
 
@@ -222,8 +213,6 @@ html:not([data-font]),
 [data-font="0"] {
   --display-font: "Terminal Grotesque", "Helvetica Neue", Arial, sans-serif;
   --display-weight: 400;
-  --display-size: 1.08;
-  --display-tracking: 1;
   --display-name-size: 1;
   --big-w: 1.315;
   --big-h: 0.625;
@@ -237,8 +226,6 @@ html:not([data-font]),
 [data-font="2"] {
   --display-font: "Basteleur", "EB Garamond", Georgia, serif;
   --display-weight: 400;
-  --display-size: 0.92;
-  --display-tracking: 0.9;
   --display-name-size: 0.85;
   --big-w: 1.966;
   --big-h: 0.766;
@@ -249,8 +236,6 @@ html:not([data-font]),
 [data-font="3"] {
   --display-font: "Lineal", "Futura", "Century Gothic", sans-serif;
   --display-weight: 500;
-  --display-size: 0.96;
-  --display-tracking: 1;
   --display-name-size: 0.85;
   --big-w: 1.401;
   --big-h: 0.734;
@@ -261,8 +246,6 @@ html:not([data-font]),
 [data-font="4"] {
   --display-font: "Le Murmure", "Arial Narrow", sans-serif;
   --display-weight: 400;
-  --display-size: 1.24;
-  --display-tracking: 1.1;
   --display-name-size: 0.9;
   --big-w: 0.689;
   --big-h: 0.828;
@@ -273,8 +256,6 @@ html:not([data-font]),
 [data-font="5"] {
   --display-font: "Sligoil", ui-monospace, "Cascadia Mono", Consolas, monospace;
   --display-weight: 500;
-  --display-size: 0.94;
-  --display-tracking: 0.6;
   --display-name-size: 0.85;
   --big-w: 1.8;
   --big-h: 0.703;
@@ -285,8 +266,6 @@ html:not([data-font]),
 [data-font="6"] {
   --display-font: "Ouroboros", "EB Garamond", Georgia, serif;
   --display-weight: 400;
-  --display-size: 0.94;
-  --display-tracking: 0.8;
   --display-name-size: 0.9;
   --big-w: 1.986;
   --big-h: 0.703;
@@ -297,8 +276,6 @@ html:not([data-font]),
 [data-font="7"] {
   --display-font: "Facade", "Arial Narrow", sans-serif;
   --display-weight: 400;
-  --display-size: 0.98;
-  --display-tracking: 1;
   --display-name-size: 0.9;
   --big-w: 1.27;
   --big-h: 0.797;
@@ -309,8 +286,6 @@ html:not([data-font]),
 [data-font="8"] {
   --display-font: "Karrik", "Helvetica Neue", Arial, sans-serif;
   --display-weight: 400;
-  --display-size: 1;
-  --display-tracking: 1;
   --display-name-size: 0.92;
   --big-w: 1.938;
   --big-h: 0.688;
@@ -321,8 +296,6 @@ html:not([data-font]),
 [data-font="9"] {
   --display-font: "Trickster", "EB Garamond", Georgia, serif;
   --display-weight: 400;
-  --display-size: 0.92;
-  --display-tracking: 0.9;
   --display-name-size: 0.82;
   --big-w: 1.553;
   --big-h: 0.766;
@@ -333,8 +306,6 @@ html:not([data-font]),
 [data-font="10"] {
   --display-font: "Compagnon", "Courier New", monospace;
   --display-weight: 500;
-  --display-size: 1.1;
-  --display-tracking: 0.6;
   --display-name-size: 0.95;
   --big-w: 1.8;
   --big-h: 0.594;
@@ -345,8 +316,6 @@ html:not([data-font]),
 [data-font="11"] {
   --display-font: "Anthony", "Futura", "Century Gothic", sans-serif;
   --display-weight: 400;
-  --display-size: 1;
-  --display-tracking: 1;
   --display-name-size: 1;
   --big-w: 1.42;
   --big-h: 0.719;
@@ -357,8 +326,6 @@ html:not([data-font]),
 [data-font="12"] {
   --display-font: "Victorianna", "EB Garamond", Georgia, serif;
   --display-weight: 200;
-  --display-size: 0.9;
-  --display-tracking: 1;
   --display-name-size: 0.95;
   --big-w: 1.549;
   --big-h: 0.938;
@@ -369,8 +336,6 @@ html:not([data-font]),
 [data-font="13"] {
   --display-font: "Gulax", "Helvetica Neue", Arial, sans-serif;
   --display-weight: 400;
-  --display-size: 1.1;
-  --display-tracking: 1;
   --display-name-size: 1;
   --big-w: 1.435;
   --big-h: 0.641;
@@ -381,8 +346,6 @@ html:not([data-font]),
 [data-font="14"] {
   --display-font: "BackOut", "Arial Narrow", sans-serif;
   --display-weight: 500;
-  --display-size: 0.85;
-  --display-tracking: 1;
   --display-name-size: 0.82;
   --big-w: 1.332;
   --big-h: 0.875;
@@ -393,8 +356,6 @@ html:not([data-font]),
 [data-font="15"] {
   --display-font: "Bluu Next", "EB Garamond", Georgia, serif;
   --display-weight: 700;
-  --display-size: 1;
-  --display-tracking: 0.9;
   --display-name-size: 0.92;
   --big-w: 1.518;
   --big-h: 0.609;
@@ -405,8 +366,6 @@ html:not([data-font]),
 [data-font="16"] {
   --display-font: "Daubenton", "EB Garamond", Georgia, serif;
   --display-weight: 400;
-  --display-size: 0.96;
-  --display-tracking: 0.8;
   --display-name-size: 0.8;
   --big-w: 1.565;
   --big-h: 0.719;
@@ -417,8 +376,6 @@ html:not([data-font]),
 [data-font="17"] {
   --display-font: "Grotesk", "Futura", "Century Gothic", sans-serif;
   --display-weight: 400;
-  --display-size: 1.04;
-  --display-tracking: 0.7;
   --display-name-size: 0.88;
   --big-w: 1.663;
   --big-h: 0.656;
@@ -429,8 +386,6 @@ html:not([data-font]),
 [data-font="18"] {
   --display-font: "Kaeru Kaeru", "Helvetica Neue", Arial, sans-serif;
   --display-weight: 400;
-  --display-size: 0.92;
-  --display-tracking: 1;
   --display-name-size: 0.9;
   --big-w: 1.581;
   --big-h: 0.766;
@@ -441,8 +396,6 @@ html:not([data-font]),
 [data-font="19"] {
   --display-font: "Format 1452", "DIN Alternate", "Arial Narrow", sans-serif;
   --display-weight: 500;
-  --display-size: 1;
-  --display-tracking: 1;
   --display-name-size: 0.95;
   --big-w: 1.35;
   --big-h: 0.734;
@@ -453,8 +406,6 @@ html:not([data-font]),
 [data-font="20"] {
   --display-font: "Flor de Ruina", "EB Garamond", Georgia, serif;
   --display-weight: 500;
-  --display-size: 0.85;
-  --display-tracking: 0.9;
   --display-name-size: 0.82;
   --big-w: 1.677;
   --big-h: 0.828;
