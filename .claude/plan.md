@@ -26,10 +26,10 @@ Every theme task: start from `themes/README.md` (the guide) and the shared facts
 
 
 
-58. **Wrapped workshop links put their bullet on the last line.** Found during task 45 (`5c1c770`): at 375px, a workshop link in the Workshops window that wraps onto two lines has its list bullet beside the last line instead of the first. The markup (a button inside each list item) does this in every theme. Fix it in the base CSS so the bullet lines up with the first line, then check each theme that draws its own markers (DOS square bullets, PlayStation glove cursor) still lines up. Run after the theme tasks above, since it may touch theme files.
 
 ## Done
 
+- 58. Wrapped workshop link bullets: `6b9b5ee`. The link button lays out as an inline block whose baseline is its last line; `vertical-align: top` on `.workshop__link` (`workshop.css`) puts the bullet beside the first line. NES and PlayStation markers already line up, so no theme file changed.
 - 55. DOS, owner 2: `15b58bb`. Wallpaper small print at 20px VT323, single-line photo frame (on `::after`) with a ░ well, dashed ░/▒ spot with ■ handles, ░→█ upload bar; framed list with inverse-video active row, inverse Hidden / dimmed Past tags, `[+]`/`[-]` toggle, box-drawing sign-ups table (stacked below 560px), single-line group-box form with pixel ▼ pickers. DOS is now complete on both pages; all six themes are done. Workshop-row buttons keep the base's smaller 24px sizing on mouse screens.
 - 57. Move 414 follow-ups: `4f129ab`. The handle gets its `grab` cursor back (`grabbing` while dragging still comes from `html.is-moving-414`), and the lift shadow moved onto the figures (`.big-414.is-lifted .big-414__name`) so a focused handle stays above the card during a drag. Focus was checked with stand-in classes (browser pane hidden).
 - 54. PlayStation, owner 2: `a038724`. Photo with a white rim and soft edge shade (on `::after`), rounded selection spot box with controller-style handles, PSone.css gauge progress bar (new `--ps-gauge` token), dark-well list with the glove and selection band, tinted Hidden and grey Past capsules, dark sign-ups table, form as a titled inner window. PlayStation is now complete on both pages.
