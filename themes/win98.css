@@ -752,20 +752,6 @@
   box-shadow: var(--w98-default-pressed);
 }
 
-/* "Sign in with Google": the G (Google's own colours) straight on the button. */
-:root[data-theme="win98"] .admin-google {
-  gap: 6px;
-  padding-left: 8px;
-}
-
-:root[data-theme="win98"] .admin-google-mark {
-  width: 16px;
-  height: 16px;
-  border-radius: 0;
-  background: none;
-  box-shadow: none;
-}
-
 :root[data-theme="win98"] .admin-message {
   border-radius: 0;
 }

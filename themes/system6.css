@@ -774,11 +774,6 @@
   box-shadow: 0 0 0 1px var(--face), 0 0 0 4px var(--shadow);
 }
 
-/* Google's mark keeps its own colours, on its white disc with a 1px line. */
-:root[data-theme="system6"] .admin-google-mark {
-  box-shadow: 0 0 0 1px var(--s6-ink);
-}
-
 /* A problem in an alert (or under them, after Sign out): a white box in a 1px line. */
 :root[data-theme="system6"] .admin-dialog .admin-message-error,
 :root[data-theme="system6"] #admin-signout-error {

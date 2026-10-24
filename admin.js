@@ -1,12 +1,13 @@
 /*
-  Owner page (admin.html): Google sign-in through Supabase Auth, then the owner check.
+  Owner page (admin.html): email and password sign-in through Supabase Auth, then the
+  owner check.
 
   Uses supabase-js (loaded from jsDelivr in admin.html) for sign-in and, in the section
   modules, for owner data. The public site doesn't load it; it keeps plain fetch. The
   Supabase URL and publishable key come from comments-config.js.
 
-  Views: loading -> sign-in -> (Google) -> checking -> owner page, "isn't an owner
-  account", or an error. Whether an account is an owner is decided by the database:
+  Views: loading -> sign-in -> checking -> owner page, "isn't an owner account", or an
+  error. Owners are Supabase Auth users added by hand in the dashboard (no sign-up). Whether an account is an owner is decided by the database:
   is_owner() in supabase/owners.sql.
 
   Section modules (admin-wallpaper.js, admin-workshops.js) plug in through
@@ -48,8 +49,11 @@
     owner: document.getElementById('admin-owner')
   };
   var loadingText = document.getElementById('admin-loading-text');
-  var signinButton = document.getElementById('admin-signin-google');
-  // The words on the button (beside the Google mark), changed while Google opens.
+  var signinForm = document.getElementById('admin-signin-form');
+  var signinEmail = document.getElementById('admin-signin-email');
+  var signinPassword = document.getElementById('admin-signin-password');
+  var signinButton = document.getElementById('admin-signin-submit');
+  // The words on the button, changed while signing in.
   var signinText = signinButton.querySelector('[data-admin-label]') || signinButton;
   var signinLabel = signinText.textContent;
   var signinError = document.getElementById('admin-signin-error');
@@ -80,11 +84,6 @@
   var checkSeq = 0;           // bumped to drop answers to older checks
   var retryAction = null;
 
-  // An error Supabase sent back after Google (e.g. the owner cancelled, or Google isn't
-  // set up), and whether the address holds sign-in details at all.
-  var urlError = readUrlError();
-  var hadAuthParams = urlError !== '' || /[?&#](code|access_token)=/.test(location.href);
-
   var admin = window.studioAdmin = {
     client: null,
     session: null,
@@ -106,12 +105,8 @@
     return;
   }
 
-  // PKCE: Google sends the owner back with ?code=..., which supabase-js swaps for a
-  // session (and removes from the address) as the page loads.
   var client = admin.client = window.supabase.createClient(supabaseUrl, supabaseKey, {
     auth: {
-      flowType: 'pkce',
-      detectSessionInUrl: true,
       persistSession: true,
       autoRefreshToken: true
     }
@@ -119,45 +114,32 @@
 
   showLoading('Checking sign-in…');
 
-  // Coming back from Google with a code that can't be used (e.g. sign-in started in
-  // another browser) leaves no session; say why.
-  client.auth.initialize().then(function (result) {
-    if (result && result.error && hadAuthParams && !urlError) {
-      urlError = result.error.message || 'unknown error';
-      if (!views.signin.hidden) showSignIn();
-    }
-  }, function () {});
-
   client.auth.onAuthStateChange(function (event, session) {
     // supabase-js holds a lock while this runs, so other Supabase calls made here would
     // wait forever. Handle the change just after instead.
     setTimeout(function () { handleSession(event, session); }, 0);
   });
 
-  signinButton.addEventListener('click', function () {
-    signinButton.disabled = true;
-    signinText.textContent = 'Opening Google…';
+  signinForm.addEventListener('submit', function (event) {
+    event.preventDefault();
+    if (signinButton.disabled) return;
+    var email = signinEmail.value.trim();
+    var password = signinPassword.value;
+    if (!email || !password) return;
+    setSignInBusy(true);
     signinError.hidden = true;
-    urlError = '';
     var start;
     try {
-      start = client.auth.signInWithOAuth({
-        provider: 'google',
-        options: { redirectTo: location.origin + location.pathname }
-      });
+      start = client.auth.signInWithPassword({ email: email, password: password });
     } catch (err) {
       start = Promise.resolve({ error: err });
     }
-    // On success the browser is on its way to Google.
+    // On success onAuthStateChange (SIGNED_IN) takes over: the owner check, then the
+    // owner page or "isn't an owner account". The form stays busy until then.
     Promise.resolve(start).then(function (result) {
       if (result && result.error) signInFailed(result.error);
+      else if (!result || !result.data || !result.data.session) signInFailed(null);
     }, signInFailed);
-  });
-
-  // Coming back to this page with the Back button from Google (page restored from the
-  // back-forward cache): make the button usable again.
-  window.addEventListener('pageshow', function (event) {
-    if (event.persisted) resetSignInButton();
   });
 
   Array.prototype.forEach.call(signoutButtons, function (button) {
@@ -167,7 +149,6 @@
   // ---- Sign-in state -------------------------------------------------------------
 
   function handleSession(event, session) {
-    if (event === 'INITIAL_SESSION') cleanUrl();
     admin.session = session || null;
 
     if (!session || !session.user) {
@@ -255,11 +236,34 @@
     return 'Couldn\'t check your account (' + (message || 'unknown error') + ').';
   }
 
+  // A failed sign-in: say why, keep the email, clear the password and go back to it.
   function signInFailed(error) {
-    resetSignInButton();
-    signinError.textContent = 'Couldn\'t start Google sign-in: ' +
-      ((error && error.message) || 'unknown error') + '.';
+    setSignInBusy(false);
+    signinPassword.value = '';
+    signinError.textContent = signInMessage(error);
     signinError.hidden = false;
+    signinPassword.focus();
+  }
+
+  function signInMessage(error) {
+    var message = String((error && error.message) || '').trim();
+    var code = String((error && error.code) || '');
+    var status = error && error.status;
+    if (code === 'invalid_credentials' || /invalid login credentials/i.test(message)) {
+      return 'That email and password don\'t match an account.';
+    }
+    if (code === 'email_not_confirmed' || /email not confirmed/i.test(message)) {
+      return 'Couldn\'t sign in: this account isn\'t confirmed yet. Confirm it in the Supabase dashboard.';
+    }
+    if (status === 429 || /rate limit|too many/i.test(message)) {
+      return 'Couldn\'t sign in: too many tries. Wait a few minutes and try again.';
+    }
+    if ((error && error.name === 'AuthRetryableFetchError') ||
+        /^(TypeError|FetchError|AbortError)\b/.test(message) ||
+        /failed to fetch|networkerror|load failed/i.test(message)) {
+      return 'Couldn\'t sign in: Supabase couldn\'t be reached. Check your connection and try again.';
+    }
+    return 'Couldn\'t sign in: ' + (message || 'unknown error').replace(/\.$/, '') + '.';
   }
 
   function signOut() {
@@ -373,20 +377,22 @@
     showView('loading');
   }
 
+  // Opening the sign-in view (on load, or after signing out) starts with an empty form.
+  // If it's already showing (e.g. a sign-out in another tab), what's typed stays.
   function showSignIn() {
-    resetSignInButton();
-    if (urlError) {
-      signinError.textContent = 'Google sign-in didn\'t work: ' + urlError;
-      signinError.hidden = false;
-    } else {
+    if (views.signin.hidden) {
+      setSignInBusy(false);
+      signinForm.reset();
       signinError.hidden = true;
     }
     showView('signin');
   }
 
-  function resetSignInButton() {
-    signinButton.disabled = false;
-    signinText.textContent = signinLabel;
+  function setSignInBusy(busy) {
+    signinEmail.disabled = busy;
+    signinPassword.disabled = busy;
+    signinButton.disabled = busy;
+    signinText.textContent = busy ? 'Signing in…' : signinLabel;
   }
 
   function showError(message, retry) {
@@ -406,27 +412,6 @@
     Array.prototype.forEach.call(signoutButtons, function (button) {
       button.disabled = disabled;
     });
-  }
-
-  // ---- Address -------------------------------------------------------------------
-
-  function readUrlError() {
-    var search = new URLSearchParams(location.search);
-    var hash = new URLSearchParams(location.hash.replace(/^#/, ''));
-    return String(
-      search.get('error_description') || hash.get('error_description') ||
-      search.get('error') || hash.get('error') || ''
-    ).trim();
-  }
-
-  // Once supabase-js has read the address, drop what's left of the sign-in details
-  // (errors, and anything it didn't remove itself) so a reload starts clean.
-  function cleanUrl() {
-    if (!hadAuthParams) return;
-    if (!location.search && !location.hash) return;
-    try {
-      history.replaceState(history.state, '', location.pathname);
-    } catch (err) { /* leave the address as it is */ }
   }
 
   function reload() {

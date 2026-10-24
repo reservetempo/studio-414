@@ -3,19 +3,26 @@
 -- Run once in the Supabase dashboard: SQL Editor -> New query -> paste -> Run.
 -- It is safe to run again (it skips or replaces what already exists).
 --
--- Owners sign in on admin.html with Google. The page then calls is_owner(), which says
--- whether the signed-in account's email is in site_owners. The list itself isn't
--- reachable through the API: Row Level Security is on with no policies, and anon and
--- authenticated have no privileges on the table. is_owner() only ever answers true or
--- false, and only about the caller's own email (false when nobody is signed in).
+-- Owners sign in on admin.html with their email and password (Supabase Auth). The page
+-- then calls is_owner(), which says whether the signed-in account's email is in
+-- site_owners. The list itself isn't reachable through the API: Row Level Security is
+-- on with no policies, and anon and authenticated have no privileges on the table.
+-- is_owner() only ever answers true or false, and only about the caller's own email
+-- (false when nobody is signed in).
 --
--- Add an owner: their Google account's email, in lower case, here in the SQL Editor:
+-- Add an owner, in two steps:
+--   1. Authentication -> Users -> Add user -> Create new user: their email and a
+--      password, with Auto Confirm User ticked.
+--   2. Their email, in lower case, here in the SQL Editor:
 --
---   insert into public.site_owners (email) values ('owner@gmail.com');
+--   insert into public.site_owners (email) values ('owner@example.com');
 --
--- Remove one:
+-- Remove one (and delete their user in Authentication -> Users if they no longer need
+-- to sign in):
 --
---   delete from public.site_owners where email = 'owner@gmail.com';
+--   delete from public.site_owners where email = 'owner@example.com';
+--
+-- Change an owner's password: Authentication -> Users, that user's menu.
 --
 -- See the list: Table Editor -> site_owners.
 

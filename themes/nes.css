@@ -1120,25 +1120,6 @@
   white-space: nowrap;
 }
 
-/* "Sign in with Google": the G (Google's own colours) on a white tile with a pixel
-   line, at the left of the words. */
-:root[data-theme="nes"] .admin-google {
-  gap: 8px;
-  padding-left: 8px;
-}
-
-:root[data-theme="nes"] .admin-google:not(:disabled):active {
-  padding-left: 12px;
-}
-
-:root[data-theme="nes"] .admin-google-mark {
-  width: 20px;
-  height: 20px;
-  border-radius: 0;
-  background: #ffffff;
-  box-shadow: inset 0 0 0 2px var(--nes-ink);
-}
-
 /* ---------- Alerts: NES.css dialogs ---------- */
 
 /* The window's frame and title (above); inside, the icon at the top left, the words
@@ -1972,10 +1953,6 @@
 @media (prefers-reduced-motion: reduce) {
   :root[data-theme="nes"] .admin-button:not(:disabled):active {
     padding: 0 20px var(--nes-u) 16px;
-  }
-
-  :root[data-theme="nes"] .admin-google:not(:disabled):active {
-    padding-left: 8px;
   }
 
   :root[data-theme="nes"] .admin-barber::before,
