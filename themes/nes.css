@@ -1018,3 +1018,476 @@
     padding: 0 2px 2px 0;
   }
 }
+
+/* ======================================================================================
+   Owner page (admin.html, admin.css)
+   ====================================================================================== */
+
+/* A line one pixel (4px) thick round the four sides with its corners left out, as
+   background layers (NES.css's fields, progress bars and small containers), and the
+   notices' lamps: NES.css's warning yellow with a "!", its success green with a tick,
+   in a black pixel ring like the spots light's. */
+:root[data-theme="nes"] {
+  --nes-line:
+    var(--nes-ink-fill) var(--nes-u) 0 / calc(100% - 2 * var(--nes-u)) var(--nes-u) no-repeat,
+    var(--nes-ink-fill) var(--nes-u) 100% / calc(100% - 2 * var(--nes-u)) var(--nes-u) no-repeat,
+    var(--nes-ink-fill) 0 var(--nes-u) / var(--nes-u) calc(100% - 2 * var(--nes-u)) no-repeat,
+    var(--nes-ink-fill) 100% var(--nes-u) / var(--nes-u) calc(100% - 2 * var(--nes-u)) no-repeat;
+  --nes-lamp-warn: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8' shape-rendering='crispEdges'%3E%3Cpath fill='%23f7d51d' d='M2 1h4v1H2zM1 2h6v4H1zM2 6h4v1H2z'/%3E%3Cpath fill='%23000' d='M2 0h4v1H2zM1 1h1v1H1zM6 1h1v1H6zM0 2h1v4H0zM7 2h1v4H7zM1 6h1v1H1zM6 6h1v1H6zM2 7h4v1H2zM3 1h2v3H3zM3 5h2v1H3z'/%3E%3C/svg%3E");
+  --nes-lamp-ok: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8' shape-rendering='crispEdges'%3E%3Cpath fill='%2392cc41' d='M2 1h4v1H2zM1 2h6v4H1zM2 6h4v1H2z'/%3E%3Cpath fill='%23000' d='M2 0h4v1H2zM1 1h1v1H1zM6 1h1v1H6zM0 2h1v4H0zM7 2h1v4H7zM1 6h1v1H1zM6 6h1v1H6zM2 7h4v1H2zM5 2h1v1H5zM4 3h1v1H4zM2 3h1v1H2zM3 4h1v1H3z'/%3E%3C/svg%3E");
+}
+
+/* ---------- Page ---------- */
+
+/* The pixel font throughout, on its grid: words at 8px on 16px lines, the window
+   titles at 16px. It has no bold, so nothing is set bold. */
+:root[data-theme="nes"] .admin-header,
+:root[data-theme="nes"] .admin {
+  font-size: 8px;
+  line-height: 16px;
+  -webkit-font-smoothing: auto;
+  -moz-osx-font-smoothing: auto;
+}
+
+:root[data-theme="nes"] .admin-title b,
+:root[data-theme="nes"] .admin-dialog-lead,
+:root[data-theme="nes"] .admin-email {
+  font-weight: 400;
+}
+
+/* The account's address in the ink for names. */
+:root[data-theme="nes"] .admin-email {
+  color: var(--accent-ink);
+}
+
+/* ---------- The menu bar ---------- */
+
+/* Flat paper on a line of the ink, with the buttons' shade above it; the app's name
+   at 16px. */
+:root[data-theme="nes"] .admin-header {
+  gap: 8px 16px;
+  min-height: 48px;
+  padding: 4px 16px 8px;
+  border-bottom: var(--nes-u) solid var(--nes-ink);
+  background: var(--nes-paper);
+  box-shadow: inset 0 calc(-1 * var(--nes-u)) var(--nes-shade);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  color: var(--nes-ink);
+}
+
+:root[data-theme="nes"] .admin-title,
+:root[data-theme="nes"] .admin-account-text {
+  font-size: 8px;
+  line-height: 16px;
+}
+
+:root[data-theme="nes"] .admin-title b {
+  font-size: 16px;
+}
+
+:root[data-theme="nes"] .admin-account {
+  gap: 8px 16px;
+}
+
+/* ---------- Windows and buttons ---------- */
+
+:root[data-theme="nes"] #admin-owner {
+  gap: 32px;
+}
+
+:root[data-theme="nes"] .admin-section-body {
+  padding: 8px 16px 16px;
+}
+
+:root[data-theme="nes"] .admin-actions {
+  gap: 8px;
+}
+
+/* NES.css's buttons (above), the words in the part the shade leaves, moving with it
+   while pressed. The menu bar's Sign out is as tall as the others on touch screens. */
+:root[data-theme="nes"] .admin-button {
+  padding: 0 20px var(--nes-u) 16px;
+}
+
+:root[data-theme="nes"] .admin-button:not(:disabled):active {
+  padding: var(--nes-u) 16px 0 20px;
+}
+
+:root[data-theme="nes"] .admin-header .admin-button {
+  flex: none;
+  min-height: 32px;
+  white-space: nowrap;
+}
+
+/* "Sign in with Google": the G (Google's own colours) on a white tile with a pixel
+   line, at the left of the words. */
+:root[data-theme="nes"] .admin-google {
+  gap: 8px;
+  padding-left: 8px;
+}
+
+:root[data-theme="nes"] .admin-google:not(:disabled):active {
+  padding-left: 12px;
+}
+
+:root[data-theme="nes"] .admin-google-mark {
+  width: 20px;
+  height: 20px;
+  border-radius: 0;
+  background: #ffffff;
+  box-shadow: inset 0 0 0 2px var(--nes-ink);
+}
+
+/* ---------- Alerts: NES.css dialogs ---------- */
+
+/* The window's frame and title (above); inside, the icon at the top left, the words
+   beside it and the buttons at the bottom right. */
+:root[data-theme="nes"] .admin-dialog-body {
+  min-height: 80px;
+  padding: 16px 16px 16px 88px;
+}
+
+:root[data-theme="nes"] .admin-dialog-body > * {
+  margin-bottom: 8px;
+}
+
+:root[data-theme="nes"] .admin-dialog-body > :last-child {
+  margin-bottom: 0;
+}
+
+:root[data-theme="nes"] .admin-dialog .admin-actions {
+  margin-top: 16px;
+}
+
+/* The icon: "414" on a tile like a primary button, the title colour in a pixel line
+   with its shade at the bottom right. */
+:root[data-theme="nes"] .admin-dialog-body::before {
+  top: 16px;
+  left: 20px;
+  width: 48px;
+  height: 48px;
+  padding: 0 var(--nes-u) var(--nes-u) 0;
+  border: 0;
+  border-radius: 0;
+  background:
+    var(--nes-line),
+    linear-gradient(var(--nes-tint-shade) 0 0) var(--nes-u) calc(100% - var(--nes-u)) / calc(100% - 2 * var(--nes-u)) var(--nes-u) no-repeat,
+    linear-gradient(var(--nes-tint-shade) 0 0) calc(100% - var(--nes-u)) var(--nes-u) / var(--nes-u) calc(100% - 2 * var(--nes-u)) no-repeat,
+    linear-gradient(var(--nes-tint) 0 0) var(--nes-u) var(--nes-u) / calc(100% - 2 * var(--nes-u)) calc(100% - 2 * var(--nes-u)) no-repeat;
+  box-shadow: none;
+  color: var(--nes-tint-text);
+  font-size: 8px;
+  font-weight: 400;
+  letter-spacing: 0;
+  line-height: 1;
+  text-shadow: none;
+}
+
+/* Phones: the icon nearer the edge, and "Something went wrong" on the font's smaller
+   size, so it fits on the frame. */
+@media (max-width: 480px) {
+  :root[data-theme="nes"] #admin-error {
+    --nes-title: 8px;
+  }
+
+  :root[data-theme="nes"] .admin-dialog-body {
+    padding-left: 80px;
+  }
+
+  :root[data-theme="nes"] .admin-dialog-body::before {
+    left: 16px;
+  }
+}
+
+/* Loading: NES.css's progress bar, a pixel line round blocks in the ink for names,
+   which crawl along a pixel at a time (standing still under reduced motion). */
+:root[data-theme="nes"] .admin-barber {
+  --barber-step: 16px;
+  height: 24px;
+  border: calc(2 * var(--nes-u)) solid transparent;
+  border-radius: 0;
+  background: var(--nes-line);
+  background-origin: border-box;
+  background-clip: border-box;
+}
+
+:root[data-theme="nes"] .admin-barber::before {
+  background: repeating-linear-gradient(90deg, var(--accent-ink) 0 8px, transparent 8px 16px);
+  animation-timing-function: steps(4);
+}
+
+:root[data-theme="nes"] .admin-barber::after {
+  content: none;
+}
+
+/* ---------- Notices (every section, the alerts, Sign out's) ---------- */
+
+/* A small white container in a pixel line, a lamp at its left: yellow with a "!" for
+   a problem (the words in red), green with a tick when something is done. */
+:root[data-theme="nes"] .admin-message {
+  border-radius: 0;
+}
+
+:root[data-theme="nes"] .admin-dialog .admin-message,
+:root[data-theme="nes"] #admin-signout-error,
+:root[data-theme="nes"] .look .admin-message,
+:root[data-theme="nes"] .wallpaper .admin-message,
+:root[data-theme="nes"] .workshops .admin-message {
+  position: relative;
+  min-height: 32px;
+  padding: 8px 12px 8px 36px;
+  border: 0;
+  background: var(--nes-line), linear-gradient(var(--field) 0 0) var(--nes-u) var(--nes-u) / calc(100% - 2 * var(--nes-u)) calc(100% - 2 * var(--nes-u)) no-repeat;
+  box-shadow: none;
+  color: var(--field-text);
+  font-size: 8px;
+  line-height: 16px;
+}
+
+:root[data-theme="nes"] .admin-dialog .admin-message-error,
+:root[data-theme="nes"] #admin-signout-error,
+:root[data-theme="nes"] .look .admin-message-error,
+:root[data-theme="nes"] .wallpaper .admin-message-error,
+:root[data-theme="nes"] .workshops .admin-message-error {
+  color: var(--error);
+}
+
+:root[data-theme="nes"] .admin-dialog .admin-message::before,
+:root[data-theme="nes"] #admin-signout-error::before,
+:root[data-theme="nes"] .look .admin-message::before,
+:root[data-theme="nes"] .wallpaper .admin-message::before,
+:root[data-theme="nes"] .workshops .admin-message::before {
+  content: "";
+  position: absolute;
+  top: 8px;
+  left: 12px;
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  border-radius: 0;
+  background: var(--nes-lamp-warn) 0 0 / 16px 16px no-repeat;
+  box-shadow: none;
+  clip-path: none;
+}
+
+:root[data-theme="nes"] .look .admin-message-ok::before,
+:root[data-theme="nes"] .wallpaper .admin-message-ok::before,
+:root[data-theme="nes"] .workshops .admin-message-ok::before {
+  background-image: var(--nes-lamp-ok);
+}
+
+/* In the Workshops form and under a workshop a problem stays a bare red line, its
+   lamp at the left. */
+:root[data-theme="nes"] .workshops-form .admin-message-error,
+:root[data-theme="nes"] .workshops-item .admin-message-error {
+  min-height: 16px;
+  padding: 0 0 0 24px;
+  background: none;
+}
+
+:root[data-theme="nes"] .workshops-form .admin-message-error::before,
+:root[data-theme="nes"] .workshops-item .admin-message-error::before {
+  top: 0;
+  left: 0;
+}
+
+/* ---------- Look section ---------- */
+
+/* The pointer's colours are taken here, so they are the page's, not each swatch's. */
+:root[data-theme="nes"] .look {
+  --look-selection-ring: var(--face-text);
+  --look-hover: var(--shadow);
+}
+
+:root[data-theme="nes"] .look-label {
+  padding-top: 0;
+  font-size: var(--nes-label);
+  line-height: 16px;
+}
+
+/* The themes: NES.css's radio buttons, a menu where an arrow points at the pick
+   (blinking while it has the focus; in the shade under the pointer). Focused, a
+   dotted line round the name. */
+:root[data-theme="nes"] .look-themes {
+  gap: 8px;
+}
+
+:root[data-theme="nes"] .look-theme {
+  gap: 8px;
+  font-size: 8px;
+  line-height: 16px;
+}
+
+@media (pointer: coarse) {
+  :root[data-theme="nes"] .look-themes {
+    gap: 0;
+  }
+
+  :root[data-theme="nes"] .look-theme {
+    min-height: 32px;
+  }
+}
+
+:root[data-theme="nes"] .look-theme-input,
+:root[data-theme="nes"] .look-theme-input:focus-visible {
+  width: 8px;
+  height: 14px;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+
+:root[data-theme="nes"] .look-theme-input:checked {
+  background: var(--nes-ink);
+  -webkit-mask: var(--nes-pointer) center / 8px 14px no-repeat;
+  mask: var(--nes-pointer) center / 8px 14px no-repeat;
+}
+
+@media (hover: hover) {
+  :root[data-theme="nes"] .look-theme:hover .look-theme-input:not(:checked) {
+    background: var(--nes-shade);
+    -webkit-mask: var(--nes-pointer) center / 8px 14px no-repeat;
+    mask: var(--nes-pointer) center / 8px 14px no-repeat;
+  }
+}
+
+:root[data-theme="nes"] .look-theme-input:checked:focus-visible {
+  animation: nes-blink 1s steps(1) infinite;
+}
+
+:root[data-theme="nes"] .look-theme-input:focus-visible + .look-theme-name {
+  outline: 2px dotted var(--nes-ink);
+  outline-offset: 2px;
+}
+
+@keyframes nes-blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+/* The colours: little containers in a pixel line, the title colour over a band of
+   the face. Picked: the arrow points at it and its name is in the page's title
+   colour. Focused: a dotted line round it. */
+:root[data-theme="nes"] .look-colors {
+  grid-template-columns: repeat(auto-fill, minmax(6rem, 1fr));
+  gap: 8px 4px;
+}
+
+:root[data-theme="nes"] .look-color {
+  gap: 8px;
+  padding: 4px 0;
+  font-size: 8px;
+  line-height: 16px;
+}
+
+:root[data-theme="nes"] .look-color-chip {
+  position: relative;
+  width: 48px;
+  height: 32px;
+  border-radius: 0;
+  background:
+    var(--nes-line),
+    linear-gradient(var(--title) 0 16px, var(--face) 16px) var(--nes-u) var(--nes-u) / calc(100% - 2 * var(--nes-u)) calc(100% - 2 * var(--nes-u)) no-repeat;
+  box-shadow: none;
+}
+
+:root[data-theme="nes"] .look-color-chip::before {
+  position: absolute;
+  top: 9px;
+  left: -16px;
+  width: 8px;
+  height: 14px;
+  background: var(--look-selection-ring);
+  -webkit-mask: var(--nes-pointer) center / 8px 14px no-repeat;
+  mask: var(--nes-pointer) center / 8px 14px no-repeat;
+}
+
+:root[data-theme="nes"] .look-color-input:checked ~ .look-color-chip::before {
+  content: "";
+}
+
+@media (hover: hover) {
+  :root[data-theme="nes"] .look-color:hover .look-color-input:not(:checked) ~ .look-color-chip::before {
+    content: "";
+    background: var(--look-hover);
+  }
+}
+
+:root[data-theme="nes"] .look-color-input:checked:focus-visible ~ .look-color-chip::before {
+  animation: nes-blink 1s steps(1) infinite;
+}
+
+:root[data-theme="nes"] .look-color-input:checked ~ .look-color-chip,
+:root[data-theme="nes"] .look-color-input:focus-visible ~ .look-color-chip {
+  box-shadow: none;
+}
+
+:root[data-theme="nes"] .look-color-input:focus-visible ~ .look-color-chip {
+  outline: 2px dotted var(--focus);
+  outline-offset: 2px;
+}
+
+:root[data-theme="nes"] .look-color-name {
+  padding: 0 2px;
+  border-radius: 0;
+}
+
+/* ---------- Owner page, high contrast ---------- */
+
+/* The pixel lines are gradients, which go: plain lines instead. The themes are the
+   system's radio buttons; the arrow by the picked colour is in its text colour. */
+@media (forced-colors: active) {
+  :root[data-theme="nes"] .admin-dialog-body::before,
+  :root[data-theme="nes"] .admin-dialog .admin-message,
+  :root[data-theme="nes"] #admin-signout-error,
+  :root[data-theme="nes"] .look .admin-message,
+  :root[data-theme="nes"] .wallpaper .admin-message,
+  :root[data-theme="nes"] .workshops .admin-message {
+    border: 2px solid CanvasText;
+  }
+
+  :root[data-theme="nes"] .admin-barber {
+    border-color: CanvasText;
+  }
+
+  :root[data-theme="nes"] .workshops-form .admin-message-error,
+  :root[data-theme="nes"] .workshops-item .admin-message-error {
+    border: 0;
+  }
+
+  :root[data-theme="nes"] .look-theme-input,
+  :root[data-theme="nes"] .look-theme-input:checked {
+    width: 15px;
+    height: 15px;
+    -webkit-mask: none;
+    mask: none;
+    animation: none;
+  }
+
+  :root[data-theme="nes"] .look-color-chip::before {
+    background: CanvasText;
+  }
+}
+
+/* ---------- Owner page, reduced motion ---------- */
+
+/* The words stay put on pressed buttons, the arrows don't blink and the progress
+   bar's blocks stand still. */
+@media (prefers-reduced-motion: reduce) {
+  :root[data-theme="nes"] .admin-button:not(:disabled):active {
+    padding: 0 20px var(--nes-u) 16px;
+  }
+
+  :root[data-theme="nes"] .admin-google:not(:disabled):active {
+    padding-left: 8px;
+  }
+
+  :root[data-theme="nes"] .admin-barber::before,
+  :root[data-theme="nes"] .look-theme-input:checked:focus-visible,
+  :root[data-theme="nes"] .look-color-input:checked:focus-visible ~ .look-color-chip::before {
+    animation: none;
+  }
+}
