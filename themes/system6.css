@@ -634,3 +634,315 @@
     transition: none;
   }
 }
+
+/* ========== Owner page (admin.html; admin.css, admin-look.js) ==========
+   The windows, buttons and fields above apply there too. Here: the menu bar, the
+   alerts, the notices and the Look section. The Wallpaper and Workshops sections'
+   insides are not styled yet. */
+
+:root[data-theme="system6"] {
+  /* The alerts' icons, 32px, black on white as in the original. A document with a
+     folded corner (the "414" icon), the caution triangle and the note balloon. */
+  --s6-icon-doc: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cpath d='M3.5.5h17l8 8v23h-25z' fill='%23fff' stroke='%23000'/%3E%3Cpath d='M20.5.5v8h8' fill='none' stroke='%23000'/%3E%3C/svg%3E");
+  --s6-icon-caution: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cpath d='M16 2 31 29H1z' fill='%23fff' stroke='%23000' stroke-width='2' stroke-linejoin='round'/%3E%3Cpath d='M14 11h4v10h-4zM14 23h4v3h-4z' fill='%23000'/%3E%3C/svg%3E");
+  --s6-icon-note: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cpath d='M6 3h20l4 4v11l-4 4H15l-7 7v-7H6l-4-4V7z' fill='%23fff' stroke='%23000' stroke-width='2' stroke-linejoin='round'/%3E%3Cpath d='M8 9h16v2H8zM8 14h11v2H8z' fill='%23000'/%3E%3C/svg%3E");
+  /* The same two, small, for the notices (the caution's "!" is the notice's text). */
+  --s6-small-caution: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='15' height='14' viewBox='0 0 15 14'%3E%3Cpath d='M7.5 1 14 13H1z' fill='%23fff' stroke='%23000' stroke-linejoin='round'/%3E%3C/svg%3E");
+  --s6-small-note: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='15' height='14' viewBox='0 0 15 14'%3E%3Cpath d='M2.5.5h10l2 2v5l-2 2h-6l-3 3v-3h-1l-2-2v-5z' fill='%23fff' stroke='%23000'/%3E%3Cpath d='M4 4h7v1H4zM4 6h5v1H4z' fill='%23000'/%3E%3C/svg%3E");
+}
+
+/* ---------- Menu bar ---------- */
+
+/* The white menu bar with a 1px line under it, all in the chrome's face. */
+:root[data-theme="system6"] .admin-header {
+  min-height: 20px;
+  padding: 1px 12px;
+  border-bottom: 1px solid var(--face-text);
+  background: var(--field);
+  box-shadow: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  color: var(--field-text);
+  font-weight: var(--s6-chicago);
+  -webkit-font-smoothing: auto;
+  -moz-osx-font-smoothing: auto;
+}
+
+:root[data-theme="system6"] .admin-title b {
+  font-weight: inherit;
+}
+
+/* Sign out as a menu's title: bare words that go inverse video while pressed. */
+:root[data-theme="system6"] .admin-header .admin-button {
+  min-height: 18px;
+  padding: 0 8px;
+  border-color: transparent;
+  border-radius: 0;
+  background: transparent;
+  color: var(--field-text);
+  font-size: 13px;
+}
+
+:root[data-theme="system6"] .admin-header .admin-button:active:not(:disabled) {
+  background: var(--face-text);
+  color: var(--field);
+}
+
+:root[data-theme="system6"] .admin-header .admin-button:focus-visible {
+  outline-offset: -1px;
+}
+
+:root[data-theme="system6"] .admin-header .admin-button:disabled {
+  border-color: transparent;
+  background: transparent;
+  color: var(--face-muted);
+}
+
+@media (pointer: coarse) {
+  :root[data-theme="system6"] .admin-header .admin-button {
+    min-height: 32px;
+  }
+}
+
+/* ---------- Alerts ---------- */
+
+/* A modal alert: no title bar (its title stays for screen readers), a double frame
+   (a 1px line, a gap, a 3px line) and no drop shadow. */
+:root[data-theme="system6"] .admin-dialog {
+  position: relative;
+  box-shadow: inset 0 0 0 2px var(--s6-paper), inset 0 0 0 5px var(--s6-ink);
+}
+
+:root[data-theme="system6"] .admin-dialog > .box__titlebar {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  min-height: 0;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+:root[data-theme="system6"] .admin-dialog-body {
+  min-height: 0;
+  padding: 22px 22px 22px 70px;
+}
+
+/* The icon at the left: "414" on a document; caution for an error, a note for the
+   wrong account. */
+:root[data-theme="system6"] .admin-dialog-body::before {
+  top: 22px;
+  left: 22px;
+  width: 32px;
+  height: 32px;
+  place-items: end center;
+  padding-bottom: 5px;
+  border: 0;
+  border-radius: 0;
+  background: var(--s6-icon-doc) center / 32px 32px no-repeat;
+  box-shadow: none;
+  color: var(--s6-ink);
+  font-size: 11px;
+  font-weight: var(--s6-chicago);
+  letter-spacing: 0;
+  text-shadow: none;
+}
+
+:root[data-theme="system6"] #admin-error .admin-dialog-body::before {
+  content: "";
+  background-image: var(--s6-icon-caution);
+}
+
+:root[data-theme="system6"] #admin-denied .admin-dialog-body::before {
+  content: "";
+  background-image: var(--s6-icon-note);
+}
+
+:root[data-theme="system6"] .admin-dialog .admin-actions {
+  margin-top: 20px;
+}
+
+/* The last button is the default one, with the thick outline (Sign in, Sign out
+   when it is the only one, Try again). */
+:root[data-theme="system6"] .admin-dialog .admin-actions .admin-button:last-child {
+  box-shadow: var(--s6-default-ring);
+}
+
+:root[data-theme="system6"] .admin-dialog .admin-actions .admin-button:last-child:disabled {
+  box-shadow: 0 0 0 1px var(--face), 0 0 0 4px var(--shadow);
+}
+
+/* Google's mark keeps its own colours, on its white disc with a 1px line. */
+:root[data-theme="system6"] .admin-google-mark {
+  box-shadow: 0 0 0 1px var(--s6-ink);
+}
+
+/* A problem in an alert (or under them, after Sign out): a white box in a 1px line. */
+:root[data-theme="system6"] .admin-dialog .admin-message-error,
+:root[data-theme="system6"] #admin-signout-error {
+  border: 1px solid var(--s6-ink);
+  border-radius: 0;
+  background: var(--field);
+  color: var(--error);
+}
+
+/* The progress bar for a wait of unknown length: black and white stripes that roll
+   along in a 1px frame (still under reduced motion, as in admin.css). */
+:root[data-theme="system6"] .admin-barber {
+  border: 1px solid var(--s6-ink);
+  border-radius: 0;
+  background: var(--field);
+}
+
+:root[data-theme="system6"] .admin-barber::before {
+  background: repeating-linear-gradient(-45deg, var(--s6-ink) 0 4px, var(--field) 4px 8px);
+}
+
+:root[data-theme="system6"] .admin-barber::after {
+  content: none;
+}
+
+@media (max-width: 480px) {
+  :root[data-theme="system6"] .admin-dialog-body {
+    padding: 18px 18px 20px 62px;
+  }
+
+  :root[data-theme="system6"] .admin-dialog-body::before {
+    top: 18px;
+    left: 18px;
+    font-size: 11px;
+  }
+}
+
+/* ---------- Notices ---------- */
+
+/* A white box in a 1px line, with the caution triangle (its "!" in the notice's
+   font) or the note balloon. Under a workshop and in its form an error stays a bare
+   line. */
+:root[data-theme="system6"] .look .admin-message,
+:root[data-theme="system6"] .wallpaper .admin-message,
+:root[data-theme="system6"] .workshops .admin-message {
+  border: 1px solid var(--s6-ink);
+  border-radius: 0;
+  background: var(--field);
+  box-shadow: none;
+}
+
+:root[data-theme="system6"] .workshops-form .admin-message-error,
+:root[data-theme="system6"] .workshops-item .admin-message-error {
+  border: 0;
+  background: none;
+}
+
+:root[data-theme="system6"] .look .admin-message::before,
+:root[data-theme="system6"] .wallpaper .admin-message::before,
+:root[data-theme="system6"] .workshops .admin-message::before {
+  border-radius: 0;
+  box-shadow: none;
+  clip-path: none;
+  color: var(--s6-ink);
+  font-weight: 700;
+}
+
+:root[data-theme="system6"] .look .admin-message-error::before,
+:root[data-theme="system6"] .wallpaper .admin-message-error::before,
+:root[data-theme="system6"] .workshops .admin-message-error::before {
+  padding-bottom: 2px;
+  background: var(--s6-small-caution) center / 100% 100% no-repeat;
+}
+
+:root[data-theme="system6"] .look .admin-message-ok::before,
+:root[data-theme="system6"] .wallpaper .admin-message-ok::before,
+:root[data-theme="system6"] .workshops .admin-message-ok::before {
+  content: "";
+  width: 15px;
+  background: var(--s6-small-note) center / 100% 100% no-repeat;
+}
+
+/* ---------- Look section ---------- */
+
+/* The picked colour's name in inverse video; the page's face for the gap round the
+   picked swatch (declared here, as the swatches carry their own data-color). */
+:root[data-theme="system6"] .look {
+  --look-selection: var(--face-text);
+  --look-selection-text: var(--face);
+  --s6-look-gap: var(--face);
+}
+
+/* A round radio button: white in a 1px line; picked, a black dot in it. Held down,
+   the line thickens. */
+:root[data-theme="system6"] .look-theme-input {
+  border: 1px solid var(--s6-ink);
+  border-radius: 50%;
+  background: var(--field);
+  box-shadow: none;
+}
+
+:root[data-theme="system6"] .look-theme-input:checked {
+  border-color: var(--s6-ink);
+  background: radial-gradient(circle closest-side, var(--s6-ink) 0 52%, transparent 58%), var(--field);
+}
+
+:root[data-theme="system6"] .look-theme-input:active {
+  box-shadow: inset 0 0 0 1px var(--s6-ink);
+}
+
+:root[data-theme="system6"] .look-theme-input:focus-visible {
+  outline: 2px dotted var(--s6-ink);
+  outline-offset: 2px;
+  box-shadow: none;
+}
+
+/* A swatch as a little window: the title colour over the face, a 1px line between
+   them and round them. Picked: a thick outline 1px clear of it, as the default
+   button's, and its name in inverse video. Focused: a dotted rectangle. */
+:root[data-theme="system6"] .look-color-chip {
+  border-radius: 0;
+  background: linear-gradient(to bottom, var(--title) 0 21px, var(--face-text) 21px 22px, var(--face) 22px);
+  box-shadow: inset 0 0 0 1px var(--face-text);
+}
+
+:root[data-theme="system6"] .look-color-input:checked ~ .look-color-chip {
+  box-shadow: inset 0 0 0 1px var(--face-text), 0 0 0 2px var(--s6-look-gap), 0 0 0 4px var(--face-text);
+}
+
+:root[data-theme="system6"] .look-color-name {
+  border-radius: 0;
+}
+
+:root[data-theme="system6"] .look-color-input:focus-visible ~ .look-color-chip {
+  outline: 2px dotted var(--face-text);
+  outline-offset: 6px;
+}
+
+:root[data-theme="system6"] .look-color-input:focus-visible:not(:checked) ~ .look-color-chip {
+  box-shadow: inset 0 0 0 1px var(--face-text);
+}
+
+/* Save is the default button: the thick outline (greyed while it saves). */
+:root[data-theme="system6"] .look-actions .admin-button-primary {
+  box-shadow: var(--s6-default-ring);
+}
+
+:root[data-theme="system6"] .look-actions .admin-button-primary:disabled {
+  box-shadow: 0 0 0 1px var(--face), 0 0 0 4px var(--shadow);
+}
+
+@media (forced-colors: active) {
+  :root[data-theme="system6"] .admin-header {
+    border-bottom-color: CanvasText;
+  }
+
+  :root[data-theme="system6"] .look-color-input:focus-visible ~ .look-color-chip {
+    outline-color: CanvasText;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root[data-theme="system6"] .admin-barber::before {
+    animation: none;
+  }
+}
