@@ -115,9 +115,10 @@
 
 /* The frame: a 1px grey line, a 2px white rim inside it and a soft shade under the
    rim (PSone.css's border, ::before and inset shadow), over the shaded panel, with a
-   drop shadow under the window. The comment box is framed the same way. */
+   drop shadow under the window. The comment box and Display are framed the same way. */
 :root[data-theme="psone"] .box,
-:root[data-theme="psone"] .comments__inner {
+:root[data-theme="psone"] .comments__inner,
+:root[data-theme="psone"] .switcher__inner {
   border: 1px solid var(--ps-line);
   border-radius: var(--ps-radius);
   background: linear-gradient(var(--ps-top), var(--ps-bottom));
@@ -133,7 +134,8 @@
 }
 
 :root[data-theme="psone"] .box ::selection,
-:root[data-theme="psone"] .comments__inner ::selection {
+:root[data-theme="psone"] .comments__inner ::selection,
+:root[data-theme="psone"] .switcher__inner ::selection {
   background: var(--ps-ink);
   color: #000;
   text-shadow: none;
@@ -157,7 +159,8 @@
 }
 
 :root[data-theme="psone"] .box__title,
-:root[data-theme="psone"] .comments__title {
+:root[data-theme="psone"] .comments__title,
+:root[data-theme="psone"] .switcher__title {
   color: var(--ps-title-text);
   font-family: var(--aqua-font);
   font-size: var(--ps-title);
@@ -340,7 +343,7 @@
   }
 }
 
-/* Pressed (or while what it opens is open: the paint roller), the shading turns over
+/* Pressed (or while what it opens is open), the shading turns over
    and the panel sinks. */
 :root[data-theme="psone"] .aqua-pill:not(:disabled):active,
 :root[data-theme="psone"] .aqua-pill[aria-expanded="true"],
@@ -499,6 +502,36 @@
 
 /* ---------- Display ---------- */
 
+/* A panel at the foot of the page, framed as the comment box (above): its heading as
+   the title over the faint line, the page colours giving way to the panel's light
+   ones inside. The rows' buttons and menus are the windows' (above). */
+:root[data-theme="psone"] .switcher__inner {
+  --page-text: var(--ps-text);
+  --page-text-muted: var(--ps-muted);
+  padding: 0 14px 14px;
+}
+
+:root[data-theme="psone"] .switcher__title {
+  display: flex;
+  align-items: center;
+  min-height: var(--ps-bar);
+  margin: 0 -14px 4px;
+  padding: 3px 12px 0;
+  background: linear-gradient(to right, transparent, rgb(255 255 255 / 0.3), transparent)
+    50% 100% / calc(100% - 16px) 1px no-repeat;
+}
+
+/* The labels' column fits 414 FONT in the spaced capitals. */
+:root[data-theme="psone"] .switcher__row {
+  grid-template-columns: 4.9em 32px minmax(0, 1fr) 32px;
+}
+
+@media (max-width: 400px) {
+  :root[data-theme="psone"] .switcher__row {
+    grid-template-columns: 4.9em 28px minmax(0, 1fr) 28px;
+  }
+}
+
 /* The ‹ and › (here and in the calendar) and − and + stay centred: no letter spacing
    after them. */
 :root[data-theme="psone"] .switcher__step,
@@ -509,12 +542,10 @@
 
 /* ---------- Buttons on the page ---------- */
 
-/* Workshops, the paint roller and Move 414 stand on the page or the photo: the white
-   rim two lines wide and a dark line outside it, so they show on light and dark
-   colours alike. The focus rings of the first two are in the page's text colour,
-   outside them. */
+/* Workshops and Move 414 stand on the page or the photo: the white rim two lines wide
+   and a dark line outside it, so they show on light and dark colours alike. The focus
+   ring of the first is in the page's text colour, outside it. */
 :root[data-theme="psone"] .workshop-button,
-:root[data-theme="psone"] .switcher-toggle,
 :root[data-theme="psone"] .big-414__handle {
   --ps-ring: 0 0 0 1px rgb(0 0 0 / 0.6);
   border-color: var(--ps-rim);
@@ -524,12 +555,7 @@
   letter-spacing: 0.08em;
 }
 
-:root[data-theme="psone"] .switcher-toggle {
-  border-radius: var(--ps-radius);
-}
-
-:root[data-theme="psone"] .workshop-button:focus-visible,
-:root[data-theme="psone"] .switcher-toggle:focus-visible {
+:root[data-theme="psone"] .workshop-button:focus-visible {
   outline: 2px solid var(--page-text);
   outline-offset: 3px;
 }

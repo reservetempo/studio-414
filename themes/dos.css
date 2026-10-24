@@ -80,10 +80,11 @@
 /* ---------- Windows ---------- */
 
 /* The frame is drawn inside the box, so nothing moves; the shadow is two columns
-   right and a row down (square, as a text-mode shadow is). The comment box is framed
-   the same way. */
+   right and a row down (square, as a text-mode shadow is). The comment box and Display
+   are framed the same way. */
 :root[data-theme="dos"] .box,
-:root[data-theme="dos"] .comments__inner {
+:root[data-theme="dos"] .comments__inner,
+:root[data-theme="dos"] .switcher__inner {
   border: 0;
   border-radius: 0;
   background: var(--dos-frame);
@@ -94,7 +95,8 @@
 }
 
 :root[data-theme="dos"] .box ::selection,
-:root[data-theme="dos"] .comments__inner ::selection {
+:root[data-theme="dos"] .comments__inner ::selection,
+:root[data-theme="dos"] .switcher__inner ::selection {
   background: var(--dos-ink);
   color: var(--dos-fill);
 }
@@ -119,7 +121,8 @@
 
 /* Inverse video, a space either side: ═══ Title ═══. */
 :root[data-theme="dos"] .box__title,
-:root[data-theme="dos"] .comments__title {
+:root[data-theme="dos"] .comments__title,
+:root[data-theme="dos"] .switcher__title {
   flex: 0 1 auto;
   min-width: 0;
   margin: 0;
@@ -251,11 +254,6 @@
 
 /* ---------- In the windows ---------- */
 
-/* Room for the frame: the Display's body sits close to the edges. */
-:root[data-theme="dos"] .switcher__body {
-  padding: 6px calc(2 * var(--dos-cw)) calc(2 * var(--dos-top) + 2px);
-}
-
 /* Labels in the chrome font, at its whole-pixel size. */
 :root[data-theme="dos"] .signup__label,
 :root[data-theme="dos"] .switcher__label,
@@ -362,7 +360,7 @@
 
 /* Turbo Vision's, in monochrome: a block in inverse video (the window's text colour,
    the words in its fill) with a shadow a column right and half a row down (its ▄ and
-   ▀). Pressed (or while what it opens is open: the paint roller), it moves right onto
+   ▀). Pressed (or while what it opens is open), it moves right onto
    its shadow and the shadow goes. Focused, ► ◄ markers either side of the words.
    Plain and default buttons look the same; "Post comment" is one too. */
 :root[data-theme="dos"] .aqua-pill,
@@ -542,22 +540,32 @@
 
 /* ---------- Display ---------- */
 
-/* The chrome font at its whole size, and room between the rows and columns for the
-   buttons' shadows. The labels' column fits LAYOUT. */
+/* A panel at the foot of the page, framed as the comment box: its heading as the
+   title on the frame, in inverse video. The chrome font at its whole size, and room
+   between the rows and columns, right of the last column and under the last row for
+   the buttons' shadows, clear of the frame. The labels' column fits 414 FONT. */
 :root[data-theme="dos"] .switcher {
   --dos-step: 32px;
   font-size: var(--dos-text);
   line-height: var(--dos-ch);
 }
 
+:root[data-theme="dos"] .switcher__inner {
+  padding: 0 calc(2 * var(--dos-cw)) calc(2 * var(--dos-top) + 2px + var(--dos-btn-y));
+}
+
+:root[data-theme="dos"] .switcher__title {
+  justify-self: center;
+  max-width: calc(100% - 4 * var(--dos-cw));
+}
+
 :root[data-theme="dos"] .switcher__body {
   gap: 12px;
-  padding-right: calc(3 * var(--dos-cw));
-  padding-bottom: calc(2 * var(--dos-top) + 2px + var(--dos-btn-y));
+  padding-right: var(--dos-cw);
 }
 
 :root[data-theme="dos"] .switcher__row {
-  grid-template-columns: calc(6 * var(--dos-cw) + 2px) var(--dos-step) minmax(0, 1fr) var(--dos-step);
+  grid-template-columns: calc(8 * var(--dos-cw) + 2px) var(--dos-step) minmax(0, 1fr) var(--dos-step);
   gap: 12px;
 }
 
@@ -817,14 +825,10 @@
 
 /* ---------- Buttons on the page ---------- */
 
-/* The Workshops button, the paint roller and Move 414 stand on the page, the same
-   colour as a window, so they are blocks like the rest. */
+/* The Workshops button and Move 414 stand on the page, the same colour as a window,
+   so they are blocks like the rest. */
 :root[data-theme="dos"] .workshop-button {
   padding: 0 16px;
-}
-
-:root[data-theme="dos"] .switcher-toggle {
-  --dos-mark-in: 1px;
 }
 
 :root[data-theme="dos"] .big-414__handle:not(:disabled):active {
@@ -879,7 +883,8 @@
    place, and the close box and grip fall back to system colours. */
 @media (forced-colors: active) {
   :root[data-theme="dos"] .box,
-  :root[data-theme="dos"] .comments__inner {
+  :root[data-theme="dos"] .comments__inner,
+  :root[data-theme="dos"] .switcher__inner {
     outline: calc(2 * var(--dos-line) + var(--dos-gap)) double CanvasText;
     outline-offset: calc(-1 * var(--dos-in-side) - var(--dos-line));
   }
