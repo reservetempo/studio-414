@@ -24,10 +24,9 @@ The first theme tasks ran over the 150k budget, so each theme is now split into 
 
 Every theme task: start from `themes/README.md` (the guide) and the shared facts above; copy the original library's look (credit it in the file header) and map its colours onto the palette tokens; preview with `?theme=<id>` plus a few `&color=` values and at 375px (no horizontal scroll), `?theme=aqua` unchanged; check contrast for all 21 colours with a scratchpad script (not committed). Done when that part reads as the original library in every colour. Keep it small: download the library CSS to the scratchpad and grep it (never print it whole); don't read base CSS files whole (the guide gives the selectors); prefer computed styles over screenshots and take at most about five, at half scale where detail isn't needed. Most theme tasks still ran 150-210k, roughly in line with their tool calls, so stop at about 50 tool calls: push what's finished and report what's left. Owner-page previews need the stub described in the guide's section 5 (untracked copy, never committed, deleted after). If `git pull --rebase` refuses because another task's uncommitted files are in the working tree, run `git fetch origin`; if `origin/main` is already in HEAD's history, just push; otherwise stop and report.
 
-49. **PlayStation, owner 1** (`psone`, after 44). Same look as task 44. Known from 1a: the owner page's windows get the dark panels, but their text still uses the dark `--face-text`/`--face-muted`, so it is unreadable until this task.
 50. **DOS, owner 1** (`dos`, after 45). Same look as task 45. Known from 1a: the owner page's `.box` windows get the blue fill and their face-colour text likely fails contrast until this task.
 53. **NES, owner 2** (`nes`). After NES.css (MIT): pixel-art stepped frames, chunky buttons with a bottom-right shade, Press Start 2P on an 8px grid; public site and owner 1 done (`cdcca13`), shared `--nes-line`, `--nes-lamp-warn`, `--nes-lamp-ok`.
-54. **PlayStation, owner 2** (`psone`, after 49). Same look as task 44.
+54. **PlayStation, owner 2** (`psone`). After PSone.css (MIT): FF7-menu dark translucent panels, glowing light text, rounded selection band, pointing glove; public site and owner 1 done (`8056609`).
 55. **DOS, owner 2** (`dos`, after 50). Same look as task 45.
 
 
@@ -36,6 +35,7 @@ Every theme task: start from `themes/README.md` (the guide) and the shared facts
 
 ## Done
 
+- 49. PlayStation, owner 1: `8056609`. Dark menu-bar strip with a glowing title, light text in the section windows, tinted 414 alert icon, light-red error wells, rolling-stripe Loading bar, nested-panel notices, glove-and-band theme picker and rimmed colour swatches (system radios come back in high contrast).
 - 48. NES, owner 1: `cdcca13`. Press Start 2P at 8px on the owner page, face-colour menu bar with pixel line, NES dialogs with a 414 tile, crawling-block progress bar, white notice boxes with yellow/green pixel lamps, NES.css radios with a blinking arrow for themes, pixel-framed colour chips. On phones only the "Something went wrong" title drops to 8px to fit.
 - 56. Move 414 behind the card: `06caeac`. `.big-414` formed its own stacking layer, so its button could never rise above the windows; it now drops that layer while the button has focus, the focused button sits above every window, and it's back 14px under the figures (an `.aqua-pill` rule had moved it far down the photo).
 - 45. DOS, part 2: `5c1c770`. Calendar days on the window fill with room for their shadows, outlined today, block workshop days with ► ◄, dotted past days, inverse-video tooltip; square-bullet links with inverse-video hover; dimmed status lines, inverse-video errors; blinking square spots light; high-contrast rules. Visited links are only slightly dimmer (kept at 4.5:1).
