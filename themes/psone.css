@@ -69,6 +69,15 @@
   --ps-rim: #f2f2f2;
   --ps-line: #c6c6c6;
   --ps-glow: rgb(255 255 255 / 0.3);
+  --ps-btn-top: color-mix(in srgb, var(--title) 20%, #383838);
+  --ps-btn-bottom: color-mix(in srgb, var(--title) 12%, #141414);
+  --ps-tint-top: color-mix(in srgb, var(--title) 40%, #222222);
+  --ps-tint-bottom: color-mix(in srgb, var(--title) 30%, #0a0a0a);
+  --ps-off-top: color-mix(in srgb, var(--title) 10%, #282828);
+  --ps-off-bottom: color-mix(in srgb, var(--title) 6%, #121212);
+  --ps-dim: #b4b4b4;
+  --ps-placeholder: #bdbdbd;
+  --ps-band: rgb(255 255 255 / 0.06);
 }
 
 /* Then the tints, where relative colours work. */
@@ -86,6 +95,15 @@
     --ps-rim: oklch(from var(--title) 0.93 min(c, 0.03) h);
     --ps-line: oklch(from var(--title) 0.75 min(c, 0.03) h);
     --ps-glow: oklch(from var(--title) 0.88 min(c, 0.12) h / 0.45);
+    --ps-btn-top: oklch(from var(--title) calc(min(l, 0.33) + 0.08) min(c, 0.05) h);
+    --ps-btn-bottom: oklch(from var(--title) calc(min(l, 0.33) * 0.55) min(c, 0.04) h);
+    --ps-tint-top: oklch(from var(--title) clamp(0.42, l, 0.47) min(c, 0.19) h);
+    --ps-tint-bottom: oklch(from var(--title) calc(clamp(0.42, l, 0.47) * 0.6) min(c, 0.15) h);
+    --ps-off-top: oklch(from var(--title) calc(min(l, 0.33) * 0.75) min(c, 0.03) h);
+    --ps-off-bottom: oklch(from var(--title) calc(min(l, 0.33) * 0.45) min(c, 0.03) h);
+    --ps-dim: oklch(from var(--title) 0.74 min(c, 0.03) h);
+    --ps-placeholder: oklch(from var(--title) 0.72 min(c, 0.06) h);
+    --ps-band: rgb(255 255 255 / 0.12);
   }
 }
 
@@ -255,6 +273,282 @@
   color: var(--ps-ink);
 }
 
+/* ---------- Buttons ---------- */
+
+/* Small panels like the windows: shaded top to bottom, a grey line with a white rim
+   inside it, the words in light capitals with the hard shadow. Plain buttons are
+   greyed shades of the colour, as PSone.css's grey button; the tinted ones (the default
+   buttons, the Workshops button, "Post comment") brighter tones of it, as its primary.
+   Under the pointer or focused, a menu selection lights up: PSone.css's band across
+   the middle, a white rim and a soft glow. Its parts are custom properties, so the
+   states below change only what they need. */
+:root[data-theme="psone"] .aqua-pill,
+:root[data-theme="psone"] .comments__submit {
+  --ps-face-top: var(--ps-btn-top);
+  --ps-face-bottom: var(--ps-btn-bottom);
+  --ps-hi: transparent;
+  --ps-edge: var(--ps-rim);
+  --ps-sink: inset 0 0 2px 2px rgb(0 0 0 / 0.3);
+  --ps-halo: 0 0 transparent;
+  --ps-ring: 0 0 transparent;
+  border: 1px solid var(--ps-line);
+  border-radius: 6px;
+  background:
+    linear-gradient(to right, transparent, var(--ps-hi), transparent),
+    linear-gradient(var(--ps-face-top), var(--ps-face-bottom));
+  color: var(--ps-text);
+  box-shadow:
+    var(--ps-ring),
+    var(--ps-halo),
+    inset 0 0 0 1px var(--ps-edge),
+    var(--ps-sink),
+    0 1px 3px rgb(0 0 0 / 0.5);
+  font-family: var(--aqua-font);
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  text-decoration: none;
+  text-shadow: var(--ps-drop-small);
+  text-transform: uppercase;
+}
+
+:root[data-theme="psone"] .aqua-pill--tint,
+:root[data-theme="psone"] .comments__submit {
+  --ps-face-top: var(--ps-tint-top);
+  --ps-face-bottom: var(--ps-tint-bottom);
+}
+
+/* No Aqua shine and no pulse. */
+:root[data-theme="psone"] .aqua-pill::after,
+:root[data-theme="psone"] .aqua-pill--pulse::before {
+  content: none;
+  animation: none;
+}
+
+@media (hover: hover) {
+  :root[data-theme="psone"] .aqua-pill:not(:disabled):hover,
+  :root[data-theme="psone"] .comments__submit:not(:disabled):hover,
+  :root[data-theme="psone"] .aqua-popup:hover {
+    --ps-hi: var(--ps-band);
+    --ps-edge: var(--ps-text);
+    --ps-halo: 0 0 8px var(--ps-glow);
+  }
+}
+
+/* Pressed (or while what it opens is open: the paint roller), the shading turns over
+   and the panel sinks. */
+:root[data-theme="psone"] .aqua-pill:not(:disabled):active,
+:root[data-theme="psone"] .aqua-pill[aria-expanded="true"],
+:root[data-theme="psone"] .comments__submit:not(:disabled):active {
+  --ps-sink: inset 0 2px 5px rgb(0 0 0 / 0.7);
+  background:
+    linear-gradient(to right, transparent, var(--ps-hi), transparent),
+    linear-gradient(var(--ps-face-bottom), var(--ps-face-top));
+}
+
+/* Focused: the selection, and a light ring round it that shows on the dark panels. */
+:root[data-theme="psone"] .aqua-pill:focus-visible,
+:root[data-theme="psone"] .comments__submit:focus-visible {
+  --ps-hi: var(--ps-band);
+  --ps-halo: 0 0 8px var(--ps-glow);
+  outline: 2px solid var(--ps-rim);
+  outline-offset: 2px;
+}
+
+/* Disabled (Pay until the form is ready, Post comment while posting): a flat, darker
+   panel without the rim, its words grey as PSone.css's (still 4.5:1), even on a
+   tinted one. */
+:root[data-theme="psone"] .aqua-pill:disabled,
+:root[data-theme="psone"] .comments__submit:disabled {
+  --ps-face-top: var(--ps-off-top);
+  --ps-face-bottom: var(--ps-off-bottom);
+  --ps-edge: transparent;
+  --ps-hi: transparent;
+  color: var(--ps-dim);
+}
+
+/* ---------- Text fields ---------- */
+
+/* Dark wells sunk into the panel, the text light, with PSone.css's dashed line along
+   the bottom inside. */
+:root[data-theme="psone"] .aqua-field,
+:root[data-theme="psone"] .comments__input,
+:root[data-theme="psone"] .comments__textarea {
+  --ps-field-edge: var(--ps-line);
+  --ps-field-ring: 0 0 transparent;
+  --ps-halo: 0 0 transparent;
+  border: 1px solid var(--ps-field-edge);
+  border-radius: 4px;
+  background:
+    repeating-linear-gradient(to right,
+      color-mix(in srgb, var(--ps-line) 55%, transparent) 0 4px, transparent 4px 8px)
+      6px calc(100% - 4px) / calc(100% - 12px) 1px no-repeat,
+    var(--ps-deep);
+  color: var(--ps-text);
+  caret-color: var(--ps-text);
+  box-shadow: var(--ps-field-ring), inset 0 1px 3px rgb(0 0 0 / 0.7), var(--ps-halo);
+  text-shadow: none;
+}
+
+:root[data-theme="psone"] .aqua-field::placeholder,
+:root[data-theme="psone"] .comments__input::placeholder,
+:root[data-theme="psone"] .comments__textarea::placeholder {
+  color: var(--ps-placeholder);
+}
+
+/* Wrong: the edge and a line inside it in the light red. */
+:root[data-theme="psone"] .aqua-field[aria-invalid="true"],
+:root[data-theme="psone"] .comments__input[aria-invalid="true"],
+:root[data-theme="psone"] .comments__textarea[aria-invalid="true"] {
+  --ps-field-edge: var(--ps-error);
+  --ps-field-ring: inset 0 0 0 1px var(--ps-error);
+}
+
+:root[data-theme="psone"] .aqua-field:disabled {
+  --ps-field-edge: color-mix(in srgb, var(--ps-line) 50%, transparent);
+  background: var(--ps-off-bottom);
+  color: var(--ps-dim);
+}
+
+/* Focused, the field (and the menu) glows inside a light ring; a wrong field keeps
+   its red edge. */
+:root[data-theme="psone"] .aqua-field:focus-visible,
+:root[data-theme="psone"] .aqua-popup:focus-visible,
+:root[data-theme="psone"] .comments__input:focus-visible,
+:root[data-theme="psone"] .comments__textarea:focus-visible {
+  --ps-halo: 0 0 8px var(--ps-glow);
+  outline: 2px solid var(--ps-rim);
+  outline-offset: 1px;
+}
+
+:root[data-theme="psone"] .aqua-field:not([aria-invalid="true"]):focus-visible,
+:root[data-theme="psone"] .comments__input:not([aria-invalid="true"]):focus-visible,
+:root[data-theme="psone"] .comments__textarea:not([aria-invalid="true"]):focus-visible {
+  --ps-field-edge: var(--ps-rim);
+}
+
+/* ---------- Pop-up menus ---------- */
+
+/* A plain button with a small light down arrow (and its hard shadow) at the right,
+   each drawn from two half squares so it takes the tint. Open, the list is dark too. */
+:root[data-theme="psone"] .aqua-popup {
+  --ps-hi: transparent;
+  --ps-edge: var(--ps-rim);
+  --ps-halo: 0 0 transparent;
+  border: 1px solid var(--ps-line);
+  border-radius: 6px;
+  background:
+    linear-gradient(45deg, transparent 50%, var(--ps-ink) 50%) calc(100% - 15px) 50% / 5px 5px no-repeat,
+    linear-gradient(-45deg, transparent 50%, var(--ps-ink) 50%) calc(100% - 10px) 50% / 5px 5px no-repeat,
+    linear-gradient(45deg, transparent 50%, #000 50%) calc(100% - 14px) calc(50% + 1px) / 5px 5px no-repeat,
+    linear-gradient(-45deg, transparent 50%, #000 50%) calc(100% - 9px) calc(50% + 1px) / 5px 5px no-repeat,
+    linear-gradient(to right, transparent, var(--ps-hi), transparent),
+    linear-gradient(var(--ps-btn-top), var(--ps-btn-bottom));
+  color: var(--ps-text);
+  box-shadow:
+    var(--ps-halo),
+    inset 0 0 0 1px var(--ps-edge),
+    inset 0 0 2px 2px rgb(0 0 0 / 0.3),
+    0 1px 3px rgb(0 0 0 / 0.5);
+  text-shadow: var(--ps-drop-small);
+}
+
+:root[data-theme="psone"] .aqua-popup:focus-visible {
+  --ps-hi: var(--ps-band);
+}
+
+:root[data-theme="psone"] .aqua-popup option {
+  background-color: var(--ps-deep);
+  color: var(--ps-text);
+}
+
+/* ---------- Check box ---------- */
+
+/* A small dark well; ticked, it fills with the tinted buttons' tone and a white tick. */
+:root[data-theme="psone"] .workshop__check input {
+  width: 16px;
+  height: 16px;
+  border: 1px solid var(--ps-line);
+  border-radius: 4px;
+  background: var(--ps-deep);
+  box-shadow: inset 0 1px 3px rgb(0 0 0 / 0.7);
+}
+
+:root[data-theme="psone"] .workshop__check input:checked {
+  border-color: var(--ps-rim);
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath d='M1.5 5.2l2.4 2.6L8.6 1.8' stroke='%23fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E")
+      center / 10px 10px no-repeat,
+    linear-gradient(var(--ps-tint-top), var(--ps-tint-bottom));
+}
+
+:root[data-theme="psone"] .workshop__check input:active:not(:disabled) {
+  box-shadow: inset 0 2px 4px rgb(0 0 0 / 0.8);
+}
+
+:root[data-theme="psone"] .workshop__check input:focus-visible {
+  outline: 2px solid var(--ps-rim);
+  outline-offset: 2px;
+  box-shadow: inset 0 1px 3px rgb(0 0 0 / 0.7), 0 0 8px var(--ps-glow);
+}
+
+/* ---------- Display ---------- */
+
+/* The ‹ and › stay centred: no letter spacing after them. */
+:root[data-theme="psone"] .switcher__step {
+  letter-spacing: 0;
+}
+
+/* ---------- Buttons on the page ---------- */
+
+/* Workshops, the paint roller and Move 414 stand on the page or the photo: the white
+   rim two lines wide and a dark line outside it, so they show on light and dark
+   colours alike. The focus rings of the first two are in the page's text colour,
+   outside them. */
+:root[data-theme="psone"] .workshop-button,
+:root[data-theme="psone"] .switcher-toggle,
+:root[data-theme="psone"] .big-414__handle {
+  --ps-ring: 0 0 0 1px rgb(0 0 0 / 0.6);
+  border-color: var(--ps-rim);
+}
+
+:root[data-theme="psone"] .workshop-button {
+  letter-spacing: 0.08em;
+}
+
+:root[data-theme="psone"] .switcher-toggle {
+  border-radius: var(--ps-radius);
+}
+
+:root[data-theme="psone"] .workshop-button:focus-visible,
+:root[data-theme="psone"] .switcher-toggle:focus-visible {
+  outline: 2px solid var(--page-text);
+  outline-offset: 3px;
+}
+
+/* Shown only while focused, so its ring is inside it. */
+:root[data-theme="psone"] .big-414__handle:focus {
+  outline: 2px solid var(--ps-rim);
+  outline-offset: -5px;
+}
+
+:root[data-theme="psone"] .big-414__handle:not(:focus) {
+  border: 0;
+  background: none;
+  box-shadow: none;
+}
+
+/* ---------- Mailing-list card ---------- */
+
+:root[data-theme="psone"] .signup__input {
+  padding: 0 10px;
+}
+
+:root[data-theme="psone"] .signup__email:focus-visible {
+  outline: 2px solid var(--ps-rim);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
 /* ---------- Comment box ---------- */
 
 /* A window like the others, its heading as the title over the faint line. Inside,
@@ -281,11 +575,41 @@
     50% 100% / calc(100% - 16px) 1px no-repeat;
 }
 
+/* Fields (above) with room inside their edge; the text area clears the dashed line. */
+:root[data-theme="psone"] .comments__input {
+  padding-inline: 10px;
+}
+
+:root[data-theme="psone"] .comments__textarea {
+  height: calc(3 * 1.4em + 16px);
+  padding: 5px 10px 9px;
+}
+
+/* "Post comment": a tinted button (above), as Sign up. */
+:root[data-theme="psone"] .comments__submit {
+  min-height: 32px;
+  padding: 0 16px;
+  font-size: 14px;
+}
+
 /* ---------- High contrast ---------- */
 
+/* The gradients go, and with them the menu's arrow and the drawn check box: both
+   return to the system's. */
 @media (forced-colors: active) {
   :root[data-theme="psone"] .box__grip::after {
     background: CanvasText;
+  }
+
+  :root[data-theme="psone"] .aqua-popup {
+    -webkit-appearance: auto;
+    appearance: auto;
+  }
+
+  :root[data-theme="psone"] .workshop__check input {
+    -webkit-appearance: auto;
+    appearance: auto;
+    background: none;
   }
 }
 
