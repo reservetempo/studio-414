@@ -145,9 +145,12 @@
 /* Each workshop's link: a button (it opens a window) dressed as a link of the time,
    underlined and blue, purple once its sign-up window has opened (data-visited,
    workshop.js), red while pressed, whatever the switcher's colours. The spots left
-   follow it in the window's own text. */
+   follow it in the window's own text. A button is laid out as an inline block, whose
+   baseline is its last line, so the bullet would sit by the last line of a name that
+   wraps; set against the top of the line instead, its first line takes the bullet. */
 .workshop__link {
   display: inline;
+  vertical-align: top;
   margin: 0;
   padding: 0;
   border: 0;
