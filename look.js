@@ -15,6 +15,10 @@
     preview: it isn't saved or kept), else from the copy kept in localStorage under
     "studio414.look", else Aqua and 0. A part missing or invalid in the URL comes from
     the copy (or the default);
+  - on the public site only, puts the visitor's own page colour over that colour:
+    index.html's <head> script sets window.studio414PageColor (0-20) from Display's
+    Colour row (switcher.js) before this file runs. A valid ?color= in the URL wins
+    over it; the owner page never sets it, so it always shows the owners' colour;
   - writes in the active theme's stylesheet, after the base CSS, so the page never
     paints as Aqua first. Aqua loads nothing.
   Once the page has loaded it fetches the row, keeps the copy (or forgets it when no
@@ -32,6 +36,8 @@
     current()  the { theme, color } on the page now
     apply(v)   switches the page to v (attributes and theme stylesheet); false if invalid
     save(v)    keeps v as the copy (null forgets it); false if invalid
+    setPageColor(n)  shows the visitor's own colour n (0-20) over the look's, or the
+               look's again for null (Display, on the public site); false if invalid
 */
 (function () {
   'use strict';
@@ -77,15 +83,21 @@
 
   var pending = 0; // bumped by every switch, so only the latest one finishes
   var touched = false; // apply() was called: the fetched look no longer overrides it
+  // The visitor's own page colour (public site only, see above), shown over the look's
+  // colour; null shows the look's. site is the look last switched to (the owners', or
+  // the URL's preview), whose colour comes back when the visitor's is taken off.
+  var pageColor = isColor(window.studio414PageColor) ? window.studio414PageColor : null;
+  var site = null;
 
   // Switches the page to look (valid). A theme file is loaded first and only then are
   // the attributes set and the other theme files dropped, so nothing paints unstyled.
   function show(look) {
     var token = ++pending;
+    site = look;
     function finish() {
       if (token !== pending) return;
       html.setAttribute('data-theme', look.theme);
-      html.setAttribute('data-color', String(look.color));
+      html.setAttribute('data-color', String(pageColor !== null ? pageColor : look.color));
       var links = themeLinks();
       for (var i = 0; i < links.length; i++) {
         if (links[i].getAttribute('data-look-theme') !== look.theme && links[i].parentNode) {
@@ -146,6 +158,12 @@
         else localStorage.removeItem(api.KEY);
       } catch (e) { /* no localStorage: the look still shows, just not before first paint */ }
       return true;
+    },
+    setPageColor: function (n) {
+      if (n !== null && !isColor(n)) return false;
+      pageColor = n;
+      html.setAttribute('data-color', String(n !== null ? n : site.color));
+      return true;
     }
   };
 
@@ -157,12 +175,14 @@
   var color = params.get('color') === null ? null : urlColor(params.get('color'));
   if (!isTheme(theme)) theme = null;
   api.preview = theme !== null || color !== null;
+  if (color !== null) pageColor = null; // ?color= in the URL wins over the visitor's colour too
   var look = {
     theme: theme !== null ? theme : saved.theme,
     color: color !== null ? color : saved.color
   };
+  site = look;
   html.setAttribute('data-theme', look.theme);
-  html.setAttribute('data-color', String(look.color));
+  html.setAttribute('data-color', String(pageColor !== null ? pageColor : look.color));
   if (look.theme !== 'aqua') {
     // Written in while the page is parsed, the stylesheet holds up the first paint like
     // the ones above it. (If this file ever runs later, show() loads it instead.)
@@ -180,7 +200,7 @@
     function use(value) {
       api.save(value);
       if (api.preview || touched) return;
-      var now = api.current();
+      var now = site; // the look under any visitor's page colour
       var next = value || api.DEFAULT;
       if (now.theme !== next.theme || now.color !== next.color) show(next);
     }
