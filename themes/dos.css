@@ -1,1 +1,340 @@
-/* DOS theme (after Bootstra.386). See themes/README.md. */
+/* DOS theme, after Bootstra.386 by Chris McKenzie (kristopolous) (Apache License 2.0,
+   github.com/kristopolous/BOOTSTRA.386): VGA text mode. Windows are solid blocks of
+   colour framed by a double line (as the ═ ║ ╔ box-drawing characters draw it), with
+   a solid black shadow two columns right and one row down, the title centred on the
+   top line in inverse video and a [■] close in the top-left, as in DOS and Turbo
+   Vision windows. No Bootstra.386 CSS is loaded: the shapes are redrawn here on the
+   existing markup. See themes/README.md.
+
+   Colours: the window is filled with the colour's --title and drawn in its
+   --title-text (the classic is a blue window with white lines and text). That is the
+   page's own pair (--page-bg, --page-text), 4.5:1 and up for all 21 colours, so the
+   comment box's text keeps its colours. Text that is muted elsewhere is mixed 85%
+   --title-text into --title: 4.8:1 or more for every colour (checked with a script).
+
+   Font: VT323 by Peter Hull (SIL Open Font License 1.1, fonts/dos/LICENSE.txt), from
+   Fontsource (latin subset). It is drawn as pixels: at 20px a character is a cell 8px
+   wide and 20px tall, which the frame and the close box are measured in. */
+
+@font-face {
+  font-family: "S414 DOS";
+  src: url("../fonts/dos/VT323.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root[data-theme="dos"] {
+  --aqua-font: "S414 DOS", "Courier New", monospace;
+  --aqua-radius: 0;
+  --dos-cw: 8px;              /* one character cell, at --dos-text */
+  --dos-ch: 20px;
+  --dos-text: 20px;           /* chrome text: VT323's pixels stay whole */
+  --dos-line: 2px;            /* each of the frame's two lines, and the gap between */
+  --dos-gap: 2px;
+  --dos-top: 7px;             /* the outer line from the top and bottom (centred in a row) */
+  --dos-side: 4px;            /* and from the sides */
+  --dos-bar: 20px;            /* the title row; taller for fingers, the frame stays put */
+}
+
+@media (pointer: coarse) {
+  :root[data-theme="dos"] {
+    --dos-bar: 32px;
+  }
+}
+
+/* Built from the palette, so declared again on anything with its own data-color. */
+:root[data-theme="dos"],
+:root[data-theme="dos"] [data-color] {
+  --dos-fill: var(--title);
+  --dos-ink: var(--title-text);
+  --dos-dim: color-mix(in srgb, var(--title-text) 85%, var(--title));
+  --dos-shade: var(--dk-shadow);
+  --dos-ink-fill: linear-gradient(var(--dos-ink) 0 0);
+  /* The double frame: an outer rectangle of lines, and an inner one a line and a gap
+     in, over the fill. */
+  --dos-in-top: calc(var(--dos-top) + var(--dos-line) + var(--dos-gap));
+  --dos-in-side: calc(var(--dos-side) + var(--dos-line) + var(--dos-gap));
+  --dos-frame:
+    var(--dos-ink-fill) left var(--dos-side) top var(--dos-top) / calc(100% - 2 * var(--dos-side)) var(--dos-line) no-repeat,
+    var(--dos-ink-fill) left var(--dos-side) bottom var(--dos-top) / calc(100% - 2 * var(--dos-side)) var(--dos-line) no-repeat,
+    var(--dos-ink-fill) left var(--dos-side) top var(--dos-top) / var(--dos-line) calc(100% - 2 * var(--dos-top)) no-repeat,
+    var(--dos-ink-fill) right var(--dos-side) top var(--dos-top) / var(--dos-line) calc(100% - 2 * var(--dos-top)) no-repeat,
+    var(--dos-ink-fill) left var(--dos-in-side) top var(--dos-in-top) / calc(100% - 2 * var(--dos-in-side)) var(--dos-line) no-repeat,
+    var(--dos-ink-fill) left var(--dos-in-side) bottom var(--dos-in-top) / calc(100% - 2 * var(--dos-in-side)) var(--dos-line) no-repeat,
+    var(--dos-ink-fill) left var(--dos-in-side) top var(--dos-in-top) / var(--dos-line) calc(100% - 2 * var(--dos-in-top)) no-repeat,
+    var(--dos-ink-fill) right var(--dos-in-side) top var(--dos-in-top) / var(--dos-line) calc(100% - 2 * var(--dos-in-top)) no-repeat,
+    var(--dos-fill);
+}
+
+/* ---------- Windows ---------- */
+
+/* The frame is drawn inside the box, so nothing moves; the shadow is two columns
+   right and a row down (square, as a text-mode shadow is). The comment box is framed
+   the same way. */
+:root[data-theme="dos"] .box,
+:root[data-theme="dos"] .comments__inner {
+  border: 0;
+  border-radius: 0;
+  background: var(--dos-frame);
+  color: var(--dos-ink);
+  box-shadow: calc(2 * var(--dos-cw)) var(--dos-ch) 0 var(--dos-shade);
+  -webkit-font-smoothing: auto;
+  -moz-osx-font-smoothing: auto;
+}
+
+:root[data-theme="dos"] .box ::selection,
+:root[data-theme="dos"] .comments__inner ::selection {
+  background: var(--dos-ink);
+  color: var(--dos-fill);
+}
+
+/* No bar of its own: the title row is the frame's top line, with the title centred
+   on it and the close box on the left. Its side padding keeps the title clear of the
+   close box, the same on both sides so the title stays centred. */
+:root[data-theme="dos"] .box__titlebar {
+  align-items: flex-start;
+  justify-content: center;
+  min-height: var(--dos-bar);
+  padding: 0 calc(6 * var(--dos-cw));
+  border-bottom: 0;
+  border-radius: 0;
+  background: none;
+  color: var(--dos-ink);
+}
+
+:root[data-theme="dos"] .box__titlebar:has(> .box__lights)::after {
+  content: none;
+}
+
+/* Inverse video, a space either side: ═══ Title ═══. */
+:root[data-theme="dos"] .box__title,
+:root[data-theme="dos"] .comments__title {
+  flex: 0 1 auto;
+  min-width: 0;
+  margin: 0;
+  padding: 0 var(--dos-cw);
+  overflow: hidden;
+  background: var(--dos-ink);
+  color: var(--dos-fill);
+  font-family: var(--aqua-font);
+  font-size: var(--dos-text);
+  font-weight: 400;
+  font-style: normal;
+  letter-spacing: 0;
+  line-height: var(--dos-ch);
+  text-align: center;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  text-shadow: none;
+}
+
+/* The move handle has no ring of its own over the frame: focused, the title gets a
+   dotted box round it. The transparent outline shows in high-contrast modes. */
+:root[data-theme="dos"] .box__handle:focus-visible {
+  outline: 2px solid transparent;
+  outline-offset: -3px;
+}
+
+:root[data-theme="dos"] .box__titlebar:has(> .box__handle:focus-visible) .box__title {
+  outline: 2px dotted var(--dos-ink);
+  outline-offset: 2px;
+}
+
+/* Only a real close, on the top line two columns in (╔═[■]═): the decorative
+   gumdrops (the card, the owner's windows) and minimise and zoom go. */
+:root[data-theme="dos"] .box__lights {
+  position: absolute;
+  top: 0;
+  left: calc(2 * var(--dos-cw));
+  gap: 0;
+}
+
+:root[data-theme="dos"] .box__lights:not(:has(> .box__close)),
+:root[data-theme="dos"] .box__light:not(.box__close) {
+  display: none;
+}
+
+/* [■]: the brackets are text (VT323 has no ■), the block the × icon redrawn as a
+   square of border, both in the one grid cell; on the fill, so the frame's lines stop
+   either side. */
+:root[data-theme="dos"] .box__light.box__close {
+  width: calc(3 * var(--dos-cw));
+  height: var(--dos-ch);
+  border: 0;
+  border-radius: 0;
+  background: var(--dos-fill);
+  box-shadow: none;
+  color: var(--dos-ink);
+  font-family: var(--aqua-font);
+  font-size: var(--dos-text);
+  line-height: var(--dos-ch);
+}
+
+:root[data-theme="dos"] .box__close::before {
+  border-radius: 0;
+}
+
+:root[data-theme="dos"] .box__close::after {
+  content: "[ ]";
+  grid-area: 1 / 1;
+  white-space: pre;
+}
+
+:root[data-theme="dos"] .box__close svg {
+  grid-area: 1 / 1;
+  box-sizing: border-box;
+  width: 6px;
+  height: 6px;
+  border: 3px solid currentColor;
+  opacity: 1;
+}
+
+:root[data-theme="dos"] .box__close svg > * {
+  display: none;
+}
+
+/* Pressed or focused, it goes inverse video. */
+:root[data-theme="dos"] .box__light.box__close:active,
+:root[data-theme="dos"] .box__light.box__close:focus-visible {
+  background: var(--dos-ink);
+  color: var(--dos-fill);
+}
+
+:root[data-theme="dos"] .box__close:focus-visible {
+  outline: 2px solid transparent;
+  outline-offset: 0;
+}
+
+/* The resize grip: Turbo Vision's corner, the frame's last two cells turned to a
+   single line, ─┘. The fill clears the double lines; the corner is drawn over it. */
+:root[data-theme="dos"] .box__grip::before,
+:root[data-theme="dos"] .box__grip::after {
+  content: "";
+  position: absolute;
+  clip-path: none;
+}
+
+:root[data-theme="dos"] .box__grip::before {
+  right: 0;
+  bottom: 0;
+  width: calc(2 * var(--dos-cw));
+  height: var(--dos-ch);
+  background: var(--dos-fill);
+}
+
+:root[data-theme="dos"] .box__grip::after {
+  right: calc(var(--dos-side) + var(--dos-line));
+  bottom: calc(var(--dos-top) + var(--dos-line));
+  width: calc(2 * var(--dos-cw) - var(--dos-side) - var(--dos-line));
+  height: calc(var(--dos-ch) - var(--dos-top) - var(--dos-line));
+  box-sizing: border-box;
+  border: solid var(--dos-ink);
+  border-width: 0 var(--dos-line) var(--dos-line) 0;
+  background: none;
+}
+
+:root[data-theme="dos"] .box__grip:focus-visible {
+  outline: 2px dotted var(--dos-ink);
+  outline-offset: -2px;
+}
+
+/* ---------- In the windows ---------- */
+
+/* Room for the frame: the Display's body sits close to the edges. */
+:root[data-theme="dos"] .switcher__body {
+  padding: 6px calc(2 * var(--dos-cw)) calc(2 * var(--dos-top) + 2px);
+}
+
+/* Labels in the chrome font, at its whole-pixel size. */
+:root[data-theme="dos"] .signup__label,
+:root[data-theme="dos"] .switcher__label,
+:root[data-theme="dos"] .comments__label {
+  color: var(--dos-ink);
+  font-family: var(--aqua-font);
+  font-size: var(--dos-text);
+  font-weight: 400;
+  letter-spacing: 0;
+  line-height: var(--dos-ch);
+  text-transform: uppercase;
+}
+
+/* The card's text, on the fill: notes dimmed, errors inverse video. */
+:root[data-theme="dos"] .signup__message {
+  color: var(--dos-dim);
+}
+
+:root[data-theme="dos"] .signup__message[data-state="error"] {
+  width: fit-content;
+  padding: 0 4px;
+  background: var(--dos-ink);
+  color: var(--dos-fill);
+}
+
+/* "Email us" sits on the frame's bottom line, so it clears the line behind it. */
+:root[data-theme="dos"] .signup__email {
+  padding: 0 4px;
+  background: var(--dos-fill);
+  color: var(--dos-dim);
+}
+
+:root[data-theme="dos"] .signup__email:hover {
+  color: var(--dos-ink);
+}
+
+:root[data-theme="dos"] .signup__email:focus-visible {
+  outline-color: var(--dos-ink);
+}
+
+/* ---------- Comment box ---------- */
+
+/* A window like the others, its heading as the title on the frame. Its text is the
+   page's (--page-text on --page-bg), which the fill matches; the photo no longer
+   shows through. */
+:root[data-theme="dos"] .comments__inner {
+  padding: 0 calc(2 * var(--dos-cw)) calc(2 * var(--dos-top) + 2px);
+}
+
+:root[data-theme="dos"] .comments > .comments__inner {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+:root[data-theme="dos"] .comments__title {
+  align-self: center;
+  max-width: calc(100% - 4 * var(--dos-cw));
+}
+
+/* ---------- High contrast ---------- */
+
+/* The gradients go: the double line is drawn as an outline instead, in the same
+   place, and the close box and grip fall back to system colours. */
+@media (forced-colors: active) {
+  :root[data-theme="dos"] .box,
+  :root[data-theme="dos"] .comments__inner {
+    outline: calc(2 * var(--dos-line) + var(--dos-gap)) double CanvasText;
+    outline-offset: calc(-1 * var(--dos-in-side) - var(--dos-line));
+  }
+
+  :root[data-theme="dos"] .box__light.box__close {
+    color: ButtonText;
+  }
+
+  /* The square of border doesn't show here: the block is a character instead. */
+  :root[data-theme="dos"] .box__close svg {
+    display: none;
+  }
+
+  :root[data-theme="dos"] .box__close::after {
+    content: "[\25A0]";
+  }
+
+  :root[data-theme="dos"] .box__grip::before {
+    background: Canvas;
+  }
+
+  :root[data-theme="dos"] .box__grip::after {
+    border-color: CanvasText;
+    background: none;
+  }
+}
