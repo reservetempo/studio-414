@@ -124,11 +124,11 @@ body). Undo: `border` (1px `--aqua-edge`), `border-radius` (top corners), `backg
   radial gradients, rim `border`, `box-shadow`, `--drop*` variables. Windows without a
   real close (card, owner windows) have three decorative `<span>`s (`aria-hidden`); hide
   `--min`/`--zoom` if the original has none.
-- Real close: `button.box__light--close.box__close` (Display, both Workshops dialogs)
+- Real close: `button.box__light--close.box__close` (both Workshops dialogs)
   with an × `<svg viewBox="0 0 7 7">` in `currentColor`, `opacity: 0` until `:hover` /
   `:focus-visible` (always shown on `hover: none`); `::before` is a transparent hit area
   (`inset: -6px`); `:active` changes `--drop`; `:focus-visible` outline.
-- JS adds `button.box__handle` (boxes.js on `#signup`, `#switcher`; workshop.js on both
+- JS adds `button.box__handle` (boxes.js on `#signup`; workshop.js on both
   dialogs): transparent, absolute over the title bar, `cursor: move`, inset outline on
   `:focus-visible`. Keep it transparent; restyle only its focus.
 - JS adds `button.box__grip` (boxes.js, `#signup` only): bottom-right 22px (32px coarse);
@@ -161,7 +161,7 @@ right padding. Focus as fields.
 | Component | Selectors (file) | Notes |
 |---|---|---|
 | Mailing-list card | `form#signup.signup.box` (styles.css places it on the photo's window) | decorative gumdrops; `.box__title#signup-title`; `.signup__body`, `.signup__label` (spaced caps), `.signup__row`, `#email.signup__input.aqua-field` (17px+), Sign up, `.signup__message` (`[data-state="error"]` → `--error`), `a.signup__email` (muted, at most the body's content width, wraps after "at" when wider; hover `--accent-ink`, 1px dotted `--focus`). JS: handle + grip. |
-| Display | `#switcher.switcher.box.box--fixed` (switcher.css), built by switcher.js | real close + min/zoom spans, title "Display"; `.switcher` sets `--aqua-font` 13px; `.switcher__body` grid of `.switcher__row` (Part, Font, Styles, Layout; rows `[hidden]` when nothing to reset); `.switcher__label`; `.switcher__step.aqua-pill` ‹ ›; `select.switcher__select.aqua-popup` (`--part`, `--font`); `.switcher__reset.aqua-pill` "Reset"; `.switcher__live` (visually hidden). Phone media queries shrink it. JS: handle, no grip. |
+| Display | `section#switcher.switcher` (switcher.css), built by switcher.js and added at the very end of the page, after the comment section | **not a window** (no title bar, gumdrops, handle or paint roller; always shown; nothing drags it): styled like the comment box, straight on the page colour with no fill. `.switcher` (page text `--page-text`, `--aqua-font`); `.switcher__inner` the 1px `--page-text` line box (at most 432px, centred); `h2#switcher-title.switcher__title` "Display" (1.25rem, as `.comments__title`); `.switcher__body` (13px) grid of `.switcher__row` (Colour, 414 font, Styles, Layout; the last two `[hidden]` when nothing to reset); `.switcher__label` (10px spaced caps); `.switcher__step.aqua-pill` ‹ ›; `select.switcher__select.aqua-popup` (`--color`, `--font`); `.switcher__reset.aqua-pill` "Reset"; `.switcher__live` (visually hidden); focus: 2px `--page-text` on its pills and menus. Then `footer.switcher-credit` (muted italic, link focus 2px `--page-text`). Old `#switcher` window rules (`.box__titlebar`, `.box__close`, `.switcher-toggle`) no longer match anything: delete them. |
 | Workshops window | `dialog#workshops.workshop.workshop--list.box` (workshop.css) | close `#workshops-close`; `::backdrop` (black 32%); `.is-moved` (dragged); `#workshops-status.workshop__status`, `#workshops-retry.workshop__retry.aqua-pill`; links list below; calendar above. |
 | Workshop links | `ul#workshops-list.workshop__list > li > button.workshop__link[data-id]` (workshop.js builds them, with a `<time>` and a spots `<span>`) | dressed as early-web links in **fixed** colours: #0000ee, `[data-visited]` #551a8b, `:active` #ee0000, underline, `border-radius: 0`, `background: none`; focus: 2px `--aqua-focus`. Use `--accent-ink` (4.5:1 on face and field) if the theme changes the face. |
 | Calendar | `.calendar#workshops-calendar` (calendar.css, built by calendar.js) | `.calendar__head`: `#calendar-prev/#calendar-next.calendar__step.aqua-pill`, `h3.calendar__month`; `table.calendar__grid` (field well: `background`, `border`, inset `box-shadow`, `border-spacing: 2px`, `--aqua-font`); `th` weekdays (muted, bold, bottom line); `.calendar__day` (a `<span>` holding a number `<span>`; a `<button>` for an upcoming workshop); `:not(.aqua-pill)` round, no fill; `--past` (`--placeholder`); `[aria-current="date"]` today (tint wash + inset ring); `--workshop` (bold) + `.aqua-pill.aqua-pill--tint` (upcoming; JS adds); `--workshop.--past` faded plain pill (gradient); `span.calendar__tip` (JS adds; yellow #ffffc7 tooltip with shadow, shown on `:hover` / `:focus-visible`). |
@@ -171,14 +171,13 @@ right padding. Focus as fields.
 | Sign up button | `.signup__button.aqua-pill.aqua-pill--tint.aqua-pill--pulse` | the default button. |
 | Workshops button | `button#workshop-button.workshop-button.aqua-pill.aqua-pill--tint` (workshop.css) | fixed top right on the page, 36px, uppercase, `letter-spacing`; `[hidden]` until workshop.js runs; `[data-state="soldout"]` reads "Sold out"; `::before` is a transparent hit area (don't paint it); focus: 2px `--page-text` (it sits on the page). |
 | Other pills | Pay `#workshop-pay.workshop__pay` (tint, pulse; `:disabled` until the form is valid; `[aria-busy]`), OK `#workshop-ok.workshop__ok`, All workshops, Try again, − / +, Display ‹ › and Reset, calendar ‹ › and workshop days | all `.aqua-pill`; restyle the pill once, then tune sizes. |
-| Paint roller | `button.switcher-toggle.aqua-pill` (switcher.css, built by switcher.js) | fixed bottom left, 44px, `border-radius: 11px`; 16px pixel roller SVG at 32px: `.switcher-toggle__paint` (fill `--title`), `__shine` (white .55), `__shade` (black .22); `[aria-expanded="true"]` while Display is open (pressed, z-index 0); focus: 2px `--page-text`. |
 | Move 414 | `button.big-414__handle.aqua-pill` (boxes.js adds it; styles.css) | clipped to 1px until focused (`:not(:focus)`), then a 32px pill under the 414; focus: 1px dotted `--focus`, offset -5px. Leave `.big-414:focus-within` alone. |
 
 **Focus rings** to restyle: `.aqua-pill:focus-visible`; `.aqua-field`, `.aqua-popup`
 `:focus-visible`; `.box__handle`, `.box__close`, `.box__grip` `:focus-visible`;
 `.workshop__link:focus-visible`; `.workshop__check input:focus-visible`;
 `.signup__email:focus-visible`; `.big-414__handle:focus`; on the page (use a colour that
-reads on `--page-bg`): `.workshop-button`, `.switcher-toggle`, `.comments__*`
+reads on `--page-bg`): `.workshop-button`, `.comments__*`, `.switcher .aqua-pill`, `.switcher .aqua-popup`, `.switcher-credit a`
 `:focus-visible`. Many originals use a dotted inner line: `outline: 1px dotted`.
 
 **Disabled states:** `.aqua-pill:disabled` (Pay until valid), `.workshop__input:disabled`,
@@ -229,8 +228,8 @@ the grey ring and the name capsule's rounding, and the focus rings (`box-shadow`
 Start the `studio-414` launch config (`python -m http.server 8000`), then open
 `http://localhost:8000/index.html?theme=<id>&color=<n>`. Try a light title colour
 (2 Saffron), a deep one (11 Oxblood), Classic (0) and Porcelain (19), and 375px wide (no
-sideways scroll). `?theme=aqua` must look unchanged. To reach everything: the paint
-roller opens Display; Tab reaches "Move 414"; the Workshops button opens the calendar
+sideways scroll). `?theme=aqua` must look unchanged. To reach everything: Display
+sits at the very end of the page, under the comments; Tab reaches "Move 414"; the Workshops button opens the calendar
 and links (they load from the back end); a link or a marked day opens the sign-up
 window, whose Pay stays disabled until the form is valid.
 

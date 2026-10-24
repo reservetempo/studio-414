@@ -5,7 +5,7 @@
    public site loads styles.css (its layout, the bevels and the other tokens) after
    colors.css. */
 
-/* The palette. The boxes (the mailing-list card and Display, and the owner page's
+/* The palette. The boxes (the mailing-list card and the owner page's
    windows) are Mac OS X Aqua windows built from it (the --aqua-* tokens below, used
    by boxes.css); the Workshops dialogs and calendar still use the older bevel tokens
    (styles.css). These are colour

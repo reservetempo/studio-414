@@ -384,7 +384,7 @@ html.is-moving-414 * {
      below it, or else the bottom of the hero, where the photo runs past it. */
   --photo-end: min(var(--photo-y) + var(--photo-h), 100cqh);
   /* The lowest it may sit: 16px above the bottom of the hero, wholly on the first
-     screen (on narrow phones, clear of the paint roller: below). */
+     screen. */
   --card-gutter: 16px;
 
   position: absolute;
@@ -405,15 +405,6 @@ html.is-moving-414 * {
   /* Lets the padding below follow the card's width. The window chrome (frame, title
      bar, resize grip) is in boxes.css. */
   container-type: inline-size;
-}
-
-/* Phones narrow enough for the card (300px, centred) to reach over the paint roller in
-   the bottom-left corner (44px square, 8px in: switcher.css): the card keeps above it,
-   with 8px to spare. */
-@media (max-width: 419px) {
-  .signup {
-    --card-gutter: 60px;
-  }
 }
 
 /* Everything under the title bar, centred in the space left. In proportion to the

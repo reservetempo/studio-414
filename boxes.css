@@ -1,13 +1,14 @@
 /* Mac OS X Aqua (Jaguar/Panther) chrome for the boxes: the mailing-list card
-   (.signup) and the style switcher, "Display" (.switcher). Each is an Aqua window:
+   (.signup) and the windows that reuse it (below). Each is an Aqua window:
    rounded top corners, a big soft drop shadow and no black frame, fine pinstripes in
    the body, and a striped title bar with the three gumdrops (red, yellow, green) at
    the left and the title centred. On the card a ridged resize grip sits in the
-   bottom-right corner. (The comment section is not a window: comments.css.)
+   bottom-right corner. (The comment section and Display are not windows:
+   comments.css, switcher.css.)
    boxes.js adds the drag handle over the title bar and the grip, and moves and sizes
    the boxes; the colours are the tokens in aqua.css (the --aqua-* ones are built
-   from the palette that switcher.css swaps per colour). Where each box sits by
-   default is in styles.css (the card) and switcher.css (Display).
+   from the palette that colors.css swaps per colour). Where the card sits by
+   default is in styles.css.
 
    Reusable (the owner page, admin.html, uses them; also for the Workshops and
    calendar dialogs, ...): load aqua.css (palette and --aqua-* tokens) and this file,
@@ -44,7 +45,7 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* A closed box (Display, until its paint roller opens it: switcher.js). */
+/* A closed box (the hidden attribute). */
 .box[hidden] {
   display: none;
 }
@@ -58,14 +59,6 @@
   max-width: none;
   margin: 0;
   aspect-ratio: auto;
-}
-
-/* A box fixed to the screen (Display) stays fixed once moved: its left and top are
-   then screen coordinates, and its default right and bottom no longer apply. */
-.box--fixed.is-placed {
-  position: fixed;
-  right: auto;
-  bottom: auto;
 }
 
 .box ::selection {
@@ -188,7 +181,7 @@
   --drop-glow: var(--aqua-green-glow);
 }
 
-/* The red gumdrop as a real close button (Display): it takes the pointer, shows its
+/* The red gumdrop as a real close button (the Workshops windows): it takes the pointer, shows its
    × on hover, on focus and on touch screens, and darkens while pressed. Its hit area
    reaches 6px beyond the drop (25px across). */
 .box__close {
@@ -359,8 +352,8 @@ html.is-sizing-box * {
   pointer-events: none;
 }
 
-/* Pressed while held; a pill that opens something (aria-expanded, the paint roller)
-   stays pressed in while it is open. */
+/* Pressed while held; a pill that opens something (aria-expanded) stays pressed in
+   while it is open. */
 .aqua-pill:active,
 .aqua-pill[aria-expanded="true"] {
   background:

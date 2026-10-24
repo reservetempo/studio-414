@@ -1,42 +1,57 @@
-/* Style switcher: Display, the window that picks the fonts (switcher.js; the fonts
-   are in fonts.css), and its paint roller. The colours are not picked here: they are
-   in colors.css. */
+/* Style switcher: Display, the panel at the very end of the page that picks the
+   visitor's page colour and the 414's font (switcher.js; the fonts are in fonts.css,
+   the colours in colors.css), and the fonts' credit under it. */
 
-/* ---------- The window ----------
-   "Display", a second Aqua window like the card: the window, the title bar with its
-   gumdrops and the colours all come from boxes.css and the palette, so it follows
-   the site's colour like the others (black text on the face, the white menus and
-   the plain pills keep every control at 4.5:1 or more on all of them). All of it is
-   in Lucida Grande, as Aqua's controls are, so the controls keep their shape while
-   the fonts are browsed.
-   Its rows: Part (Everything or one window) and the Font for that part, each a
-   pop-up menu (.aqua-popup) between round ‹ and › buttons (.aqua-pill), then the
-   Styles and Layout "Reset" pills, each shown only while there is something to reset.
-   It is fixed to the screen, so it is at hand wherever the page is scrolled to.
-   boxes.js moves it by its title bar (it has no resize grip: its rows have one size),
-   keeps it on screen and stacks it with the other windows.
-   It starts closed (hidden); the paint roller button in the bottom-left corner
-   (.switcher-toggle, below) opens it, and the red gumdrop in its title bar (.box__close
-   in boxes.css) closes it.
-   Where it opens: bottom-left, over its paint roller; top-left on short screens, out of
-   the way of the card at the bottom of the hero (see below); on phones a compact
-   window along the bottom, or along the top on the shortest ones. Once moved, where it
-   was left. */
+/* ---------- The panel ----------
+   "Display" is not a window: like the comment section just above it (comments.css),
+   it is plain text in the theme's font (--aqua-font) and the page's text colour,
+   inside one thin line in that colour, with no fill of its own, straight on the page
+   colour. It sits in the page flow after the comments, always shown; nothing drags
+   it. Its rows: Colour and 414 font, each an Aqua pop-up menu (.aqua-popup) between
+   round ‹ and › buttons (.aqua-pill), then the Styles and Layout "Reset" pills, each
+   shown only while there is something to reset. The white menus and the plain pills
+   carry their own black text, so they read on every page colour.
+
+   section#switcher.switcher
+     .switcher__inner                  the line box
+       h2#switcher-title.switcher__title "Display"
+       .switcher__body                 the rows
+         .switcher__row (role group)   .switcher__label, .switcher__step ‹,
+                                       select.switcher__select, .switcher__step ›
+                                       (or .switcher__reset on Styles and Layout)
+         p.switcher__live              visually hidden, read out on a change */
 
 .switcher {
-  position: fixed;
-  left: 16px;
-  bottom: max(16px, env(safe-area-inset-bottom));
-  width: min(360px, 100vw - 32px);
+  padding: 0 16px 24px;
+  color: var(--page-text);
   font-family: var(--aqua-font);
-  font-size: 13px;
+}
+
+/* The line box: as wide as the comment box where that sits in the page. */
+.switcher__inner {
+  display: grid;
+  gap: 10px;
+  width: 100%;
+  max-width: 432px;
+  margin: 0 auto;
+  padding: 12px 14px 14px;
+  border: 1px solid var(--page-text);
+}
+
+/* A plain heading, as the comment section's. */
+.switcher__title {
+  margin: 0;
+  font: inherit;
+  font-size: 1.25rem;
+  font-weight: 500;
   line-height: 1.2;
 }
 
 .switcher__body {
   display: grid;
   gap: 6px;
-  padding: 9px 8px 10px;
+  font-size: 13px;
+  line-height: 1.2;
 }
 
 .switcher__row {
@@ -72,8 +87,9 @@
   font-size: 20px;
 }
 
-/* "Reset", on the Styles row (shown while a window has its own font) and on
-   the Layout row (shown once a box has been moved or resized, boxes.js). */
+/* "Reset", on the Styles row (shown while the visitor has their own colour or font)
+   and on the Layout row (shown once the card or the 414 has been moved or resized,
+   boxes.js). */
 .switcher__reset {
   grid-column: 2 / -1;
   justify-self: start;
@@ -91,6 +107,14 @@
   text-overflow: ellipsis;
 }
 
+/* On the page rather than in a window: focus rings in the page's text colour, as in
+   the comment section. */
+.switcher .aqua-pill:focus-visible,
+.switcher .aqua-popup:focus-visible {
+  outline: 2px solid var(--page-text);
+  outline-offset: 2px;
+}
+
 .switcher__live {
   position: absolute;
   width: 1px;
@@ -101,43 +125,6 @@
   clip: rect(0 0 0 0);
   white-space: nowrap;
   border: 0;
-}
-
-/* Phones: the full width less 8px gutters, and compact: a slimmer title bar (as an
-   Aqua utility window has) and 28px rows, so it covers as little of the page as it can.
-   Along the bottom it clears the card on tall phones (390 x 844, say), where the card
-   sits across the photo's bottom edge well above it; on shorter ones (375 x 667 and
-   down) the card comes down to its gutter (styles.css) and the window opens over the
-   bottom of it. It keeps its width once moved (a set width, not left and right). */
-@media (max-width: 480px) {
-  .switcher {
-    left: 8px;
-    bottom: max(6px, env(safe-area-inset-bottom));
-    width: calc(100vw - 16px);
-  }
-
-  .switcher .box__titlebar {
-    min-height: 24px;
-  }
-
-  .switcher__body {
-    gap: 4px;
-    padding: 5px 6px 6px;
-  }
-
-  .switcher__step,
-  .switcher__select,
-  .switcher__reset {
-    height: 28px;
-  }
-}
-
-/* Short phones: a slimmer title bar still. */
-@media (max-width: 480px) and (max-height: 640px) {
-  .switcher .box__titlebar {
-    min-height: 22px;
-    padding-block: 1px;
-  }
 }
 
 /* The narrowest phones: tighter columns, so the names still fit after the numbers. */
@@ -161,113 +148,16 @@
   }
 }
 
-/* Below about 1068px wide the card (300px, centred, at or near the bottom of the hero:
-   styles.css) reaches in under the right end of the window where it opens at the
-   bottom left. On short screens there (phones turned sideways, small windows) the
-   window opens in the top-left corner instead, over the ceiling; on taller ones
-   (768 x 1024, 1000 x 800) it stays at the bottom, over the card's bottom-left corner.
-   Up there it covers the left side of the big 414, which stands centred at the top of
-   these screens and does not make way for it. The shortest phones get the same along
-   the top: clear of the card, but over the top of the 414 or all of it. */
-@media (max-height: 620px) and (min-width: 481px) and (max-width: 1067px) {
-  .switcher {
-    top: 16px;
-    bottom: auto;
-  }
-}
-
-@media (max-height: 560px) and (max-width: 480px) {
-  .switcher {
-    top: max(8px, env(safe-area-inset-top));
-    bottom: auto;
-  }
-}
-
-/* ---------- The paint roller: opens and closes Display ----------
-   A rounded-square glossy Aqua button (.aqua-pill, boxes.css) fixed in the bottom-left
-   corner, clear of the workshop button (top right), the 414, the card and, on wide
-   screens, the comments box; on phones the comments box in the page passes under it
-   as the page scrolls, as under Display. Display opens over it there, so: a plain
-   pill (the black roller and handle keep 4.5:1 or more on it in every colour, and its
-   rim and shadow stand out against the page and the photo), with the roller in the
-   colour's title colour.
-   Above the windows while Display is closed, so it is always at hand; pressed in and
-   under them while it is open, so Display covers it (and comes back on top of it when
-   it has the keyboard focus). */
-
-.switcher-toggle {
-  position: fixed;
-  left: max(16px, env(safe-area-inset-left));
-  bottom: max(16px, env(safe-area-inset-bottom));
-  /* Over the boxes (boxes.js stacks them from z-index 1 up), under the workshop
-     button (10). */
-  z-index: 9;
-  /* Inside the 44px, so Display opening over the button covers it completely. */
-  width: 44px;
-  height: 44px;
-  margin: 0;
-  padding: 0;
-  border-radius: 11px;
-}
-
-/* The 16 x 16 pixel drawing at exactly twice its size, so every pixel stays crisp. */
-.switcher-toggle svg {
-  display: block;
-  width: 32px;
-  height: 32px;
-}
-
-.switcher-toggle__paint {
-  fill: var(--title);
-}
-
-.switcher-toggle__shine {
-  fill: #ffffff;
-  opacity: 0.55;
-}
-
-.switcher-toggle__shade {
-  fill: #000000;
-  opacity: 0.22;
-}
-
-/* Pressed in while Display is open (boxes.css), and under it. */
-.switcher-toggle[aria-expanded="true"] {
-  z-index: 0;
-}
-
-/* A ring outside it in the page's text colour, as it sits straight on the page or the
-   photo. */
-.switcher-toggle:focus-visible {
-  z-index: 9;
-  outline: 2px solid var(--page-text);
-  outline-offset: 3px;
-}
-
-@media (max-width: 480px) {
-  .switcher-toggle {
-    left: max(8px, env(safe-area-inset-left));
-    bottom: max(8px, env(safe-area-inset-bottom));
-  }
-}
-
 /* ---------- Credit ---------- */
 
-/* Quiet, at the very end of the page (straight on the page colour, outside the
-   windows, in its text colour: 4.8:1 or more on every colour), with room below it for
-   the Display window where it starts, Layout row included. */
+/* Quiet, at the very end of the page, under Display (straight on the page colour, in
+   its text colour: 4.8:1 or more on every colour). */
 .switcher-credit {
-  padding: 0 16px 176px;
+  padding: 0 16px max(32px, env(safe-area-inset-bottom));
   font-size: 0.875rem;
   font-style: italic;
   text-align: center;
   color: var(--page-text-muted);
-}
-
-@media (max-width: 480px) {
-  .switcher-credit {
-    padding-bottom: 144px;
-  }
 }
 
 .switcher-credit a {

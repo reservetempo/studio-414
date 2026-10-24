@@ -13,8 +13,8 @@
    ceiling or the band of page colour above the photo, on every screen. The corner is
    kept for it: --workshop-reach and --workshop-drop (below) say how far it reaches in
    from the right edge and down from the top, and the big 414 keeps out of that corner
-   (styles.css), the card sits at the bottom (styles.css) and the paint roller at the
-   bottom left (switcher.css). Where the comments box floats on the wall right of the
+   (styles.css) and the card sits at the bottom (styles.css). Where the comments box
+   floats on the wall right of the
    window, comments.css starts it lower to leave the corner to the button. */
 
 /* The corner the button takes, with room to spare: its gutter, the button (about 130px
@@ -64,14 +64,14 @@
 }
 
 /* Since the button stands straight on the photo or the page rather than in a window,
-   its focus ring is in the page's text colour, as round the paint roller
-   (switcher.css). */
+   its focus ring is in the page's text colour, as in the comment section and Display
+   (comments.css, switcher.css). */
 .workshop-button:focus-visible {
   outline: 2px solid var(--page-text);
   outline-offset: 3px;
 }
 
-/* Phones: the same 8px gutter as the Display window at the side. */
+/* Phones: an 8px gutter at the side. */
 @media (max-width: 480px) {
   .workshop-button {
     top: max(12px, env(safe-area-inset-top));

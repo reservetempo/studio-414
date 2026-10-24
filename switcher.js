@@ -1,5 +1,5 @@
 /*
-  Style switcher for Studio 414: the "Display" window on the public site.
+  Style switcher for Studio 414: the "Display" panel on the public site.
 
   It lets a visitor change two things for themselves, on their own screen only: the
   colour of the whole page, and the face of the big 414 and "Opening soon!" (twenty
@@ -7,18 +7,13 @@
   ("font 6"). Font 0 is the default design (Terminal Grotesque); font 1 is EB Garamond,
   the original face. All other text is in the theme's font, whatever is picked here.
 
-  The panel is a second Mac OS X Aqua window, "Display" (#switcher, styled by
-  boxes.css and switcher.css), fixed to the screen. boxes.js lets it be dragged by
-  its title bar like the other boxes.
-
-  Display starts closed. A paint roller button fixed in the bottom-left corner
-  (.switcher-toggle, a glossy button that stays pressed in while Display is open)
-  opens it and, pressed again, closes it; so do the red gumdrop in its title bar and
-  Escape anywhere inside it. Opening moves the focus to its title bar and closing
-  gives it back to the button. Closed is just the hidden attribute: boxes.js leaves a hidden box
-  alone and fits it to the screen again, where it was left, when it opens. Whether it
-  was left open is kept in localStorage under "studio414.display" ("open" or
-  "closed"), so a first visit starts closed.
+  The panel is not a window: a plain section headed "Display" (#switcher, styled by
+  switcher.css like the comment section: a thin line box in the theme's font, holding
+  the Aqua pop-up menus and pills), always shown. It is added at the very end of the
+  page, in the page flow after the comment section, followed by the fonts' credit.
+  Nothing drags it. (It used to be a floating window opened by a paint roller button;
+  the "studio414.display" key that kept it open or closed is no longer read and is
+  left as it is.)
 
   The rows, top to bottom: Colour, 414 font, then two "Reset" buttons that show only
   while there is something to reset (Styles and Layout). Colour and 414 font are each a
@@ -50,8 +45,9 @@
 
   "Reset" on the Styles row puts back the site colour and font 0, clears both keys and
   takes ?font= out of the address bar; it shows only while either is set.
-  "Reset" on the Layout row is for the layout of the boxes, shown only while a box
-  (this window included) has been moved or resized. boxes.js reports that with a
+  "Reset" on the Layout row puts back the mailing-list card and the big 414 where the
+  visitor moved or resized them; it shows only while one of them has been. boxes.js
+  reports that with a
   "studio414:layoutchange" event ({ detail: { custom } }); the button asks it to reset
   with "studio414:layoutreset". Without boxes.js the row just stays hidden.
   Either button gives the focus to the font dropdown when it goes away under it.
@@ -66,7 +62,6 @@
 
   var FONT_KEY = 'studio414.style.font';
   var COLOR_KEY = 'studio414.style.pageColor';
-  var OPEN_KEY = 'studio414.display';
   var root = document.documentElement;
   var params = new URLSearchParams(window.location.search);
   // The owner's preview page: the visitor's own choices are neither read nor written.
@@ -231,37 +226,20 @@
     return index === 0 ? null : index - 1;
   }
 
-  // An Aqua window like the card: a title bar with the three gumdrops and the title,
-  // then the rows. box--fixed tells boxes.js and boxes.css that it is fixed to the
-  // screen rather than placed in the page.
-  var panel = element('aside', 'switcher box box--fixed');
+  // A plain section like the comment section: the line box (.switcher__inner), the
+  // heading, then the rows.
+  var panel = element('section', 'switcher');
   panel.id = 'switcher';
-  panel.setAttribute('aria-label', 'Display');
+  panel.setAttribute('aria-labelledby', 'switcher-title');
 
-  var titlebar = element('div', 'box__titlebar');
-  var lights = element('span', 'box__lights');
-
-  // The red gumdrop is the close button (boxes.css), over the drag handle; the yellow
-  // and green ones are only decoration.
-  var closeButton = element('button', 'box__light box__light--close box__close');
-  closeButton.type = 'button';
-  closeButton.setAttribute('aria-label', 'Close Display');
-  closeButton.title = 'Close';
-  closeButton.innerHTML =
-    '<svg viewBox="0 0 7 7" aria-hidden="true" focusable="false">' +
-    '<path d="M1 1l5 5M6 1L1 6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" fill="none"/></svg>';
-  lights.appendChild(closeButton);
-  ['min', 'zoom'].forEach(function (kind) {
-    var light = element('span', 'box__light box__light--' + kind);
-    light.setAttribute('aria-hidden', 'true');
-    lights.appendChild(light);
-  });
-  titlebar.appendChild(lights);
-  titlebar.appendChild(element('span', 'box__title', 'Display'));
-  panel.appendChild(titlebar);
+  var inner = element('div', 'switcher__inner');
+  var heading = element('h2', 'switcher__title', 'Display');
+  heading.id = 'switcher-title';
+  inner.appendChild(heading);
+  panel.appendChild(inner);
 
   var body = element('div', 'switcher__body');
-  panel.appendChild(body);
+  inner.appendChild(body);
 
   var live = element('p', 'switcher__live');
   live.setAttribute('aria-live', 'polite');
@@ -390,7 +368,7 @@
   var resetButton = element('button', 'switcher__reset aqua-pill', 'Reset');
   resetButton.type = 'button';
   resetButton.setAttribute('aria-label', 'Reset layout');
-  resetButton.title = 'Put the windows back where they were, at their original size';
+  resetButton.title = 'Put the card and the 414 back where they were, at their original size';
   resetButton.addEventListener('click', function () {
     document.dispatchEvent(new CustomEvent('studio414:layoutreset'));
     live.textContent = 'Layout reset.';
@@ -416,63 +394,6 @@
   creditLink.href = 'https://velvetyne.fr';
   credit.appendChild(creditLink);
   credit.appendChild(document.createTextNode(', under the SIL Open Font License.'));
-
-  /* ---------- Opening and closing: the paint roller ---------- */
-
-  // A glossy Aqua button (aqua-pill) with a pixel paint roller (16 x 16, drawn at twice the size):
-  // a black outline and handle, and a roller covered in the site colour's own title-bar
-  // colour, with a lit top and a shaded bottom row (switcher.css).
-  var toggle = element('button', 'switcher-toggle aqua-pill');
-  toggle.type = 'button';
-  toggle.setAttribute('aria-label', 'Display: colour and font');
-  toggle.setAttribute('aria-controls', panel.id);
-  toggle.title = 'Display: colour and font';
-  toggle.innerHTML =
-    '<svg viewBox="0 0 16 16" aria-hidden="true" focusable="false" shape-rendering="crispEdges">' +
-    '<path class="switcher-toggle__paint" d="M2 2h9v4H2z"/>' +
-    '<path class="switcher-toggle__shine" d="M2 2h9v1H2z"/>' +
-    '<path class="switcher-toggle__shade" d="M2 5h9v1H2z"/>' +
-    '<path fill="currentColor" d="M1 1h11v1H1zM1 6h11v1H1zM1 2h1v4H1zM11 2h1v4h-1zM12 3h2v1h-2zM13 4h1v4h-1zM6 8h8v1H6zM6 9h1v1H6zM5 10h3v5H5zM6 15h1v1H6z"/></svg>';
-
-  function isOpen() {
-    return !panel.hidden;
-  }
-
-  // Opens or closes Display. focus: move the focus with it (into its title bar on
-  // opening, back to the paint roller on closing), as when the visitor does it.
-  function setOpen(open, focus) {
-    panel.hidden = !open;
-    toggle.setAttribute('aria-expanded', String(open));
-    writeStorage(OPEN_KEY, open ? 'open' : 'closed');
-    if (!focus) return;
-    if (open) {
-      // The drag handle over the title bar (boxes.js), or else the red gumdrop.
-      (panel.querySelector('.box__handle') || closeButton).focus();
-    } else {
-      toggle.focus();
-    }
-  }
-
-  toggle.addEventListener('click', function () {
-    setOpen(!isOpen(), true);
-  });
-
-  closeButton.addEventListener('click', function () {
-    setOpen(false, true);
-  });
-
-  panel.addEventListener('keydown', function (event) {
-    if (event.key !== 'Escape' || event.defaultPrevented) return;
-    // Escape during a drag puts the window back instead (boxes.js).
-    if (root.classList.contains('is-moving-box') || root.classList.contains('is-sizing-box')) return;
-    event.preventDefault();
-    setOpen(false, true);
-  });
-
-  // Closed on a first visit; as the visitor left it after that.
-  var startOpen = readStorage(OPEN_KEY) === 'open';
-  panel.hidden = !startOpen;
-  toggle.setAttribute('aria-expanded', String(startOpen));
 
   /* ---------- Updating ---------- */
 
@@ -517,10 +438,9 @@
 
   apply();
   render();
-  document.body.appendChild(credit);
-  // The paint roller just before the window, so Tab goes from one into the other.
-  document.body.appendChild(toggle);
+  // At the very end of the page, after the comment section: Display, then the credit.
   document.body.appendChild(panel);
+  document.body.appendChild(credit);
   // The head script has handed the page colour to look.js before first paint; show it
   // now if that script is missing.
   if (pageColor !== null && window.studio414PageColor !== pageColor) applyColor();

@@ -1,12 +1,13 @@
 /*
-  Draggable, resizable boxes for Studio 414: the mailing-list card (#signup) and the
-  style switcher's "Display" window (#switcher, built by switcher.js), drawn as Mac
-  OS X Aqua windows by boxes.css. (The comment section stays put: it is not a window.)
+  Draggable, resizable boxes for Studio 414: the mailing-list card (#signup), drawn
+  as a Mac OS X Aqua window by boxes.css, and the big 414 (below). The comment
+  section and Display (switcher.js) are not windows: they stay put in the page, and
+  anything stored for them from when they were is ignored.
 
   - Drag a box by its title bar; resize the card with the grip in its bottom-right
-    corner (Display has no grip: its rows have one size). Pointer events, so a mouse,
-    a finger and a pen all work. Only the title bar and the grip take touch-action:
-    none, so a finger anywhere else still scrolls the page.
+    corner (a box without a grip keeps the size its CSS gives it). Pointer events, so
+    a mouse, a finger and a pen all work. Only the title bar and the grip take
+    touch-action: none, so a finger anywhere else still scrolls the page.
   - Keyboard: the title bar and the grip are buttons. On the title bar the arrow keys
     move the box and Shift+arrow keys resize it (or, without a grip, move it too); on
     the grip the arrow keys resize it. Escape during a drag puts the box back.
@@ -14,25 +15,18 @@
   - Until a box is moved or resized it keeps the default, responsive layout from the
     CSS. From then on it is "placed", and remembered in localStorage under
     "studio414.layout", with the order the boxes are stacked in. Without localStorage
-    it all still works for the visit. The card is then absolutely positioned at
-    page coordinates (px from the top-left corner of the page, so it scrolls with
-    the page as the photo does). Display is fixed to the screen (box--fixed), so its
-    coordinates are px from the top-left corner of the viewport and it stays put as
-    the page scrolls.
+    it all still works for the visit. It is then absolutely positioned at page
+    coordinates (px from the top-left corner of the page, so it scrolls with the page
+    as the photo does).
   - Stored coordinates are kept as the visitor left them and fitted to the screen
     whenever they are applied (on load, and when the window is resized or rotated):
     no wider than the viewport and wholly inside it across, never smaller than the
-    content needs, and with the title bar somewhere on the page (Display: wholly on
-    screen). While dragging, the title bar stays inside the visible viewport. So a
-    layout made on a wide window is squeezed onto a narrow one and comes back as it
-    was when the window widens again.
-  - "Reset" in Display sends "studio414:layoutreset", which puts every box back in
-    the default layout. Every change sends "studio414:layoutchange"
-    ({ detail: { custom } }), which shows or hides that button.
-  - A box can be closed (Display starts closed; switcher.js sets its hidden
-    attribute). A closed box has no size, so it is never measured, fitted or saved
-    while closed (its stored place is kept, and a drag of it is called off); when it
-    opens again it is fitted to the screen where it was left and comes to the front.
+    content needs, and with the title bar somewhere on the page. While dragging, the
+    title bar stays inside the visible viewport. So a layout made on a wide window is
+    squeezed onto a narrow one and comes back as it was when the window widens again.
+  - "Reset" on Display's Layout row sends "studio414:layoutreset", which puts the card
+    and the 414 back in the default layout. Every change sends
+    "studio414:layoutchange" ({ detail: { custom } }), which shows or hides that row.
 
   The big 414 (#big-414, styles.css) moves the same way, though it is not a window:
   - It is picked up anywhere on its figures. A mouse or pen drags it at once (a grab
@@ -65,22 +59,19 @@
   };
   var root = document.documentElement;
 
-  // Back to front, as they are stacked by default. fixed: positioned against the
-  // screen (box--fixed in the CSS) rather than the page. grip: resizable.
+  // Back to front, as they are stacked by default. grip: resizable.
   var boxes = [
-    { id: 'signup', el: document.getElementById('signup'), grip: true },
-    { id: 'switcher', el: document.getElementById('switcher'), grip: false }
+    { id: 'signup', el: document.getElementById('signup'), grip: true }
   ].filter(function (box) {
     return box.el && box.el.querySelector('.box__titlebar');
   });
   boxes.forEach(function (box) {
-    box.fixed = box.el.classList.contains('box--fixed');
     box.stacked = true;
   });
 
   // Everything that moves: the boxes, and the big 414, which stays under them.
   var signEl = document.getElementById('big-414');
-  var sign = signEl ? { id: '414', el: signEl, grip: false, fixed: false, stacked: false } : null;
+  var sign = signEl ? { id: '414', el: signEl, grip: false, stacked: false } : null;
   var items = sign ? boxes.concat(sign) : boxes.slice();
   if (!items.length || !window.PointerEvent) return;
 
@@ -110,8 +101,9 @@
       data = null;
     }
     if (!data || typeof data !== 'object') return;
-    // Only what still moves is read back: anything else stored (the comment section,
-    // from when it was a window) is left out, and so dropped at the next save.
+    // Only what still moves is read back: anything else stored (the comment section
+    // and Display, from when they were windows) is left out, and so dropped at the
+    // next save.
     if (data.boxes && typeof data.boxes === 'object') {
       items.forEach(function (item) {
         if (isRect(data.boxes[item.id])) placed[item.id] = roundRect(data.boxes[item.id]);
@@ -121,8 +113,7 @@
       var known = data.order.filter(function (id, index) {
         return byId[id] && byId[id].stacked && data.order.indexOf(id) === index;
       });
-      // Boxes the stored order doesn't know yet (Display, for layouts saved before
-      // it was a window) go on top, as they would by default.
+      // Boxes the stored order doesn't know go on top, as they would by default.
       order = known.concat(DEFAULT_ORDER.filter(function (id) { return known.indexOf(id) < 0; }));
     }
   }
@@ -147,15 +138,9 @@
     document.dispatchEvent(new CustomEvent('studio414:layoutchange', {
       detail: { custom: Object.keys(placed).length > 0 }
     }));
-    // That shows or hides the Layout row in Display, which changes its height: keep
-    // it on screen if it has been moved (and is open).
-    if (gesture) return;
-    boxes.forEach(function (box) {
-      if (box.fixed) refit(box);
-    });
   }
 
-  /* ---------- Geometry (in page px; screen px for a fixed box) ---------- */
+  /* ---------- Geometry (in page px) ---------- */
 
   function roundRect(r) {
     return { x: Math.round(r.x), y: Math.round(r.y), w: Math.round(r.w), h: Math.round(r.h) };
@@ -163,11 +148,6 @@
 
   function clamp(value, min, max) {
     return Math.max(min, Math.min(value, max));
-  }
-
-  // False while the box is closed (hidden, so display: none): it has no size then.
-  function isShown(box) {
-    return !box.el.hidden && box.el.getClientRects().length > 0;
   }
 
   function viewport() {
@@ -178,16 +158,14 @@
     };
   }
 
-  // Where the box is now: in page px, or in screen px for a fixed box.
+  // Where the box is now, in page px.
   function rectOf(box) {
     var r = box.el.getBoundingClientRect();
-    var dx = box.fixed ? 0 : window.pageXOffset;
-    var dy = box.fixed ? 0 : window.pageYOffset;
-    return roundRect({ x: r.left + dx, y: r.top + dy, w: r.width, h: r.height });
+    return roundRect({ x: r.left + window.pageXOffset, y: r.top + window.pageYOffset, w: r.width, h: r.height });
   }
 
   // Where left: 0; top: 0 puts a placed box: the corner of the hero for the card and
-  // the 414, of the screen for Display (fixed, so it has no offset parent).
+  // the 414.
   function origin(el) {
     var parent = el.offsetParent;
     if (!parent || parent === document.body || parent === root) return { x: 0, y: 0 };
@@ -234,10 +212,9 @@
   }
 
   // Fits a rectangle to the screen. live (while dragging): the title bar (all of the
-  // 414) stays in the visible viewport; otherwise anywhere on the page. A fixed box
-  // stays wholly on screen (or, if it were ever taller than the screen, with its title
-  // bar at the top). A box without a grip, and the 414, keep the size their CSS gives
-  // them; only their place is fitted.
+  // 414) stays in the visible viewport; otherwise anywhere on the page. A box without
+  // a grip, and the 414, keep the size their CSS gives them; only their place is
+  // fitted.
   function fit(box, r, live) {
     var el = box.el;
     var vp = viewport();
@@ -252,14 +229,8 @@
       h = el.offsetHeight;
     }
     var x = clamp(r.x, 0, Math.max(0, vp.width - w));
-    var top, bottom;
-    if (box.fixed) {
-      top = 0;
-      bottom = vp.height - h;
-    } else {
-      top = live ? vp.top : 0;
-      bottom = (live ? vp.top + vp.height : pageBottom()) - grabBottom(box);
-    }
+    var top = live ? vp.top : 0;
+    var bottom = (live ? vp.top + vp.height : pageBottom()) - grabBottom(box);
     var y = clamp(r.y, top, Math.max(top, bottom));
     return roundRect({ x: x, y: y, w: w, h: h });
   }
@@ -291,16 +262,15 @@
       el.style.width = r.w + 'px';
       el.style.height = r.h + 'px';
     }
-    var o = box.fixed ? { x: 0, y: 0 } : origin(el);
+    var o = origin(el);
     el.style.left = (r.x - o.x) + 'px';
     el.style.top = (r.y - o.y) + 'px';
   }
 
-  // Puts a placed box where it was left, fitted to the screen. A closed box is left
-  // as it is; it is fitted when it opens.
+  // Puts a placed box where it was left, fitted to the screen.
   function refit(box) {
     var r = placed[box.id];
-    if (!r || !isShown(box)) return;
+    if (!r) return;
     box.el.classList.add('is-placed');
     render(box, fit(box, r, false));
   }
@@ -470,8 +440,7 @@
     var handle = button('box__handle', 'Move the ' + name + ' box', box.grip
       ? 'Drag to move. Arrow keys move it, Shift+arrow keys resize it.'
       : 'Drag to move. Arrow keys move it.');
-    // First in the title bar, before the gumdrops (Display's red one is its close
-    // button), so Tab reaches the bar first.
+    // First in the title bar, before the gumdrops, so Tab reaches the bar first.
     var bar = el.querySelector('.box__titlebar');
     bar.insertBefore(handle, bar.firstChild);
     handle.addEventListener('pointerdown', function (event) { begin(box, 'move', event); });
@@ -599,26 +568,6 @@
     forget();
     announce();
   });
-
-  // A box closed (hidden) mid-drag puts the drag back; a box opened again is fitted
-  // to the screen where it was left, and comes to the front.
-  if (window.MutationObserver) {
-    var observer = new MutationObserver(function (records) {
-      records.forEach(function (record) {
-        var box = boxes.filter(function (b) { return b.el === record.target; })[0];
-        if (!box) return;
-        if (!isShown(box)) {
-          if (gesture && gesture.box === box) finish(true);
-          return;
-        }
-        refit(box);
-        raise(box);
-      });
-    });
-    boxes.forEach(function (box) {
-      observer.observe(box.el, { attributes: true, attributeFilter: ['hidden'] });
-    });
-  }
 
   // Refit placed boxes to a resized or rotated window, once per frame at most.
   var refitQueued = false;

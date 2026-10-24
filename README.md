@@ -109,7 +109,7 @@ Owners pick one theme and one colour for both the public site and the owner page
 
 To try a look without saving it, add `?theme=<id>&color=<n>` to either page's address, for example `index.html?theme=nes&color=6`.
 
-Visitors can change the page for themselves, on their own screen only, in the Display window on the public site (the paint roller in the bottom-left corner, [`switcher.js`](switcher.js)). **Colour** starts on "Site colour", which follows the owners' look; any other colour of the 21 stays with that visitor (kept in their browser) until they pick "Site colour" again or press the Styles **Reset**. **414 font** picks one of twenty faces for the big 414 and "Opening soon!" only; all other text keeps the theme's font. The owner page always shows the owners' colour, and `?color=` in the address wins over a visitor's own colour.
+Visitors can change the page for themselves, on their own screen only, in Display, a plain panel at the very end of the public site, under the comments ([`switcher.js`](switcher.js)). **Colour** starts on "Site colour", which follows the owners' look; any other colour of the 21 stays with that visitor (kept in their browser) until they pick "Site colour" again or press the Styles **Reset**. **414 font** picks one of twenty faces for the big 414 and "Opening soon!" only; all other text keeps the theme's font. The owner page always shows the owners' colour, and `?color=` in the address wins over a visitor's own colour. If they have dragged or resized the mailing-list card or the big 414, a Layout **Reset** puts them back.
 
 ## Still to do
 
