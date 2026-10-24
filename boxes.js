@@ -12,12 +12,19 @@
     move the box and Shift+arrow keys resize it (or, without a grip, move it too); on
     the grip the arrow keys resize it. Escape during a drag puts the box back.
   - The box last touched or focused comes to the front.
-  - Until a box is moved or resized it keeps the default, responsive layout from the
-    CSS. From then on it is "placed", and remembered in localStorage under
-    "studio414.layout", with the order the boxes are stacked in. Without localStorage
-    it all still works for the visit. It is then absolutely positioned at page
+  - Until a box is moved or resized it keeps the default layout: where the owners put
+    it on the preview page (the site layout, layout.js), or, where they left it out
+    (or no layout is saved), the responsive layout from the CSS. Once the visitor
+    moves or resizes it, it is "placed", and remembered in localStorage under
+    "studio414.layout", with the order the boxes are stacked in; that wins over the
+    owners' layout. Without localStorage it all still works for the visit. A box in
+    the owners' layout or placed by the visitor is absolutely positioned at page
     coordinates (px from the top-left corner of the page, so it scrolls with the page
     as the photo does).
+  - The owners' layout gives fractions of the visible photo (see layout.js), turned
+    into page px afresh whenever the boxes are fitted, so it follows the photo on every
+    screen. When it changes (fetched after load, or apply() from the preview page,
+    "studio414:sitelayout"), the boxes the visitor hasn't moved go to their new place.
   - Stored coordinates are kept as the visitor left them and fitted to the screen
     whenever they are applied (on load, and when the window is resized or rotated):
     no wider than the viewport and wholly inside it across, never smaller than the
@@ -25,8 +32,13 @@
     title bar stays inside the visible viewport. So a layout made on a wide window is
     squeezed onto a narrow one and comes back as it was when the window widens again.
   - "Reset" on Display's Layout row sends "studio414:layoutreset", which puts the card
-    and the 414 back in the default layout. Every change sends
-    "studio414:layoutchange" ({ detail: { custom } }), which shows or hides that row.
+    and the 414 back in the default layout (the owners', else the CSS's). Every change
+    sends "studio414:layoutchange" ({ detail: { custom } }: whether the visitor has
+    moved anything), which shows or hides that row.
+  - With ?edit=1 in the URL (the owners' preview page frames the site so) the
+    visitor's "studio414.layout" is neither read nor written: the page starts from the
+    owners' layout, and the preview page places the boxes through
+    studio414SiteLayout.apply().
 
   The big 414 (#big-414, styles.css) moves the same way, though it is not a window:
   - It is picked up anywhere on its figures. A mouse or pen drags it at once (a grab
@@ -41,6 +53,10 @@
     fitted again when the font changes (which changes its size). While dragged it
     stays wholly in view, and once placed wholly on the page. It always stays under
     the windows: it is not restacked.
+  - Visitors only move it; its size is the CSS's, or, where the owners' layout has
+    big414, their width (no wider than the screen). Its height follows its font, so
+    that width is set as a font size: width / --big-w (the advance width of "414" in
+    em, styles.css and fonts.css), worked out again when the font changes.
 */
 (function () {
   'use strict';
@@ -58,6 +74,10 @@
     ArrowDown: [0, 1]
   };
   var root = document.documentElement;
+  // The owners' preview page: the visitor's own layout is neither read nor written.
+  var editing = new URLSearchParams(window.location.search).get('edit') === '1';
+  // Each item's part of the owners' layout (layout.js).
+  var PARTS = { signup: 'card', '414': 'big414' };
 
   // Back to front, as they are stacked by default. grip: resizable.
   var boxes = [
@@ -94,6 +114,7 @@
   }
 
   function load() {
+    if (editing) return;
     var data = null;
     try {
       data = JSON.parse(window.localStorage.getItem(STORAGE_KEY));
@@ -119,6 +140,7 @@
   }
 
   function save() {
+    if (editing) return;
     try {
       window.localStorage.setItem(STORAGE_KEY, JSON.stringify({ version: 1, boxes: placed, order: order }));
     } catch (error) {
@@ -127,6 +149,7 @@
   }
 
   function forget() {
+    if (editing) return;
     try {
       window.localStorage.removeItem(STORAGE_KEY);
     } catch (error) {
@@ -213,8 +236,8 @@
 
   // Fits a rectangle to the screen. live (while dragging): the title bar (all of the
   // 414) stays in the visible viewport; otherwise anywhere on the page. A box without
-  // a grip, and the 414, keep the size their CSS gives them; only their place is
-  // fitted.
+  // a grip, and the 414, keep the size they have (the CSS's, or for the 414 the one
+  // sizeSign gives it); only their place is fitted.
   function fit(box, r, live) {
     var el = box.el;
     var vp = viewport();
@@ -253,6 +276,28 @@
     return roundRect({ x: start.x, y: start.y, w: w, h: h });
   }
 
+  /* ---------- The owners' layout (layout.js): the default ---------- */
+
+  // Where the owners put an item, in page px ({ x, y, w, h } for the card, { x, y, w }
+  // for the 414), or null where they leave it to the CSS.
+  function ownerRect(item) {
+    var site = window.studio414SiteLayout;
+    var layout = site && typeof site.current === 'function' ? site.current() : null;
+    var part = layout && layout[PARTS[item.id]];
+    return part ? site.toPage(part) : null;
+  }
+
+  // Sizes the 414 to the owners' width r.w (no wider than the screen), or gives it
+  // back the size the CSS gives it (no r). Its box is --big-w em wide.
+  function sizeSign(r) {
+    var bigW = parseFloat(window.getComputedStyle(signEl).getPropertyValue('--big-w'));
+    if (r && bigW > 0) {
+      signEl.style.fontSize = (Math.min(r.w, viewport().width) / bigW) + 'px';
+    } else {
+      signEl.style.removeProperty('font-size');
+    }
+  }
+
   /* ---------- Rendering ---------- */
 
   function render(box, r) {
@@ -267,12 +312,18 @@
     el.style.top = (r.y - o.y) + 'px';
   }
 
-  // Puts a placed box where it was left, fitted to the screen.
-  function refit(box) {
-    var r = placed[box.id];
-    if (!r) return;
-    box.el.classList.add('is-placed');
-    render(box, fit(box, r, false));
+  // Puts an item where it belongs, fitted to the screen: where the visitor left it,
+  // else where the owners put it, else in the CSS layout.
+  function refit(item) {
+    var owner = ownerRect(item);
+    if (item === sign) sizeSign(owner);
+    var r = placed[item.id] || owner;
+    if (!r) {
+      unplace(item);
+      return;
+    }
+    item.el.classList.add('is-placed');
+    render(item, fit(item, r, false));
   }
 
   function unplace(box) {
@@ -290,13 +341,7 @@
   }
 
   function applyAll() {
-    items.forEach(function (item) {
-      if (placed[item.id]) {
-        refit(item);
-      } else {
-        unplace(item);
-      }
-    });
+    items.forEach(refit);
     stack();
   }
 
@@ -381,11 +426,10 @@
       // Back to how it was: placed where it was, or in the default layout.
       if (g.before) {
         placed[g.box.id] = g.before;
-        refit(g.box);
       } else {
         delete placed[g.box.id];
-        unplace(g.box);
       }
+      refit(g.box);
     } else {
       placed[g.box.id] = r;
     }
@@ -546,8 +590,8 @@
       if (hold || (gesture && gesture.box === sign)) event.preventDefault();
     });
 
-    // Its size follows the font: fit a moved 414 to the screen again when the font
-    // changes, or a face finishes loading.
+    // Its size follows the font: size it (to the owners' width) and fit it to the
+    // screen again when the font changes, or a face finishes loading.
     var refitSign = function () {
       if (!gesture) refit(sign);
     };
@@ -567,6 +611,12 @@
     applyAll();
     forget();
     announce();
+  });
+
+  // The owners' layout changed (fetched, or apply() from the preview page): what the
+  // visitor hasn't moved goes to its new place, and the 414 takes its new size.
+  document.addEventListener('studio414:sitelayout', function () {
+    if (!gesture) applyAll();
   });
 
   // Refit placed boxes to a resized or rotated window, once per frame at most.
