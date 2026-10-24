@@ -103,7 +103,8 @@
     <div class="admin-view preview-owner" id="admin-owner" hidden>
       <!--
         The side panel: owner sections, each a window, registered by their modules
-        through studioAdmin.registerSection (see admin.js). Look is admin-look.js.
+        through studioAdmin.registerSection (see admin.js). Look is admin-look.js,
+        Layout is admin-layout.js.
       -->
       <div class="preview-layout">
         <div class="preview-panel">
@@ -111,6 +112,16 @@
             <div class="box__titlebar">
               <span class="box__lights" aria-hidden="true"><span class="box__light box__light--close"></span><span class="box__light box__light--min"></span><span class="box__light box__light--zoom"></span></span>
               <h2 class="box__title" id="admin-look-title">Look</h2>
+            </div>
+            <div class="admin-section-body" data-section-body>
+              <p class="admin-soon">Coming soon</p>
+            </div>
+          </section>
+
+          <section class="admin-section box" data-section="layout" aria-labelledby="admin-layout-title">
+            <div class="box__titlebar">
+              <span class="box__lights" aria-hidden="true"><span class="box__light box__light--close"></span><span class="box__light box__light--min"></span><span class="box__light box__light--zoom"></span></span>
+              <h2 class="box__title" id="admin-layout-title">Layout</h2>
             </div>
             <div class="admin-section-body" data-section-body>
               <p class="admin-soon">Coming soon</p>
@@ -137,5 +148,6 @@
   <script src="preview.js"></script>
   <!-- Section modules go here, after admin.js and preview.js. -->
   <script src="admin-look.js"></script>
+  <script src="admin-layout.js"></script>
 </body>
 </html>

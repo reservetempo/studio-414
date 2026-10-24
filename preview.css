@@ -80,6 +80,13 @@
   margin-left: 0;
 }
 
+/* The Layout section (admin-layout.js): its lines, then the notices and buttons as in
+   the Look section (its root carries .look for them). */
+.layout-intro,
+.layout-state {
+  margin: 0 0 12px;
+}
+
 /* Wide screens: the column at the left and the frame beside it, both the height of the
    desktop; the page fits the screen exactly. */
 @media (min-width: 760px) {
