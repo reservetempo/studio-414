@@ -41,6 +41,8 @@
   /* The pixel-stepped triangle on a pop-up menu (system.css's select button). */
   --s6-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='13' height='7' viewBox='0 0 13 7'%3E%3Cpath d='M0 0h13v1h-1v1h-1v1h-1v1h-1v1h-1v1h-1v1h-1v-1h-1v-1h-1v-1h-1v-1h-1v-1h-1v-1h-1z' fill='%23000'/%3E%3C/svg%3E");
   --s6-arrow-inverse: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='13' height='7' viewBox='0 0 13 7'%3E%3Cpath d='M0 0h13v1h-1v1h-1v1h-1v1h-1v1h-1v1h-1v1h-1v-1h-1v-1h-1v-1h-1v-1h-1v-1h-1v-1h-1z' fill='%23fff'/%3E%3C/svg%3E");
+  /* 50% grey as 1 bit draws it: every other pixel in black (a background layer). */
+  --s6-dither: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='2' height='2' viewBox='0 0 2 2'%3E%3Cpath d='M0 0h1v1h-1zM1 1h1v1h-1z' fill='%23000'/%3E%3C/svg%3E") 0 0 / 2px 2px;
 }
 
 /* Built from the palette, so declared again on anything with its own data-color. */
@@ -446,6 +448,159 @@
   outline-offset: -5px;
 }
 
+/* ---------- Workshops window ---------- */
+
+/* The status line and Try again keep their muted words and button. Each workshop's
+   link, in 1 bit: underlined ink, the muted grey once its window has opened, inverse
+   video while pressed, the dotted rectangle when focused. */
+:root[data-theme="system6"] .workshop__link {
+  color: var(--s6-ink);
+}
+
+:root[data-theme="system6"] .workshop__link[data-visited] {
+  color: var(--face-muted);
+}
+
+:root[data-theme="system6"] .workshop__link:active {
+  background: var(--face-text);
+  color: var(--face);
+}
+
+:root[data-theme="system6"] .workshop__link:focus-visible {
+  border-radius: 0;
+  outline: 1px dotted var(--s6-ink);
+  outline-offset: 1px;
+}
+
+/* ---------- Calendar ---------- */
+
+/* The month in the chrome's face, in ink. */
+:root[data-theme="system6"] .calendar__month {
+  color: var(--s6-ink);
+  font-family: var(--aqua-font);
+  font-size: 18px;
+  font-weight: var(--s6-chicago);
+  line-height: 22px;
+}
+
+/* The month as a list box: white inside a 1px line, no shadow; the weekdays over a
+   1px line. */
+:root[data-theme="system6"] .calendar__grid {
+  border: 1px solid var(--s6-ink);
+  box-shadow: none;
+}
+
+:root[data-theme="system6"] .calendar__grid th {
+  border-bottom-color: var(--field-text);
+  color: var(--field-text);
+  font-size: 12px;
+  font-weight: var(--s6-chicago);
+}
+
+/* Today: a square drawn round it. */
+:root[data-theme="system6"] .calendar__day:not(.aqua-pill) {
+  border-radius: 0;
+}
+
+:root[data-theme="system6"] .calendar__day[aria-current="date"]:not(.aqua-pill) {
+  background: none;
+  box-shadow: inset 0 0 0 1px var(--field-text);
+}
+
+/* A workshop coming up: a button in inverse video, white on black as a selected item
+   is; pressed, it goes back to black on white. Today as well, a white line runs
+   inside the black. */
+:root[data-theme="system6"] .calendar__day--workshop.aqua-pill {
+  border-color: var(--field-text);
+  background: var(--field-text);
+  color: var(--field);
+}
+
+:root[data-theme="system6"] .calendar__day--workshop.aqua-pill:active {
+  background: var(--field);
+  color: var(--field-text);
+}
+
+:root[data-theme="system6"] .calendar__day--workshop.aqua-pill[aria-current="date"] {
+  box-shadow: inset 0 0 0 1px var(--field-text), inset 0 0 0 2px var(--field);
+}
+
+/* A workshop that is over: dimmed, as a disabled button is. */
+:root[data-theme="system6"] .calendar__day--workshop.calendar__day--past {
+  border: 1px solid var(--shadow);
+  border-radius: var(--s6-radius);
+  background: var(--field);
+  color: var(--face-muted);
+}
+
+/* The workshop's name over its day: System 6 had no tooltips, so a plain white box
+   with a hard shadow, as the pop-up menus have. */
+:root[data-theme="system6"] .calendar__tip {
+  padding: 1px 5px 2px;
+  border: 1px solid var(--field-text);
+  background: var(--field);
+  color: var(--field-text);
+  box-shadow: 1px 1px 0 var(--field-text);
+  font-size: 12px;
+  font-weight: var(--s6-geneva);
+}
+
+/* ---------- Sign-up window ---------- */
+
+/* The workshop's name and the result's icon in ink. */
+:root[data-theme="system6"] .workshop__name,
+:root[data-theme="system6"] .workshop__result-icon {
+  color: var(--s6-ink);
+}
+
+/* Date, Time, Price and the fields' labels in the chrome's face, as on the card. */
+:root[data-theme="system6"] .workshop__facts dt,
+:root[data-theme="system6"] .workshop__label {
+  color: var(--s6-ink);
+  font-family: var(--aqua-font);
+  font-size: 14px;
+  font-weight: var(--s6-chicago);
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+/* The spots light: a small round, 50% grey while the spots are being checked, empty
+   when they couldn't be or the workshop is gone. */
+:root[data-theme="system6"] .workshop__spots::before {
+  border-color: var(--s6-ink);
+  background: var(--s6-dither), var(--field);
+  box-shadow: none;
+}
+
+:root[data-theme="system6"] .workshop__spots[data-state="unavailable"]::before,
+:root[data-theme="system6"] .workshop__spots[data-state="gone"]::before {
+  background: var(--field);
+}
+
+/* Something wrong with a field: its line doubled in the error red; focused (inverse
+   video), the inner line is white. */
+:root[data-theme="system6"] .workshop__input[aria-invalid="true"] {
+  border-color: var(--error);
+  box-shadow: inset 0 0 0 1px var(--error);
+}
+
+:root[data-theme="system6"] .workshop__input[aria-invalid="true"]:focus-visible {
+  border-color: var(--error);
+  box-shadow: inset 0 0 0 1px var(--field);
+}
+
+/* Disabled, a field or the check box greys its line, as a button does. */
+:root[data-theme="system6"] .workshop__input:disabled {
+  border-color: var(--shadow);
+  background: var(--s6-paper);
+  color: var(--face-muted);
+}
+
+:root[data-theme="system6"] .workshop__check input:disabled {
+  border-color: var(--shadow);
+  opacity: 1;
+}
+
 /* ---------- High contrast ---------- */
 
 @media (forced-colors: active) {
@@ -456,6 +611,17 @@
 
   :root[data-theme="system6"] .box__light {
     border-color: CanvasText;
+  }
+
+  /* The spots light keeps its own colours (workshop.css): system ones here. */
+  :root[data-theme="system6"] .workshop__spots::before {
+    border-color: CanvasText;
+    background: CanvasText;
+  }
+
+  :root[data-theme="system6"] .workshop__spots[data-state="unavailable"]::before,
+  :root[data-theme="system6"] .workshop__spots[data-state="gone"]::before {
+    background: Canvas;
   }
 }
 
