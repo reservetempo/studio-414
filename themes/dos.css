@@ -938,3 +938,364 @@
     translate: -50% 0;
   }
 }
+
+/* ======================================================================================
+   Owner page (admin.html, admin.css)
+   ====================================================================================== */
+
+/* ---------- Page ---------- */
+
+/* Text mode throughout: the chrome font at its whole size, a row to a line. */
+:root[data-theme="dos"] .admin-header,
+:root[data-theme="dos"] .admin {
+  font-size: var(--dos-text);
+  line-height: var(--dos-ch);
+  -webkit-font-smoothing: auto;
+  -moz-osx-font-smoothing: auto;
+}
+
+/* No bold in text mode: what is bold elsewhere keeps the plain weight. */
+:root[data-theme="dos"] .admin-title b,
+:root[data-theme="dos"] .admin-email,
+:root[data-theme="dos"] .admin-dialog-lead {
+  font-weight: 400;
+}
+
+/* ---------- The menu bar ---------- */
+
+/* Turbo Vision's menu bar: a row in inverse video along the top, flat. Sign out is a
+   block in the window's colours on it (no room for a shadow); pressed, it goes inverse
+   with a line round it. */
+:root[data-theme="dos"] .admin-header {
+  border-bottom: 0;
+  background: var(--dos-ink);
+  color: var(--dos-fill);
+  box-shadow: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+:root[data-theme="dos"] .admin-title,
+:root[data-theme="dos"] .admin-account-text {
+  font-size: var(--dos-text);
+  line-height: var(--dos-ch);
+}
+
+:root[data-theme="dos"] .admin-header ::selection {
+  background: var(--dos-fill);
+  color: var(--dos-ink);
+}
+
+:root[data-theme="dos"] .admin-header .admin-button {
+  --dos-btn-fill: var(--dos-fill);
+  --dos-btn-text: var(--dos-ink);
+  padding: 0 calc(2 * var(--dos-cw));
+  box-shadow: none;
+}
+
+:root[data-theme="dos"] .admin-header .admin-button:not(:disabled):active {
+  --dos-btn-fill: var(--dos-ink);
+  --dos-btn-text: var(--dos-fill);
+  box-shadow: inset 0 0 0 2px var(--dos-fill);
+  translate: none;
+}
+
+:root[data-theme="dos"] .admin-header .admin-button:disabled {
+  --dos-btn-fill: transparent;
+  --dos-btn-text: var(--dos-fill);
+  box-shadow: inset 0 0 0 2px var(--dos-fill);
+}
+
+/* ---------- Windows ---------- */
+
+/* Room for the frame, and below and right of the last buttons for their shadows. */
+:root[data-theme="dos"] .admin-section-body {
+  padding: 16px calc(3 * var(--dos-cw)) calc(2 * var(--dos-top) + 2px + var(--dos-btn-y)) calc(2 * var(--dos-cw));
+}
+
+/* Everything is on the fill: text in the window's text colour, hints dimmed. */
+:root[data-theme="dos"] .admin-status {
+  color: var(--dos-ink);
+}
+
+:root[data-theme="dos"] .admin-hint,
+:root[data-theme="dos"] .admin-soon {
+  color: var(--dos-dim);
+}
+
+/* Room between the buttons for their shadows. */
+:root[data-theme="dos"] .admin-actions {
+  gap: 16px;
+}
+
+/* An error: a strip in inverse video, as on the public site. */
+:root[data-theme="dos"] .admin-message-error {
+  padding: 0 var(--dos-cw);
+  border: 0;
+  border-radius: 0;
+  background: var(--dos-ink);
+  color: var(--dos-fill);
+}
+
+/* ---------- Alerts ---------- */
+
+/* The icon a small window of its own, "414" inside a double frame (three rows of
+   seven columns); the words beside it, the buttons at the bottom right. */
+:root[data-theme="dos"] .admin-dialog-body {
+  min-height: 90px;
+  padding: 18px calc(3 * var(--dos-cw)) calc(2 * var(--dos-top) + 2px + var(--dos-btn-y)) calc(11 * var(--dos-cw));
+}
+
+:root[data-theme="dos"] .admin-dialog-body::before {
+  top: 18px;
+  left: calc(2 * var(--dos-cw));
+  width: calc(7 * var(--dos-cw));
+  height: calc(3 * var(--dos-ch));
+  border: 0;
+  border-radius: 0;
+  background: var(--dos-frame);
+  box-shadow: none;
+  color: var(--dos-ink);
+  font: 400 var(--dos-text) / var(--dos-ch) var(--aqua-font);
+  letter-spacing: 0;
+  text-shadow: none;
+}
+
+:root[data-theme="dos"] .admin-dialog-body > .admin-message-error {
+  width: fit-content;
+  max-width: 100%;
+}
+
+/* Loading: a text-mode bar, a row of ░ with blocks (█) that step along it a column at
+   a time (still under reduced motion, below). */
+:root[data-theme="dos"] .admin-barber {
+  --barber-step: calc(6 * var(--dos-cw));
+  height: var(--dos-ch);
+  border: 0;
+  border-radius: 0;
+  background: conic-gradient(from 90deg at 2px 2px, transparent 75%, var(--dos-ink) 0) 0 0 / 4px 4px;
+}
+
+:root[data-theme="dos"] .admin-barber::before {
+  background: repeating-linear-gradient(to right, var(--dos-ink) 0 calc(3 * var(--dos-cw)), transparent 0 calc(6 * var(--dos-cw)));
+  animation: admin-barber 1.2s steps(6, end) infinite;
+}
+
+:root[data-theme="dos"] .admin-barber::after {
+  content: none;
+}
+
+/* ---------- Notices (every section) ---------- */
+
+/* A line of text with a mark two columns wide at its left: a problem is a strip in
+   inverse video with a "!", a saved change a pixel tick (DOS's √). */
+:root[data-theme="dos"] .look .admin-message,
+:root[data-theme="dos"] .wallpaper .admin-message,
+:root[data-theme="dos"] .workshops .admin-message {
+  padding: 0 0 0 calc(3 * var(--dos-cw));
+  border: 0;
+  border-radius: 0;
+  background: none;
+  color: var(--dos-ink);
+  box-shadow: none;
+  font-size: var(--dos-text);
+  line-height: var(--dos-ch);
+}
+
+:root[data-theme="dos"] .look .admin-message::before,
+:root[data-theme="dos"] .wallpaper .admin-message::before,
+:root[data-theme="dos"] .workshops .admin-message::before {
+  top: 0;
+  left: 0;
+  width: calc(2 * var(--dos-cw));
+  height: var(--dos-ch);
+  padding: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  clip-path: none;
+  color: inherit;
+  font: 400 var(--dos-text) / var(--dos-ch) var(--aqua-font);
+}
+
+:root[data-theme="dos"] .look .admin-message-error,
+:root[data-theme="dos"] .wallpaper .admin-message-error,
+:root[data-theme="dos"] .workshops .admin-message-error {
+  width: fit-content;
+  max-width: 100%;
+  padding-right: var(--dos-cw);
+  background: var(--dos-ink);
+  color: var(--dos-fill);
+}
+
+:root[data-theme="dos"] .look .admin-message-error::before,
+:root[data-theme="dos"] .wallpaper .admin-message-error::before,
+:root[data-theme="dos"] .workshops .admin-message-error::before {
+  left: var(--dos-cw);
+  width: var(--dos-cw);
+  place-items: center;
+}
+
+:root[data-theme="dos"] .look .admin-message-ok::before,
+:root[data-theme="dos"] .wallpaper .admin-message-ok::before,
+:root[data-theme="dos"] .workshops .admin-message-ok::before {
+  content: "";
+  background: var(--dos-ink);
+  -webkit-mask: var(--dos-tick) center / 100% 100% no-repeat;
+  mask: var(--dos-tick) center / 100% 100% no-repeat;
+}
+
+:root[data-theme="dos"] .admin {
+  --dos-tick: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 20'%3E%3Cpath d='M2 8h2v4H2zM4 10h2v4H4zM6 12h2v4H6zM8 10h2v4H8zM10 8h2v4h-2zM12 6h2v4h-2zM14 4h2v4h-2z'/%3E%3C/svg%3E");
+}
+
+/* ---------- Look section ---------- */
+
+/* The page's own colours for the picked name, its line and focus (the swatches carry
+   their own data-color). */
+:root[data-theme="dos"] .look {
+  --look-selection: var(--dos-ink);
+  --look-selection-text: var(--dos-fill);
+  --look-selection-ring: var(--dos-ink);
+  --look-focus-ring: 0 0 0 2px var(--dos-ink);
+}
+
+:root[data-theme="dos"] .look-field {
+  margin-bottom: var(--dos-ch);
+}
+
+/* The groups' names as the other labels: capitals in the chrome font. */
+:root[data-theme="dos"] .look-label {
+  padding-top: 0;
+  color: var(--dos-ink);
+  font-size: var(--dos-text);
+  line-height: var(--dos-ch);
+  text-transform: uppercase;
+}
+
+/* The themes: Turbo Vision's radio buttons, ( ) and (•) in the window's text colour,
+   pixels in a mask as the check box's; focused, the line goes inverse video. */
+:root[data-theme="dos"] .look-themes {
+  gap: 4px;
+}
+
+:root[data-theme="dos"] .look-theme {
+  gap: var(--dos-cw);
+  padding-right: var(--dos-cw);
+  font-size: var(--dos-text);
+  line-height: var(--dos-ch);
+}
+
+:root[data-theme="dos"] .look-theme-input {
+  --dos-radio: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 20'%3E%3Cpath d='M4 2h2v2H4zM2 4h2v12H2zM4 16h2v2H4zM18 2h2v2h-2zM20 4h2v12h-2zM18 16h2v2h-2z'/%3E%3C/svg%3E");
+  --dos-radio-on: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 20'%3E%3Cpath d='M4 2h2v2H4zM2 4h2v12H2zM4 16h2v2H4zM18 2h2v2h-2zM20 4h2v12h-2zM18 16h2v2h-2zM10 6h4v2h2v4h-2v2h-4v-2H8V8h2z'/%3E%3C/svg%3E");
+  width: calc(3 * var(--dos-cw));
+  height: var(--dos-ch);
+  border: 0;
+  border-radius: 0;
+  background: var(--dos-ink);
+  box-shadow: none;
+  -webkit-mask: var(--dos-radio) center / 100% 100% no-repeat;
+  mask: var(--dos-radio) center / 100% 100% no-repeat;
+}
+
+:root[data-theme="dos"] .look-theme-input:checked {
+  -webkit-mask-image: var(--dos-radio-on);
+  mask-image: var(--dos-radio-on);
+}
+
+:root[data-theme="dos"] .look-theme-input:focus-visible {
+  outline: 2px solid transparent;
+  box-shadow: none;
+}
+
+:root[data-theme="dos"] .look-theme:has(> .look-theme-input:focus-visible) {
+  background: var(--dos-ink);
+  color: var(--dos-fill);
+}
+
+:root[data-theme="dos"] .look-theme:has(> .look-theme-input:focus-visible) .look-theme-input {
+  background: var(--dos-fill);
+}
+
+/* The colours: each swatch a small window in its colour (its own fill, double frame
+   and text colour), the names in the chrome font. Picked: a line round the swatch and
+   the name in inverse video; focused, a dotted line round both. */
+:root[data-theme="dos"] .look-colors {
+  grid-template-columns: repeat(auto-fill, minmax(calc(12 * var(--dos-cw)), 1fr));
+  gap: 8px 4px;
+}
+
+:root[data-theme="dos"] .look-color {
+  gap: 6px;
+  padding: 4px 0;
+  font-size: var(--dos-text);
+  line-height: var(--dos-ch);
+}
+
+:root[data-theme="dos"] .look-color-chip,
+:root[data-theme="dos"] .look-color-input:focus-visible ~ .look-color-chip {
+  width: calc(6 * var(--dos-cw));
+  height: calc(2 * var(--dos-ch));
+  border-radius: 0;
+  background: var(--dos-frame);
+  box-shadow: none;
+  outline: 0;
+}
+
+:root[data-theme="dos"] .look-color-input:checked ~ .look-color-chip,
+:root[data-theme="dos"] .look-color-input:checked:focus-visible ~ .look-color-chip {
+  outline: 2px solid var(--look-selection-ring);
+  outline-offset: 2px;
+  box-shadow: none;
+}
+
+:root[data-theme="dos"] .look-color-name {
+  padding: 0 4px;
+  border-radius: 0;
+}
+
+:root[data-theme="dos"] .look-color:has(> .look-color-input:focus-visible) {
+  outline: 2px dotted var(--dos-ink);
+  outline-offset: 0;
+}
+
+/* ---------- Owner page, high contrast ---------- */
+
+/* A line under the menu bar, the icon's frame as the windows', the radio buttons the
+   system's and the tick in the text colour. */
+@media (forced-colors: active) {
+  :root[data-theme="dos"] .admin-header {
+    border-bottom: 2px solid CanvasText;
+  }
+
+  :root[data-theme="dos"] .admin-dialog-body::before {
+    outline: calc(2 * var(--dos-line) + var(--dos-gap)) double CanvasText;
+    outline-offset: calc(-1 * var(--dos-in-side) - var(--dos-line));
+  }
+
+  :root[data-theme="dos"] .look-theme-input {
+    -webkit-appearance: auto;
+    appearance: auto;
+    width: 16px;
+    height: 16px;
+    background: none;
+    -webkit-mask: none;
+    mask: none;
+  }
+
+  :root[data-theme="dos"] .look .admin-message-ok::before,
+  :root[data-theme="dos"] .wallpaper .admin-message-ok::before,
+  :root[data-theme="dos"] .workshops .admin-message-ok::before {
+    background: CanvasText;
+  }
+}
+
+/* ---------- Owner page, reduced motion ---------- */
+
+/* The loading bar stands still. */
+@media (prefers-reduced-motion: reduce) {
+  :root[data-theme="dos"] .admin-barber::before {
+    animation: none;
+  }
+}
