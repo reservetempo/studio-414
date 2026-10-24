@@ -314,8 +314,11 @@ body {
   margin: 0;
 }
 
-/* Picked up: a hard 90s shadow, and the closed hand wherever the pointer goes. */
-.big-414.is-lifted {
+/* Picked up: a hard 90s shadow, and the closed hand wherever the pointer goes. The
+   shadow is on the figures (the heading), not on the 414's box: a filter there would
+   make the box a layer of its own again, and take a focused "Move 414" button (below)
+   back under the windows for as long as the drag lasts. */
+.big-414.is-lifted .big-414__name {
   filter: drop-shadow(0.02em 0.02em 0 rgba(0, 0, 0, 0.45));
 }
 
@@ -339,14 +342,16 @@ html.is-moving-414 * {
   padding: 0 16px;
   -webkit-text-stroke: 0;
   white-space: nowrap;
-  cursor: grab;
 }
 
 /* Out of the flow, just under the figures: the extra class outweighs .aqua-pill's
    position: relative (boxes.css loads after this file), which would set it in the flow
-   below the heading's tall line box, far down the photo and over the card. */
+   below the heading's tall line box, far down the photo and over the card. It also
+   outweighs .aqua-pill's pointing hand: the open hand, as on the figures, since a mouse
+   can drag the 414 by it too (the closed hand while dragging, above). */
 .big-414 > .big-414__handle {
   position: absolute;
+  cursor: grab;
 }
 
 .big-414__handle:not(:focus) {
