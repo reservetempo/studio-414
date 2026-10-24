@@ -1,1 +1,299 @@
-/* PlayStation theme (after PSone.css). See themes/README.md. */
+/* PlayStation theme, after PSone.css by micah5 (v1.0.0, MIT, github.com/micah5/PSone.css,
+   npm psone.css): the PS1-era menus of Final Fantasy VII. Windows are PSone.css's
+   containers: a dark panel shaded top to bottom, a thin grey line round it with a
+   white rim inside and a soft shade under the rim, corners rounded 8px; light text
+   with a hard black drop shadow; titles in light grey capitals. No PSone.css is
+   loaded: the shapes are redrawn here on the existing markup. See themes/README.md.
+
+   Colours: PSone.css's fixed blue (#0d2289 to #06093b) becomes a dark shade of the
+   chosen colour's --title, its lightness held at or under OKLCH 0.33 and halved at
+   the foot, so Classic comes out as the original's blue and light colours as deep
+   tones of themselves. The panels are 90% opaque and blur what is behind them. Text,
+   titles, links, messages and the rim are light tints of --title. All checked for
+   the 21 colours with the panel over white (the worst case under it): text 8:1 and
+   up, muted text 5.3:1, links 5.8:1, errors 4.7:1, the rim 6.5:1. Browsers without
+   relative colours get opaque panels mixed from --title and fixed light greys.
+
+   Font: Pixelify Sans by Stefie Justprince (SIL Open Font License 1.1,
+   fonts/psone/LICENSE.txt), from Fontsource (latin subset), regular and bold: a free
+   pixel face in the spirit of the game menus. PSone.css's own menu fonts (a Final
+   Fantasy VII fan font, Pixel Cyr) carry no clear licence, so they are not used. */
+
+@font-face {
+  font-family: "S414 PSone";
+  src: url("../fonts/psone/PixelifySans-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "S414 PSone";
+  src: url("../fonts/psone/PixelifySans-Bold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root[data-theme="psone"] {
+  --aqua-font: "S414 PSone", "Trebuchet MS", sans-serif;
+  --aqua-radius: 8px;
+  --ps-radius: 8px;         /* window corners */
+  --ps-bar: 30px;           /* the title bar */
+  --ps-title: 15px;         /* window titles */
+  --ps-label: 13px;         /* labels in the windows */
+  --ps-close: 16px;         /* the close button */
+  --ps-drop: 2px 2px 0 #000;      /* PSone.css's hard shadow under titles */
+  --ps-drop-small: 1px 1px 0 #000; /* and under smaller text */
+}
+
+@media (pointer: coarse) {
+  :root[data-theme="psone"] {
+    --ps-bar: 36px;
+    --ps-close: 22px;
+  }
+}
+
+/* Built from the palette, so declared again on anything with its own data-color.
+   First the fallback: opaque panels and fixed light greys. */
+:root[data-theme="psone"],
+:root[data-theme="psone"] [data-color] {
+  --ps-top: color-mix(in srgb, var(--title) 35%, #000);
+  --ps-bottom: color-mix(in srgb, var(--title) 15%, #000);
+  --ps-deep: color-mix(in srgb, var(--title) 10%, #000);
+  --ps-text: #ffffff;
+  --ps-title-text: #e2e2e2;
+  --ps-muted: #d6d6d6;
+  --ps-ink: #e6e6e6;
+  --ps-error: #ffc4ba;
+  --ps-rim: #f2f2f2;
+  --ps-line: #c6c6c6;
+  --ps-glow: rgb(255 255 255 / 0.3);
+}
+
+/* Then the tints, where relative colours work. */
+@supports (color: oklch(from red calc(min(l, 0.5) * 0.5) min(c, 0.1) h / 0.9)) {
+  :root[data-theme="psone"],
+  :root[data-theme="psone"] [data-color] {
+    --ps-top: oklch(from var(--title) min(l, 0.33) min(c, 0.17) h / 0.9);
+    --ps-bottom: oklch(from var(--title) calc(min(l, 0.33) * 0.5) min(c, 0.12) h / 0.9);
+    --ps-deep: oklch(from var(--title) calc(min(l, 0.33) * 0.4) min(c, 0.08) h);
+    --ps-text: #ffffff;
+    --ps-title-text: oklch(from var(--title) 0.9 min(c, 0.04) h);
+    --ps-muted: oklch(from var(--title) 0.86 min(c, 0.04) h);
+    --ps-ink: oklch(from var(--title) 0.88 min(c, 0.1) h);
+    --ps-error: oklch(0.84 0.1 25);
+    --ps-rim: oklch(from var(--title) 0.93 min(c, 0.03) h);
+    --ps-line: oklch(from var(--title) 0.75 min(c, 0.03) h);
+    --ps-glow: oklch(from var(--title) 0.88 min(c, 0.12) h / 0.45);
+  }
+}
+
+/* ---------- Windows ---------- */
+
+/* The frame: a 1px grey line, a 2px white rim inside it and a soft shade under the
+   rim (PSone.css's border, ::before and inset shadow), over the shaded panel, with a
+   drop shadow under the window. The comment box is framed the same way. */
+:root[data-theme="psone"] .box,
+:root[data-theme="psone"] .comments__inner {
+  border: 1px solid var(--ps-line);
+  border-radius: var(--ps-radius);
+  background: linear-gradient(var(--ps-top), var(--ps-bottom));
+  color: var(--ps-text);
+  text-shadow: var(--ps-drop-small);
+  box-shadow:
+    inset 0 0 0 2px var(--ps-rim),
+    inset 0 0 3px 4px rgb(0 0 0 / 0.35),
+    0 6px 18px rgb(0 0 0 / 0.45);
+  color-scheme: dark;
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+}
+
+:root[data-theme="psone"] .box ::selection,
+:root[data-theme="psone"] .comments__inner ::selection {
+  background: var(--ps-ink);
+  color: #000;
+  text-shadow: none;
+}
+
+/* No bar of its own: the title sits in the panel's top left, over a faint line that
+   fades out at both ends (PSone.css's button edges). */
+:root[data-theme="psone"] .box__titlebar {
+  gap: 8px;
+  min-height: var(--ps-bar);
+  padding: 3px 10px 0 12px;
+  border-bottom: 0;
+  border-radius: calc(var(--ps-radius) - 1px) calc(var(--ps-radius) - 1px) 0 0;
+  background: linear-gradient(to right, transparent, rgb(255 255 255 / 0.3), transparent)
+    50% 100% / calc(100% - 16px) 1px no-repeat;
+  color: var(--ps-title-text);
+}
+
+:root[data-theme="psone"] .box__titlebar:has(> .box__lights)::after {
+  content: none;
+}
+
+:root[data-theme="psone"] .box__title,
+:root[data-theme="psone"] .comments__title {
+  color: var(--ps-title-text);
+  font-family: var(--aqua-font);
+  font-size: var(--ps-title);
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  line-height: 1.2;
+  text-align: start;
+  text-transform: uppercase;
+  text-shadow: var(--ps-drop), 0 0 8px var(--ps-glow);
+}
+
+/* The move handle stays clear; focused, it lights up as a rounded menu selection. */
+:root[data-theme="psone"] .box__handle:focus-visible {
+  outline: 2px solid var(--ps-rim);
+  outline-offset: -5px;
+  border-radius: calc(var(--ps-radius) + 1px);
+  background: rgb(255 255 255 / 0.1);
+}
+
+/* Only a real close: the decorative gumdrops (the card, the owner's windows) go. */
+:root[data-theme="psone"] .box__lights {
+  order: 1;
+  gap: 0;
+  margin-inline-start: auto;
+}
+
+:root[data-theme="psone"] .box__lights:not(:has(> .box__close)),
+:root[data-theme="psone"] .box__light:not(.box__close) {
+  display: none;
+}
+
+/* The close button: a round controller button, dark with a soft shine at the top,
+   its × always showing in the light tint. Pressed, it sinks and the × moves down. */
+:root[data-theme="psone"] .box__light.box__close {
+  width: var(--ps-close);
+  height: var(--ps-close);
+  border: 1px solid var(--ps-line);
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 30%,
+    color-mix(in srgb, var(--ps-rim) 28%, var(--ps-deep)) 0,
+    var(--ps-deep) 70%);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.6), inset 0 -1px 2px rgb(0 0 0 / 0.5);
+  color: var(--ps-ink);
+}
+
+:root[data-theme="psone"] .box__light.box__close:hover {
+  box-shadow: 0 0 6px var(--ps-glow), 0 1px 2px rgb(0 0 0 / 0.6), inset 0 -1px 2px rgb(0 0 0 / 0.5);
+}
+
+:root[data-theme="psone"] .box__light.box__close:active {
+  background: var(--ps-deep);
+  box-shadow: inset 0 1px 3px rgb(0 0 0 / 0.8);
+}
+
+:root[data-theme="psone"] .box__close svg,
+:root[data-theme="psone"] .box__close:hover svg,
+:root[data-theme="psone"] .box__close:focus-visible svg {
+  width: 8px;
+  height: 8px;
+  opacity: 1;
+  filter: drop-shadow(0 0 2px var(--ps-glow));
+}
+
+:root[data-theme="psone"] .box__close:active svg {
+  translate: 0 1px;
+}
+
+:root[data-theme="psone"] .box__close:focus-visible {
+  outline: 2px solid var(--ps-rim);
+  outline-offset: 2px;
+}
+
+/* The resize grip: three short ridges in the corner, inside the rim. */
+:root[data-theme="psone"] .box__grip::after {
+  right: 5px;
+  bottom: 5px;
+  width: 11px;
+  height: 11px;
+  background: repeating-linear-gradient(135deg,
+    transparent 0 2px,
+    var(--ps-line) 2px 3.5px,
+    transparent 3.5px 4px);
+  clip-path: polygon(100% 0, 100% 100%, 0 100%);
+}
+
+:root[data-theme="psone"] .box__grip:focus-visible {
+  outline: 2px solid var(--ps-rim);
+  outline-offset: -4px;
+  border-radius: 0 0 var(--ps-radius) 0;
+}
+
+/* ---------- Text in the windows ---------- */
+
+:root[data-theme="psone"] .signup__label,
+:root[data-theme="psone"] .switcher__label,
+:root[data-theme="psone"] .comments__label {
+  color: var(--ps-title-text);
+  font-family: var(--aqua-font);
+  font-size: var(--ps-label);
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  line-height: 1.25;
+  text-transform: uppercase;
+  text-shadow: var(--ps-drop-small);
+}
+
+:root[data-theme="psone"] .signup__message,
+:root[data-theme="psone"] .signup__email {
+  color: var(--ps-muted);
+}
+
+:root[data-theme="psone"] .signup__message[data-state="error"] {
+  color: var(--ps-error);
+}
+
+:root[data-theme="psone"] .signup__email:hover {
+  color: var(--ps-ink);
+}
+
+/* ---------- Comment box ---------- */
+
+/* A window like the others, its heading as the title over the faint line. Inside,
+   the page colours give way to the panel's light ones, and the photo shows through
+   only blurred, as behind the other windows. */
+:root[data-theme="psone"] .comments__inner {
+  --page-text: var(--ps-text);
+  --page-text-muted: var(--ps-muted);
+  padding: 0 14px 14px;
+}
+
+:root[data-theme="psone"] .comments > .comments__inner {
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+}
+
+:root[data-theme="psone"] .comments__title {
+  display: flex;
+  align-items: center;
+  min-height: var(--ps-bar);
+  margin: 0 -14px 4px;
+  padding: 3px 12px 0;
+  background: linear-gradient(to right, transparent, rgb(255 255 255 / 0.3), transparent)
+    50% 100% / calc(100% - 16px) 1px no-repeat;
+}
+
+/* ---------- High contrast ---------- */
+
+@media (forced-colors: active) {
+  :root[data-theme="psone"] .box__grip::after {
+    background: CanvasText;
+  }
+}
+
+/* ---------- Reduced motion ---------- */
+
+/* Nothing here moves but the close button's × while pressed. */
+@media (prefers-reduced-motion: reduce) {
+  :root[data-theme="psone"] .box__close:active svg {
+    translate: none;
+  }
+}
