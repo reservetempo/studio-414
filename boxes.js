@@ -38,7 +38,9 @@
   - With ?edit=1 in the URL (the owners' preview page frames the site so) the
     visitor's "studio414.layout" is neither read nor written: the page starts from the
     owners' layout, and the preview page places the boxes through
-    studio414SiteLayout.apply().
+    studio414SiteLayout.apply(). The handles are still made, but this file doesn't
+    drag anything there: edit.js does, and its drags change the owners' layout itself
+    (through apply(), which places the boxes again).
 
   The big 414 (#big-414, styles.css) moves the same way, though it is not a window:
   - It is picked up anywhere on its figures. A mouse or pen drags it at once (a grab
@@ -487,17 +489,22 @@
     // First in the title bar, before the gumdrops, so Tab reaches the bar first.
     var bar = el.querySelector('.box__titlebar');
     bar.insertBefore(handle, bar.firstChild);
-    handle.addEventListener('pointerdown', function (event) { begin(box, 'move', event); });
-    handle.addEventListener('keydown', function (event) { nudge(box, 'move', event); });
     var controls = [handle];
-
+    var grip = null;
     if (box.grip) {
-      var grip = button('box__grip', 'Resize the ' + name + ' box',
+      grip = button('box__grip', 'Resize the ' + name + ' box',
         'Drag to resize. Arrow keys resize it.');
       el.appendChild(grip);
+      controls.push(grip);
+    }
+
+    // On the preview page (?edit=1) edit.js drags the box, into the owners' layout.
+    if (editing) return;
+    handle.addEventListener('pointerdown', function (event) { begin(box, 'move', event); });
+    handle.addEventListener('keydown', function (event) { nudge(box, 'move', event); });
+    if (grip) {
       grip.addEventListener('pointerdown', function (event) { begin(box, 'size', event); });
       grip.addEventListener('keydown', function (event) { nudge(box, 'size', event); });
-      controls.push(grip);
     }
 
     controls.forEach(function (control) {
@@ -557,6 +564,10 @@
     signHandle.className = 'big-414__handle aqua-pill';
     signHandle.textContent = 'Move 414 with the arrow keys';
     signEl.appendChild(signHandle);
+  }
+
+  // On the preview page (?edit=1) edit.js drags the 414, into the owners' layout.
+  if (sign && !editing) {
     signHandle.addEventListener('keydown', function (event) { nudge(sign, 'move', event); });
 
     // A mouse or pen picks it up at once; a finger after a long press.
@@ -589,6 +600,9 @@
     signEl.addEventListener('contextmenu', function (event) {
       if (hold || (gesture && gesture.box === sign)) event.preventDefault();
     });
+  }
+
+  if (sign) {
 
     // Its size follows the font: size it (to the owners' width) and fit it to the
     // screen again when the font changes, or a face finishes loading.

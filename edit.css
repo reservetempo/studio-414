@@ -1,0 +1,117 @@
+/* Edit mode (edit.js), only on the owners' preview page, which frames the site with
+   ?edit=1. Outlines and highlights use the palette (--aqua-focus, set by every theme
+   and colour), so they read on all of them. */
+
+html.is-editing {
+  --edit-line: var(--aqua-focus, var(--page-text));
+  --edit-grab: 12px;    /* how thick the photo's edges and the corners are to grab */
+}
+
+@media (pointer: coarse) {
+  html.is-editing {
+    --edit-grab: 24px;
+  }
+}
+
+/* Display is for visitors: not shown while the owners arrange the site. */
+html.is-editing section#switcher,
+html.is-editing footer.switcher-credit {
+  display: none !important;
+}
+
+/* A light outline on what the pointer is over, a firmer one on what it drags. */
+html.is-editing #signup:hover,
+html.is-editing #big-414:hover,
+html.is-editing .edit-photo:has(> .edit-edge:hover),
+html.is-editing .edit-photo:focus-within {
+  outline: 1px dashed var(--edit-line);
+  outline-offset: 2px;
+}
+
+html.is-editing .is-edit-active,
+html.is-editing .is-edit-active:hover {
+  outline: 2px solid var(--edit-line);
+  outline-offset: 2px;
+}
+
+/* While dragging: the drag's cursor everywhere, and no text selection. */
+html.is-edit-dragging,
+html.is-edit-dragging * {
+  cursor: var(--edit-cursor, move) !important;
+  -webkit-user-select: none !important;
+  user-select: none !important;
+}
+
+/* The 414 is held anywhere, by a finger too, at once. */
+html.is-editing #big-414 {
+  cursor: grab;
+  touch-action: none;
+  -webkit-touch-callout: none;
+}
+
+/* Corners of the card and the 414 (the card's bottom-right one is its grip). */
+.edit-corner {
+  position: absolute;
+  z-index: 10;
+  width: var(--edit-grab);
+  height: var(--edit-grab);
+  touch-action: none;
+  -webkit-touch-callout: none;
+}
+
+.edit-corner--nw { top: 0; left: 0; cursor: nwse-resize; }
+.edit-corner--ne { top: 0; right: 0; cursor: nesw-resize; }
+.edit-corner--sw { bottom: 0; left: 0; cursor: nesw-resize; }
+.edit-corner--se { bottom: 0; right: 0; cursor: nwse-resize; }
+
+/* The visible photo (placed by edit.js), under the card and the 414. No z-index of its
+   own, so its keyboard handle can rise over them. */
+.edit-photo {
+  position: absolute;
+  pointer-events: none;
+}
+
+.edit-photo[hidden] {
+  display: none;
+}
+
+.edit-edge {
+  position: absolute;
+  z-index: 0;
+  pointer-events: auto;
+  touch-action: none;
+  -webkit-touch-callout: none;
+}
+
+.edit-edge--n { top: 0; left: 0; right: 0; height: var(--edit-grab); cursor: ns-resize; }
+.edit-edge--s { bottom: 0; left: 0; right: 0; height: var(--edit-grab); cursor: ns-resize; }
+.edit-edge--w { top: 0; bottom: 0; left: 0; width: var(--edit-grab); cursor: ew-resize; }
+.edit-edge--e { top: 0; bottom: 0; right: 0; width: var(--edit-grab); cursor: ew-resize; }
+
+.edit-edge:hover,
+.edit-photo.is-edit-active .edit-edge {
+  background: color-mix(in srgb, var(--edit-line) 22%, transparent);
+}
+
+/* "Resize the photo": out of sight until the keyboard reaches it. */
+.edit-photo__handle {
+  position: absolute;
+  z-index: 8;
+  top: 50%;
+  left: 50%;
+  translate: -50% -50%;
+  height: 32px;
+  margin: 0;
+  padding: 0 16px;
+  white-space: nowrap;
+  pointer-events: auto;
+}
+
+.edit-photo__handle:not(:focus) {
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+}

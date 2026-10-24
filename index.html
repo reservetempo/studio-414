@@ -304,6 +304,23 @@
   <script defer src="boxes.js"></script>
   <script defer src="workshop.js"></script>
   <script defer src="calendar.js"></script>
+  <!-- Edit mode (edit.js, edit.css), only on the owners' preview page, which frames the
+       site with ?edit=1: the stylesheet now, the script once the deferred scripts above
+       (boxes.js) have run. Visitors load neither. -->
+  <script>
+    (function () {
+      if (new URLSearchParams(location.search).get('edit') !== '1') return;
+      var css = document.createElement('link');
+      css.rel = 'stylesheet';
+      css.href = 'edit.css';
+      document.head.appendChild(css);
+      document.addEventListener('DOMContentLoaded', function () {
+        var js = document.createElement('script');
+        js.src = 'edit.js';
+        document.body.appendChild(js);
+      });
+    })();
+  </script>
 
   <script>
     // Placeholder handler until the mailing list service is connected.
