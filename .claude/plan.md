@@ -14,11 +14,7 @@ Managed by the main session (see CLAUDE.md). `/z <items>` adds tasks; `/z` works
   - The saved arrangement is the starting layout for every visitor. Visitors can still drag the card and the 414 for themselves (their own `studio414.layout` wins), and Display's Layout Reset brings back the owner's arrangement.
 - Saved in `site_settings` as the row with key `layout` (public read, owner write, like `look` and `wallpaper`). No row means today's CSS layout exactly. Task 67 sets the value's shape and documents it at the top of `layout.js`; later tasks read it there.
 - Preview page design: `preview.html` reuses `admin.js`/`admin.css` (sign-in/loading/not-owner/error alerts, menu bar, section windows, `studioAdmin.registerSection`), has a side panel with the Look section (`admin-look.js`) and a Layout section, and frames `index.html?edit=1&theme=<id>&color=<n>`. Same origin, so it can call the framed page's `studio414Look.apply` and `studio414SiteLayout`. `?edit=1` turns on edit mode in the framed page; edit mode ignores the visitor's own layout, colour and font and never writes them.
-- These tasks share index.html, styles.css, boxes.js and switcher.js, so they run in order. Only 65, 66 and 67 can run at the same time.
-
-### 64. Display as a plain panel at the bottom of the page
-
-Display stops being a window: a plain panel, always shown, at the very end of the page after the comment section, in the page flow (not fixed). Remove the paint roller (`.switcher-toggle`), its `studio414.display` open/closed key, the title bar, gumdrop and Escape-to-close, and Display's entry in `boxes.js` (only the card and the 414 stay draggable; stored `switcher` entries ignored). Keep task 63's rows and the Layout Reset (it resets the visitor's own card and 414 moves). Aqua look: like the comment section (plain, thin line box, theme font) with the existing Aqua pop-up menus and pills, headed "Display". Update `themes/README.md` (Display is no longer a window; list its new selectors) and the README's Display paragraph. The theme files' old `#switcher` window rules are tasks 65-66, so themes may look off until then. Files: switcher.js, switcher.css, boxes.js, boxes.css, index.html, README.md, themes/README.md. Done when: Display sits under the comments on desktop and at 375px (no horizontal scroll), works by keyboard, matches the comment box in Aqua, no console errors.
+- These tasks share index.html, styles.css, boxes.js and switcher.js, so they run in order. Only 65, 66, 67 and 73 can run at the same time.
 
 ### 65. Display panel in Windows 98, Mac System 6 and NES
 
@@ -27,6 +23,10 @@ In `themes/win98.css`, `themes/system6.css` and `themes/nes.css`: remove the rul
 ### 66. Display panel in PlayStation and DOS
 
 Same as task 65, for `themes/psone.css` and `themes/dos.css`.
+
+### 73. No gap above Display on wide screens
+
+On screens at least 1100x640 the comment box floats over the photo, but its section (`comments.css`) still leaves an empty strip of page colour (up to 180px) under the hero, so Display (task 64, `section#switcher` after the comments) has a visible gap above it. Remove that strip so Display follows the hero with normal spacing, without moving the floating comment box. Files: comments.css, switcher.css only if needed. Done when: at 1400x900, 1100x640 and 375px there's no empty strip above Display beyond normal spacing, and the comment box is where it was.
 
 ### 67. Site layout setting and loader
 
@@ -74,6 +74,7 @@ Every theme task: start from `themes/README.md` (the guide) and the shared facts
 
 ## Done
 
+- 64. Display as a plain panel at the bottom: `d530815`. Always-shown `section#switcher` after the comments (1px `--page-text` line box, max 432px, theme font, "Display" heading), font credit `footer.switcher-credit` under it. Paint roller, `studio414.display`, title bar, gumdrop and Escape removed; boxes.js drops Display plus its fixed-box and hidden-box code (stored `switcher` entries ignored). The <=419px 60px card gutter for the roller is gone. README and themes/README.md updated. Left a gap above Display on wide screens (task 73).
 - 63. Display: Colour for the page, "414 font", no Part row: `404d0cd`. Part row, per-window fonts and `studio414.style.<part>.font` code removed (old keys ignored), end-of-body window-font script deleted. Colour row ("Site colour" + 21) saved as `studio414.style.pageColor`; index.html head script passes it to look.js as `window.studio414PageColor`; new `studio414Look.setPageColor(n|null)`; admin.html unaffected. `?color=` wins at load (a later pick removes it from the URL so the pick sticks); `?edit=1` reads and writes no storage. Styles Reset clears both. README gained a Display paragraph under "Set up the site look".
 - 62. Page text in the theme's font: `e4b88de`. Body, comments, card label, email link, Display credit, workshop windows and calendar month use `--aqua-font`; only the 414 and "Opening soon!" follow `data-font`. Unused `--body-font`, `--display-size`, `--display-tracking`, `--display-italic` removed. NES page text 8px/16px lines (fields 16px on touch); DOS 20px, email link on two lines with an extra card row. The email link now wraps after "at" on the 300px card in most themes (button sits above it). Win98 comments show its 11px pixel font at 17px (chunky but readable; small follow-up in win98.css if wanted). Ran ~190k tokens.
 - 61. README wording: `e085358`. Removed "still to come" from the owner-page, wallpaper and look paragraphs; they now describe the Wallpaper and Look sections in the present tense.
