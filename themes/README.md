@@ -1,7 +1,7 @@
 # Writing a theme
 
-The site (`index.html`) and the owner page (`admin.html`) are drawn as Mac OS X Aqua. A
-theme is one CSS file that redraws that chrome as another system, on the same markup.
+The site (`index.html`), the owner page (`admin.html`) and the owners' preview page
+(`preview.html`) are drawn as Mac OS X Aqua. A theme is one CSS file that redraws that chrome as another system, on the same markup.
 This guide lists what to restyle, where the Aqua rules live and what in them to undo, so
 a theme can be written without reading the Aqua CSS in full.
 
@@ -16,10 +16,10 @@ a theme can be written without reading the Aqua CSS in full.
 | `psone`   | PlayStation    | PSone.css    | `themes/psone.css`   |
 | `dos`     | DOS            | Bootstra.386 | `themes/dos.css`     |
 
-- Both pages carry `<html data-theme="<id>" data-color="<n>">` (colour 0-20, 0 "Classic"
+- Every page carries `<html data-theme="<id>" data-color="<n>">` (colour 0-20, 0 "Classic"
   by default). The loader sets them before first paint and loads only the active theme's
   file, on top of the Aqua base CSS (which always loads); Aqua loads none.
-- `?theme=<id>&color=<n>` on either page previews a look without saving it.
+- `?theme=<id>&color=<n>` on any page previews a look without saving it.
 - **Every selector starts `:root[data-theme="<id>"]`.** That adds (0,2,0) to the base
   selector it mirrors, so it wins whatever the load order. Mirror the base selector
   exactly (or more specifically): `:root[data-theme="x"] .aqua-pill` (0,3,0) only *ties*
@@ -186,14 +186,23 @@ reads on `--page-bg`): `.workshop-button`, `.comments__*`, `.switcher .aqua-pill
 `.comments__submit:disabled` (dotted underline, muted). Text must still be 4.5:1 unless
 it is truly inert.
 
-## 4. Owner page only (admin.css)
+## 4. Owner pages only (admin.css, preview.css)
+
+The owner page (`admin.html`) shows three section windows, in this order: Workshops,
+Wallpaper, and Preview website, a short line and a pill that is a link to the preview
+page (`preview.html`). The preview page has the same menu bar, alerts and section
+windows (admin.css), with an "Owner page" link pill in the menu bar, the Look section in
+a side panel, and the public site in a frame (`index.html?edit=1&theme=<id>&color=<n>`);
+preview.css only lays it out.
 
 | Component | Selectors | Notes |
 |---|---|---|
 | Page | `html` (bg `--title`), `body` (`--aqua-font` 14px, `--face-text`), `body::before` | `body::before` is the site photo, dimmed: out of scope. |
 | Menu bar | `header.admin-header` | sticky; `background` (stripes + white gradient), `border-bottom`, `box-shadow`, `backdrop-filter: blur`; `.admin-title` (`<b>` app name), `#admin-account.admin-account` (`[hidden]` until signed in), `.admin-account-text`, `.admin-email`, Sign out `.admin-header .admin-button` (22px, 12px text). |
 | Alerts | `section.admin-view.admin-dialog.box`: `#admin-loading`, `#admin-signin`, `#admin-denied`, `#admin-error` | decorative gumdrops; `.admin-dialog-body` (88px left padding for the icon) whose `::before` is the "414" icon (tinted square: gradients, `border-radius: 11px`, `box-shadow`, `text-shadow`); `.admin-dialog-lead` (bold), `.admin-status`, `.admin-hint` (muted), `.admin-message.admin-message-error` (`#admin-signin-error`, `#admin-error-text`; fixed `--admin-error` / `--admin-error-bg`, radius 6px), `.admin-actions` (right-aligned pills). Sign-in: `form#admin-signin-form.admin-signin-form` (a column, gap 10px) of two `.admin-signin-field` (a `label.admin-label` above an `input.admin-field.aqua-field`, full width, 13px; email and password), then `.admin-actions` with `#admin-signin-submit.admin-button.admin-button-primary.aqua-pill--tint.aqua-pill--pulse` ("Sign in"; "Signing in…" and the fields disabled while it runs). Loading: `.admin-barber` (barber pole: `::before` stripes with `animation: admin-barber 0.8s`, `::after` gloss + inset shadow, radius 6px). `#admin-signout-error` sits outside the windows. |
-| Section windows | `#admin-owner > section.admin-section.box[data-section]` | decorative gumdrops; `.admin-section-body[data-section-body]`; `.admin-soon` placeholder. Buttons: `.admin-button.aqua-pill` (+ `.admin-button-primary.aqua-pill--tint`); bigger on `pointer: coarse`. |
+| Section windows | `#admin-owner > section.admin-section.box[data-section]` (on preview.html inside `.preview-panel`) | decorative gumdrops; `.admin-section-body[data-section-body]`; `.admin-soon` placeholder. Buttons: `.admin-button.aqua-pill` (+ `.admin-button-primary.aqua-pill--tint`); bigger on `pointer: coarse`. |
+| Preview website | `section[data-section="preview"]` > `.admin-section-body.admin-preview` > `p.admin-preview-text.admin-hint` + `.admin-actions` > `a.admin-preview-link.admin-button.admin-button-primary.aqua-pill.aqua-pill--tint` | the last window on admin.html; the pill is an `<a href="preview.html">` (same tab), `text-decoration: none`. Style it as the other pills; keep it free of link underlines. |
+| Preview page | `main.admin.preview` > `#admin-owner.preview-owner` > `.preview-layout` > `.preview-panel` (the column of section windows, Look first) + `.preview-stage` > `iframe#preview-frame.preview-frame`; menu bar `a.preview-back.admin-button.aqua-pill` ("Owner page") | preview.css: layout only. `.preview-panel` is a column (gap 28px), at the left and scrolling on its own from 760px wide (`clamp(17rem, 30vw, 23rem)`), above the frame below that. `#preview-frame` fills the rest (`border: 0`, `background: var(--title)`); `.preview-stage` has a 1px dark edge (top, or left from 760px). The framed site carries its own theme and colour (preview.js forwards this page's). In the panel, `.look-field` stacks its label above the radios, as on phones. |
 | Notices (every section) | `.look .admin-message`, `.wallpaper .admin-message`, `.workshops .admin-message` + `-error` / `-ok` | small panel: gradient `background`, `border`, `border-radius: 4px`, `box-shadow`; `::before` icon: caution = yellow gel triangle with "!" (`clip-path`, gradient), ok = green gumdrop with "✓" (radial gradient, inset rim). In the form and list rows an error is a bare red line (`.workshops-form .admin-message-error`, `.workshops-item .admin-message-error`). |
 | Wallpaper | `.wallpaper` (admin-wallpaper.js builds all of it) | `.wallpaper-loading`, `.wallpaper-current`; image well `figure.wallpaper-figure` (`--field` fill, `box-shadow` edge; `::after` inset shadow overlay) with `img.wallpaper-photo`; `.wallpaper-spot` (selection rectangle: tint border, glow wash, `--wallpaper-lines` white box-shadows); `.wallpaper-caption`, `.wallpaper-readout`, `.wallpaper-note`, `.wallpaper-hint`; progress `.wallpaper-progress` > `.wallpaper-progress-text` + `progress.wallpaper-progress-bar` (`appearance: none`; `--progress-track`, `-gloss`, `-stripes`, `-dark`, `-light`; `::-webkit-progress-bar`, `::-webkit-progress-value`, `::-moz-progress-bar`, `:indeterminate`; `animation: wallpaper-progress 0.8s`); hidden `input.wallpaper-file` ("Choose photo" is a pill); editor `.wallpaper-editor`, `h3.wallpaper-editor-title`, `.wallpaper-editor-intro`, `figure.wallpaper-figure.wallpaper-figure-editor` > `.wallpaper-box` (draggable spot box; `:focus-visible` ring + lines; `.is-dragging` stronger wash) > `span.wallpaper-handle.wallpaper-handle-nw/-ne/-sw/-se` (JS adds; tinted glossy dots: radial gradient, border, shadow; `::before` hit area; bigger on coarse pointers). |
 | Workshops: list view | `.workshops` (admin-workshops.js builds all of it; sets `--workshops-row`, the alternate-row tint) | `.workshops-loading`, `.workshops-top` ("Add workshop"), `.workshops-list-panel`, `.workshops-list-retry`, `.workshops-empty`; `ul.workshops-list` (white well, field edge, white under-line `box-shadow`) > `li.workshops-item` (grid; even rows `--workshops-row`; `.is-past` greyed): `.workshops-item-head`, `.workshops-item-name`, `.workshops-item-when`, `.workshops-item-meta` (`-spots`, `-price`, `-sep`), `.workshops-item-actions` (smaller pills on `pointer: fine`; `.admin-button[aria-disabled="true"]` at opacity .6), `.workshops-reason`. |
@@ -204,12 +213,13 @@ it is truly inert.
 
 ### Look section
 
-The first section window (`data-section="look"`); `admin-look.js` builds all of it and
-the "Look section" block at the end of admin.css styles it. What the JS adds: `checked`
+The first section window in preview.html's `.preview-panel` (`data-section="look"`; no
+longer on admin.html); `admin-look.js` builds all of it and the "Look section" block at
+the end of admin.css styles it (preview.css stacks its groups in the narrow panel). What the JS adds: `checked`
 on the radios, `hidden` on the loading line, the form and the notices, `disabled` on
 Save (while saving) and Undo (while the picks are the saved look), and a pick switches
 `data-theme` / `data-color` on `<html>` at once (`studio414Look.apply`), so theme files
-load and drop while the page is open.
+load and drop while the page is open (and the framed site follows).
 
 | Component | Selectors | Notes |
 |---|---|---|
@@ -217,7 +227,7 @@ load and drop while the page is open.
 | Groups | `.look-field` > `span.look-label` (`#look-theme-label`, `#look-color-label`) + `[role="radiogroup"]` | grid: label column `--look-label-width`, right-aligned 13px label with `::after ":"`; under 560px a flex column with the label above, left-aligned. The notices (`.look .admin-message`) and buttons (`.admin-actions.look-actions`) have a `margin-left` to line up with the groups (0 under 560px). |
 | Themes | `.look-themes` (flex column) > `label.look-theme` > `input[type="radio"].look-theme-input[name="look-theme"]` + `span.look-theme-name` | the radio is drawn in CSS (`appearance: none`): 15px (18px on coarse pointers), `border` (`--aqua-plain-rim`), `border-radius: 50%`, gel `background` gradients, `box-shadow`. `:checked` is a `--aqua-tint` bead with a `--aqua-tint-text` dot, all in `background`. `:focus-visible`: `--aqua-focus-ring` + transparent outline. `appearance: auto` under `forced-colors`. |
 | Colours | `.look-colors` (grid, `repeat(auto-fill, minmax(5rem, 1fr))`, wraps) > `label.look-color` > `input[type="radio"].look-color-input[name="look-color"]` + `span.look-color-chip[data-color="N"][aria-hidden]` + `span.look-color-name` | the radio is invisible (`opacity: 0`) and laid over the whole swatch (`label` `position: relative`; input `position: absolute; inset: 0; z-index: 1`): keep that, or the swatches stop taking clicks. Chip: 44 × 32px, `border-radius: 4px`, `background` a white gloss over `--title` with a `--face` band (keep those two tokens: they are the colour), edge and drop `box-shadow`. Picked (`.look-color-input:checked ~ …`): a grey `box-shadow` ring on the chip, the name a capsule (`border-radius: 999px`) in `--look-selection`. Focus (`.look-color-input:focus-visible ~ .look-color-chip`): `--look-focus-ring` + transparent outline. Under `forced-colors` the chip keeps its colours and the picked name is `Highlight`. |
-| Buttons and notices | `.look-actions` > Save (`.admin-button-primary.aqua-pill--tint`, "Saving…" while saving), "Undo changes", "Preview the site" (opens `index.html?theme=&color=` in a new tab); `.look .admin-message-error` (the saved look didn't load, or not saved), `.look .admin-message-ok` (saved; focused) | pills and notices as in the other sections. |
+| Buttons and notices | `.look-actions` > Save (`.admin-button-primary.aqua-pill--tint`, "Saving…" while saving), "Undo changes"; `.look .admin-message-error` (the saved look didn't load, or not saved), `.look .admin-message-ok` (saved; focused) | pills and notices as in the other sections. |
 
 Aqua to undo in a theme: the radio bead (`background` gradients, `border-radius: 50%`,
 `box-shadow`, and the `:checked` bead), the chip's gloss gradient, rounding and shadow,
@@ -247,9 +257,10 @@ previews only, use a stubbed copy: copy `admin.html` to an untracked
 (the three lines) with the script below, open `zz-admin-preview.html?theme=<id>`, and
 delete the copy when done. Never commit it. (Checked on 23 Oct 2026: both sections
 render, with the list, the past toggle, the sign-ups table and the form. Set
-`is_owner: false` to see "Not an owner".) The Look section keeps a `?theme=` / `?color=`
-preview: its picks start from it and it doesn't switch the page to the saved look (the
-stub has none, so Aqua in Classic, which "Undo changes" goes back to).
+`is_owner: false` to see "Not an owner".) For the preview page, do the same with a copy
+of `preview.html` (for example `zz-preview-page.html`). Its Look section keeps a
+`?theme=` / `?color=` preview: its picks start from it and it doesn't switch the page to
+the saved look (the stub has none, so Aqua in Classic, which "Undo changes" goes back to).
 
 ```html
 <script>

@@ -66,6 +66,8 @@ The code is written but not deployed. Do everything in Stripe **test mode** firs
 
 The owners' page is at `/admin.html` (for example `https://your-site-address/admin.html`). Nothing on the site links to it, and search engines are asked not to list it. Owners sign in with an email and password. An owner is someone with a user in Supabase **Authentication** whose email is also in the `site_owners` list; you add both by hand, and nobody can sign themselves up. Anyone who signs in but isn't in `site_owners` is told their account isn't an owner account.
 
+Signed in, the owner page shows three windows, in this order: **Workshops** (the workshops and who signed up), **Wallpaper** (see "Set up the wallpaper upload") and **Preview website**, whose button opens the owners' preview page, `/preview.html`, in the same tab. The preview page shows the public site in a frame with a side panel beside it: the **Look** section is there (see "Set up the site look"), and that is where owners arrange the page (see "Set up the site layout"). It uses the same sign-in, and its **Owner page** button goes back.
+
 1. In the Supabase dashboard, **Authentication → Sign In / Providers**: make sure **Email** is turned on (it is by default), and turn **off** **Allow new users to sign up**, then save. Owners are only ever added by hand (step 3).
 2. **SQL Editor**: paste in [`supabase/owners.sql`](supabase/owners.sql) and click **Run** (if it hasn't been run yet).
 3. For each owner:
@@ -103,11 +105,11 @@ Owners upload a new wallpaper photo for the site from the Wallpaper section of t
 
 ## Set up the site look
 
-Owners pick one theme and one colour for both the public site and the owner page, in the Look section of the owner page. Both pages read it from Supabase in [`look.js`](look.js); [`supabase/look.sql`](supabase/look.sql) describes the setting, and [`themes/README.md`](themes/README.md) how a theme is written. Until a look is saved, the site stays Aqua in Classic. Set up the wallpaper upload first.
+Owners pick one theme and one colour for both the public site and the owner pages, in the Look section of the preview page (`/preview.html`, opened from the owner page's **Preview website** button), where the framed site follows each pick before it's saved. All the pages read it from Supabase in [`look.js`](look.js); [`supabase/look.sql`](supabase/look.sql) describes the setting, and [`themes/README.md`](themes/README.md) how a theme is written. Until a look is saved, the site stays Aqua in Classic. Set up the wallpaper upload first.
 
 1. **SQL Editor**: paste in [`supabase/look.sql`](supabase/look.sql) and click **Run** (after `wallpaper.sql`, which makes the settings table).
 
-To try a look without saving it, add `?theme=<id>&color=<n>` to either page's address, for example `index.html?theme=nes&color=6`.
+To try a look without saving it, add `?theme=<id>&color=<n>` to any page's address, for example `index.html?theme=nes&color=6`.
 
 Visitors can change the page for themselves, on their own screen only, in Display, a plain panel at the very end of the public site, under the comments ([`switcher.js`](switcher.js)). **Colour** starts on "Site colour", which follows the owners' look; any other colour of the 21 stays with that visitor (kept in their browser) until they pick "Site colour" again or press the Styles **Reset**. **414 font** picks one of twenty faces for the big 414 and "Opening soon!" only; all other text keeps the theme's font. The owner page always shows the owners' colour, and `?color=` in the address wins over a visitor's own colour. If they have dragged or resized the mailing-list card or the big 414, a Layout **Reset** puts them back.
 

@@ -101,14 +101,16 @@
 
     <div class="admin-view" id="admin-owner" hidden>
       <!--
-        Owner sections, each an Aqua window. A section module (admin-look.js,
-        admin-wallpaper.js, admin-workshops.js) calls studioAdmin.registerSection('<data-section>', render);
+        Owner sections, each an Aqua window. A section module (admin-workshops.js,
+        admin-wallpaper.js) calls studioAdmin.registerSection('<data-section>', render);
         see admin.js. Until one does, the section keeps its "Coming soon" placeholder.
+        "Preview website" is a plain link to preview.html, where the owner changes the
+        look (admin-look.js) and arranges the page.
       -->
-      <section class="admin-section box" data-section="look" aria-labelledby="admin-look-title">
+      <section class="admin-section box" data-section="workshops" aria-labelledby="admin-workshops-title">
         <div class="box__titlebar">
           <span class="box__lights" aria-hidden="true"><span class="box__light box__light--close"></span><span class="box__light box__light--min"></span><span class="box__light box__light--zoom"></span></span>
-          <h2 class="box__title" id="admin-look-title">Look</h2>
+          <h2 class="box__title" id="admin-workshops-title">Workshops</h2>
         </div>
         <div class="admin-section-body" data-section-body>
           <p class="admin-soon">Coming soon</p>
@@ -125,13 +127,16 @@
         </div>
       </section>
 
-      <section class="admin-section box" data-section="workshops" aria-labelledby="admin-workshops-title">
+      <section class="admin-section box" data-section="preview" aria-labelledby="admin-preview-title">
         <div class="box__titlebar">
           <span class="box__lights" aria-hidden="true"><span class="box__light box__light--close"></span><span class="box__light box__light--min"></span><span class="box__light box__light--zoom"></span></span>
-          <h2 class="box__title" id="admin-workshops-title">Workshops</h2>
+          <h2 class="box__title" id="admin-preview-title">Preview website</h2>
         </div>
-        <div class="admin-section-body" data-section-body>
-          <p class="admin-soon">Coming soon</p>
+        <div class="admin-section-body admin-preview" data-section-body>
+          <p class="admin-hint admin-preview-text">Change the look and arrange the page.</p>
+          <div class="admin-actions">
+            <a class="admin-button admin-button-primary aqua-pill aqua-pill--tint admin-preview-link" href="preview.html">Preview website</a>
+          </div>
         </div>
       </section>
     </div>
@@ -145,7 +150,6 @@
           crossorigin="anonymous"></script>
   <script src="admin.js"></script>
   <!-- Section modules go here, after admin.js. -->
-  <script src="admin-look.js"></script>
   <script src="admin-wallpaper.js"></script>
   <script src="admin-workshops.js"></script>
 </body>

@@ -246,6 +246,16 @@ body::before {
   color: var(--face-muted);
 }
 
+/* The last window, "Preview website": a line of text and a pill that is a link to
+   preview.html (the look and the page's arrangement live there). */
+.admin-preview-text {
+  margin: 0 0 16px;
+}
+
+.admin-preview-link {
+  text-decoration: none;
+}
+
 /* ---- Text, messages and buttons ------------------------------------------------- */
 
 .admin-status {
