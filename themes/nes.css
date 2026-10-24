@@ -1,1 +1,299 @@
-/* NES theme (after NES.css). See themes/README.md. */
+/* NES theme, after NES.css by B.C.Rikko (v2.3.0, MIT, github.com/nostalgic-css/NES.css,
+   npm nes.css): an 8-bit look. Windows are NES.css's rounded containers with a title:
+   a thick pixel frame with stepped corners, the title sitting on its top line in a
+   cleared box. No NES.css is loaded: the shapes are redrawn here on the existing
+   markup, with gradients so they tint (NES.css draws them with border-image SVGs in
+   fixed colours). See themes/README.md.
+
+   Colours: NES.css's white is the colour's --face and its black the fixed
+   --face-text, so the whole look tints with the chosen colour. Pairs from the palette
+   (README section 2): --face-text on --face (4.5:1 and up), --shadow on --face for the
+   close box's shade (3:1).
+
+   Font: Press Start 2P by Cody "CodeMan38" Boisclair (SIL Open Font License 1.1,
+   fonts/nes/LICENSE.txt), as NES.css uses, from Fontsource (latin subset). It is drawn
+   on an 8px grid, so it is set at 8px or 16px wherever it can be, to keep its pixels
+   whole. */
+
+@font-face {
+  font-family: "S414 NES";
+  src: url("../fonts/nes/PressStart2P.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root[data-theme="nes"] {
+  --aqua-font: "S414 NES", "Courier New", monospace;
+  --aqua-radius: 0;
+  --nes-u: 4px;               /* one pixel of a window frame */
+  --nes-bar: 24px;            /* the title bar; the frame's top line runs through it */
+  --nes-title: 16px;          /* window titles */
+  --nes-label: 8px;           /* labels in the windows */
+  --nes-close: 20px;          /* the close box */
+  /* A pixel × (5 x 5) and the resize grip's triangle of dots, as masks for currentColor. */
+  --nes-x: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 5 5' shape-rendering='crispEdges'%3E%3Cpath d='M0 0h1v1H0zM4 0h1v1H4zM1 1h1v1H1zM3 1h1v1H3zM2 2h1v1H2zM1 3h1v1H1zM3 3h1v1H3zM0 4h1v1H0zM4 4h1v1H4z'/%3E%3C/svg%3E");
+  --nes-dots: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 5 5' shape-rendering='crispEdges'%3E%3Cpath d='M4 0h1v1H4zM2 2h1v1H2zM4 2h1v1H4zM0 4h1v1H0zM2 4h1v1H2zM4 4h1v1H4z'/%3E%3C/svg%3E");
+}
+
+@media (pointer: coarse) {
+  :root[data-theme="nes"] {
+    --nes-bar: 32px;
+  }
+}
+
+/* Built from the palette, so declared again on anything with its own data-color. */
+:root[data-theme="nes"],
+:root[data-theme="nes"] [data-color] {
+  --nes-paper: var(--face);
+  --nes-ink: var(--face-text);
+  --nes-shade: var(--shadow);
+  --nes-ink-fill: linear-gradient(var(--nes-ink) 0 0);
+  --nes-paper-fill: linear-gradient(var(--nes-paper) 0 0);
+  --nes-shade-fill: linear-gradient(var(--nes-shade) 0 0);
+}
+
+/* ---------- Windows ---------- */
+
+/* The frame: a line one pixel (4px) thick, its corners stepped in by one more pixel,
+   drawn over transparent side and bottom borders that keep the content clear of it.
+   Its top line runs through the middle of the title bar (--nes-top down), so above it
+   the page shows, as round NES.css's titles. The comment box is framed the same way. */
+:root[data-theme="nes"] .box,
+:root[data-theme="nes"] .comments__inner {
+  --nes-top: calc((var(--nes-bar) - var(--nes-u)) / 2);
+  border: solid transparent;
+  border-width: 0 var(--nes-u) var(--nes-u);
+  border-radius: 0;
+  background:
+    /* top and bottom lines, then the sides, between the steps */
+    var(--nes-ink-fill) calc(2 * var(--nes-u)) var(--nes-top) / calc(100% - 4 * var(--nes-u)) var(--nes-u) no-repeat border-box,
+    var(--nes-ink-fill) calc(2 * var(--nes-u)) 100% / calc(100% - 4 * var(--nes-u)) var(--nes-u) no-repeat border-box,
+    var(--nes-ink-fill) 0 calc(var(--nes-top) + 2 * var(--nes-u)) / var(--nes-u) calc(100% - var(--nes-top) - 4 * var(--nes-u)) no-repeat border-box,
+    var(--nes-ink-fill) 100% calc(var(--nes-top) + 2 * var(--nes-u)) / var(--nes-u) calc(100% - var(--nes-top) - 4 * var(--nes-u)) no-repeat border-box,
+    /* the four steps */
+    var(--nes-ink-fill) var(--nes-u) calc(var(--nes-top) + var(--nes-u)) / var(--nes-u) var(--nes-u) no-repeat border-box,
+    var(--nes-ink-fill) calc(100% - var(--nes-u)) calc(var(--nes-top) + var(--nes-u)) / var(--nes-u) var(--nes-u) no-repeat border-box,
+    var(--nes-ink-fill) var(--nes-u) calc(100% - var(--nes-u)) / var(--nes-u) var(--nes-u) no-repeat border-box,
+    var(--nes-ink-fill) calc(100% - var(--nes-u)) calc(100% - var(--nes-u)) / var(--nes-u) var(--nes-u) no-repeat border-box,
+    /* the paper inside, as a cross that leaves the stepped corners out */
+    var(--nes-paper-fill) var(--nes-u) calc(var(--nes-top) + 2 * var(--nes-u)) / calc(100% - 2 * var(--nes-u)) calc(100% - var(--nes-top) - 4 * var(--nes-u)) no-repeat border-box,
+    var(--nes-paper-fill) calc(2 * var(--nes-u)) calc(var(--nes-top) + var(--nes-u)) / calc(100% - 4 * var(--nes-u)) calc(100% - var(--nes-top) - 2 * var(--nes-u)) no-repeat border-box;
+  color: var(--nes-ink);
+  box-shadow: none;
+  -webkit-font-smoothing: auto;
+  -moz-osx-font-smoothing: auto;
+}
+
+:root[data-theme="nes"] .box ::selection,
+:root[data-theme="nes"] .comments__inner ::selection {
+  background: var(--nes-ink);
+  color: var(--nes-paper);
+}
+
+/* No bar of its own: the title on the left and the close box on the right, each in a
+   box of paper cleared out of the frame's top line. */
+:root[data-theme="nes"] .box__titlebar {
+  gap: 8px;
+  min-height: var(--nes-bar);
+  padding: 0 12px;
+  border-bottom: 0;
+  border-radius: 0;
+  background: none;
+  color: var(--nes-ink);
+}
+
+:root[data-theme="nes"] .box__titlebar:has(> .box__lights)::after {
+  content: none;
+}
+
+:root[data-theme="nes"] .box__title,
+:root[data-theme="nes"] .comments__title {
+  flex: 0 1 auto;
+  min-width: 0;
+  margin: 0;
+  padding: 0 8px;
+  overflow: hidden;
+  background: var(--nes-paper);
+  color: var(--nes-ink);
+  font-family: var(--aqua-font);
+  font-size: var(--nes-title);
+  font-weight: 400;
+  letter-spacing: 0;
+  line-height: var(--nes-title);
+  text-align: start;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  text-shadow: none;
+}
+
+/* The move handle has no ring of its own over the frame: focused, the title goes
+   inverse video. The transparent outline shows in high-contrast modes. */
+:root[data-theme="nes"] .box__handle:focus-visible {
+  outline: 2px solid transparent;
+  outline-offset: -3px;
+}
+
+:root[data-theme="nes"] .box__titlebar:has(> .box__handle:focus-visible) .box__title {
+  background: var(--nes-ink);
+  color: var(--nes-paper);
+}
+
+/* Only a real close: the decorative gumdrops (the card, the owner's windows) go. */
+:root[data-theme="nes"] .box__lights {
+  order: 1;
+  gap: 0;
+  margin-inline-start: auto;
+  padding: 0 4px;
+  background: var(--nes-paper);
+}
+
+:root[data-theme="nes"] .box__lights:not(:has(> .box__close)),
+:root[data-theme="nes"] .box__light:not(.box__close) {
+  display: none;
+}
+
+/* The close box: a small NES.css button, its frame one 2px pixel thick with the
+   corners left out, a shade inside along the bottom and right (top and left while
+   pressed), and a pixel × in the ink. */
+:root[data-theme="nes"] .box__light.box__close {
+  width: var(--nes-close);
+  height: var(--nes-close);
+  border: 0;
+  border-radius: 0;
+  background:
+    var(--nes-ink-fill) 2px 0 / calc(100% - 4px) 2px no-repeat,
+    var(--nes-ink-fill) 2px 100% / calc(100% - 4px) 2px no-repeat,
+    var(--nes-ink-fill) 0 2px / 2px calc(100% - 4px) no-repeat,
+    var(--nes-ink-fill) 100% 2px / 2px calc(100% - 4px) no-repeat,
+    var(--nes-shade-fill) 2px calc(100% - 2px) / calc(100% - 4px) 2px no-repeat,
+    var(--nes-shade-fill) calc(100% - 2px) 2px / 2px calc(100% - 4px) no-repeat,
+    var(--nes-paper-fill) 2px 2px / calc(100% - 4px) calc(100% - 4px) no-repeat;
+  box-shadow: none;
+  color: var(--nes-ink);
+}
+
+:root[data-theme="nes"] .box__light.box__close:active {
+  background:
+    var(--nes-ink-fill) 2px 0 / calc(100% - 4px) 2px no-repeat,
+    var(--nes-ink-fill) 2px 100% / calc(100% - 4px) 2px no-repeat,
+    var(--nes-ink-fill) 0 2px / 2px calc(100% - 4px) no-repeat,
+    var(--nes-ink-fill) 100% 2px / 2px calc(100% - 4px) no-repeat,
+    var(--nes-shade-fill) 2px 2px / calc(100% - 4px) 2px no-repeat,
+    var(--nes-shade-fill) 2px 2px / 2px calc(100% - 4px) no-repeat,
+    var(--nes-paper-fill) 2px 2px / calc(100% - 4px) calc(100% - 4px) no-repeat;
+}
+
+:root[data-theme="nes"] .box__close::before {
+  border-radius: 0;
+}
+
+/* The × always shows (NES.css has no hover-only marks); pressed, it moves down a pixel. */
+:root[data-theme="nes"] .box__close svg {
+  display: none;
+}
+
+:root[data-theme="nes"] .box__close::after {
+  content: "";
+  width: 10px;
+  height: 10px;
+  background: currentColor;
+  -webkit-mask: var(--nes-x) center / 10px 10px no-repeat;
+  mask: var(--nes-x) center / 10px 10px no-repeat;
+}
+
+:root[data-theme="nes"] .box__close:active::after {
+  translate: 1px 1px;
+}
+
+:root[data-theme="nes"] .box__close:focus-visible {
+  outline: 2px dotted var(--nes-ink);
+  outline-offset: 2px;
+}
+
+/* The resize grip: a triangle of six pixel dots, inside the frame's corner step. */
+:root[data-theme="nes"] .box__grip::after {
+  right: 8px;
+  bottom: 8px;
+  width: 10px;
+  height: 10px;
+  background: var(--nes-ink);
+  -webkit-mask: var(--nes-dots) 0 0 / 10px 10px no-repeat;
+  mask: var(--nes-dots) 0 0 / 10px 10px no-repeat;
+  clip-path: none;
+}
+
+:root[data-theme="nes"] .box__grip:focus-visible {
+  outline: 2px dotted var(--nes-ink);
+  outline-offset: -4px;
+}
+
+/* ---------- Labels in the windows ---------- */
+
+:root[data-theme="nes"] .signup__label,
+:root[data-theme="nes"] .switcher__label,
+:root[data-theme="nes"] .comments__label {
+  font-family: var(--aqua-font);
+  font-size: var(--nes-label);
+  font-weight: 400;
+  letter-spacing: 0;
+  line-height: 1.5;
+  text-transform: none;
+}
+
+/* ---------- Comment box ---------- */
+
+/* A window like the others, its heading as the title on the frame. Inside, the page
+   colours give way to the face's, and the photo no longer shows through. */
+:root[data-theme="nes"] .comments__inner {
+  --page-text: var(--face-text);
+  --page-text-muted: var(--face-muted);
+  padding: 0 12px 14px;
+}
+
+:root[data-theme="nes"] .comments > .comments__inner {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+:root[data-theme="nes"] .comments__title {
+  align-self: flex-start;
+  max-width: 100%;
+  /* Centred on the frame's top line, as a window title is in its bar. */
+  margin: calc((var(--nes-bar) - var(--nes-title)) / 2) 0 0;
+}
+
+/* ---------- High contrast ---------- */
+
+/* The gradients go: the transparent borders show as the frame, with a top line. */
+@media (forced-colors: active) {
+  :root[data-theme="nes"] .box,
+  :root[data-theme="nes"] .comments__inner {
+    border-top-width: var(--nes-u);
+  }
+
+  :root[data-theme="nes"] .box__light.box__close {
+    border: 2px solid ButtonText;
+  }
+
+  :root[data-theme="nes"] .box__close svg {
+    display: block;
+  }
+
+  :root[data-theme="nes"] .box__close::after {
+    content: none;
+  }
+
+  :root[data-theme="nes"] .box__grip::after {
+    background: CanvasText;
+  }
+}
+
+/* ---------- Reduced motion ---------- */
+
+/* Nothing here moves but the close box's × while pressed. */
+@media (prefers-reduced-motion: reduce) {
+  :root[data-theme="nes"] .box__close:active::after {
+    translate: none;
+  }
+}
