@@ -1,6 +1,6 @@
 /*
-  Owner page, "Look" section (admin.html): the theme and the colour of the whole site,
-  the public site and this page.
+  Owner page, "Look" section (admin.html, preview.html): the theme and the colour of
+  the whole site, the public site and this page.
 
   - Reads the saved look: the site_settings row 'look' (supabase/look.sql), as
     { theme, color }; no row means Aqua and Classic (studio414Look.DEFAULT). If it
@@ -11,7 +11,9 @@
     visitors until "Save", which upserts the row and keeps the copy look.js reads
     before first paint (studio414Look.save).
   - "Preview the site" opens index.html?theme=<id>&color=<n> in a new tab: a preview
-    look.js shows without saving. "Undo changes" goes back to the saved look; it is
+    look.js shows without saving. It is left out when the section has the attribute
+    data-look-no-preview (preview.html, which shows the site beside it and switches it
+    with this page, see preview.js). "Undo changes" goes back to the saved look; it is
     enabled only while the picks differ from it.
   - On sign-out the page goes back to the saved look.
   When the page itself is a preview (admin.html?theme=...&color=..., as in
@@ -95,9 +97,17 @@
     ok.tabIndex = -1;
     var saveButton = button('Save', true);
     var undoButton = button('Undo changes');
-    var previewButton = button('Preview the site');
     var actions = el('div', 'admin-actions look-actions');
-    actions.append(saveButton, undoButton, previewButton);
+    actions.append(saveButton, undoButton);
+    var section = body.closest('[data-section]');
+    if (!(section && section.hasAttribute('data-look-no-preview'))) {
+      var previewButton = button('Preview the site');
+      actions.appendChild(previewButton);
+      previewButton.addEventListener('click', function () {
+        window.open('index.html?theme=' + encodeURIComponent(picks.theme) +
+          '&color=' + picks.color, '_blank', 'noopener');
+      });
+    }
 
     form.append(intro, themeField, colorField, loadError, error, ok, actions);
     root.append(loading, form);
@@ -118,11 +128,6 @@
       if (saving || same(picks, saved)) return;
       pick({ theme: saved.theme, color: saved.color });
     });
-    previewButton.addEventListener('click', function () {
-      window.open('index.html?theme=' + encodeURIComponent(picks.theme) +
-        '&color=' + picks.color, '_blank', 'noopener');
-    });
-
     load();
 
     return function cleanup() {

@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Studio 414 preview</title>
+  <link rel="stylesheet" href="aqua.css">
+  <link rel="stylesheet" href="colors.css">
+  <link rel="stylesheet" href="boxes.css">
+  <link rel="stylesheet" href="admin.css">
+  <link rel="stylesheet" href="preview.css">
+  <!-- The owners' theme and colour (look.js), before first paint. It must stay after the
+       stylesheets and be loaded without defer: it writes in the theme's stylesheet. -->
+  <script src="look.js"></script>
+</head>
+<body>
+  <!--
+    The owners' preview page (not linked from the public site): the public site in a
+    frame, with the owner sections that change it in a panel beside it (above it on
+    phones). Owner-only like admin.html, and built the same way: admin.js signs the
+    owner in and shows one of the views below (the same ids as admin.html), admin.css
+    and the themes style it, and preview.css lays it out. preview.js fills the frame
+    and keeps it in this page's theme and colour.
+  -->
+  <header class="admin-header">
+    <h1 class="admin-title"><b>Studio 414</b> — Preview</h1>
+    <a class="admin-button aqua-pill preview-back" href="admin.html">Owner page</a>
+    <!-- Shown with the owner page only (admin.js). -->
+    <div class="admin-account" id="admin-account" hidden>
+      <p class="admin-account-text">Signed in as <strong class="admin-email" data-admin-email></strong></p>
+      <button type="button" class="admin-button aqua-pill" data-admin-signout>Sign out</button>
+    </div>
+  </header>
+
+  <main class="admin preview">
+    <!-- Shown while the page loads or checks the account. -->
+    <section class="admin-view admin-dialog box" id="admin-loading" aria-labelledby="admin-loading-title">
+      <div class="box__titlebar">
+        <span class="box__lights" aria-hidden="true"><span class="box__light box__light--close"></span><span class="box__light box__light--min"></span><span class="box__light box__light--zoom"></span></span>
+        <h2 class="box__title" id="admin-loading-title">Studio 414</h2>
+      </div>
+      <div class="admin-dialog-body" aria-live="polite">
+        <p class="admin-status" id="admin-loading-text">Loading…</p>
+        <div class="admin-barber" aria-hidden="true"></div>
+      </div>
+    </section>
+
+    <section class="admin-view admin-dialog box" id="admin-signin" aria-labelledby="admin-signin-title" hidden>
+      <div class="box__titlebar">
+        <span class="box__lights" aria-hidden="true"><span class="box__light box__light--close"></span><span class="box__light box__light--min"></span><span class="box__light box__light--zoom"></span></span>
+        <h2 class="box__title" id="admin-signin-title">Sign in</h2>
+      </div>
+      <div class="admin-dialog-body">
+        <p class="admin-dialog-lead">Sign in with your owner email and password.</p>
+        <p class="admin-message admin-message-error" id="admin-signin-error" role="alert" hidden></p>
+        <form class="admin-signin-form" id="admin-signin-form">
+          <div class="admin-signin-field">
+            <label class="admin-label" for="admin-signin-email">Email</label>
+            <input class="admin-field aqua-field" id="admin-signin-email" name="email" type="email" autocomplete="username" autocapitalize="none" spellcheck="false" required>
+          </div>
+          <div class="admin-signin-field">
+            <label class="admin-label" for="admin-signin-password">Password</label>
+            <input class="admin-field aqua-field" id="admin-signin-password" name="password" type="password" autocomplete="current-password" required>
+          </div>
+          <div class="admin-actions">
+            <button type="submit" class="admin-button admin-button-primary aqua-pill aqua-pill--tint aqua-pill--pulse" id="admin-signin-submit">
+              <span data-admin-label>Sign in</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <section class="admin-view admin-dialog box" id="admin-denied" aria-labelledby="admin-denied-title" hidden>
+      <div class="box__titlebar">
+        <span class="box__lights" aria-hidden="true"><span class="box__light box__light--close"></span><span class="box__light box__light--min"></span><span class="box__light box__light--zoom"></span></span>
+        <h2 class="box__title" id="admin-denied-title">Not an owner</h2>
+      </div>
+      <div class="admin-dialog-body">
+        <p class="admin-dialog-lead"><strong class="admin-email" data-admin-email></strong> isn't an owner account.</p>
+        <p class="admin-hint">Sign out and sign in with an owner's email and password.</p>
+        <div class="admin-actions">
+          <button type="button" class="admin-button aqua-pill" data-admin-signout>Sign out</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="admin-view admin-dialog box" id="admin-error" aria-labelledby="admin-error-title" hidden>
+      <div class="box__titlebar">
+        <span class="box__lights" aria-hidden="true"><span class="box__light box__light--close"></span><span class="box__light box__light--min"></span><span class="box__light box__light--zoom"></span></span>
+        <h2 class="box__title" id="admin-error-title">Something went wrong</h2>
+      </div>
+      <div class="admin-dialog-body">
+        <p class="admin-message admin-message-error" id="admin-error-text" role="alert"></p>
+        <div class="admin-actions">
+          <button type="button" class="admin-button aqua-pill" data-admin-signout>Sign out</button>
+          <button type="button" class="admin-button aqua-pill" id="admin-retry">Try again</button>
+        </div>
+      </div>
+    </section>
+
+    <div class="admin-view preview-owner" id="admin-owner" hidden>
+      <!--
+        The side panel: owner sections, each a window, registered by their modules
+        through studioAdmin.registerSection (see admin.js). Look is admin-look.js
+        (data-look-no-preview: no "Preview the site" button, the site is right here).
+      -->
+      <div class="preview-layout">
+        <div class="preview-panel">
+          <section class="admin-section box" data-section="look" data-look-no-preview aria-labelledby="admin-look-title">
+            <div class="box__titlebar">
+              <span class="box__lights" aria-hidden="true"><span class="box__light box__light--close"></span><span class="box__light box__light--min"></span><span class="box__light box__light--zoom"></span></span>
+              <h2 class="box__title" id="admin-look-title">Look</h2>
+            </div>
+            <div class="admin-section-body" data-section-body>
+              <p class="admin-soon">Coming soon</p>
+            </div>
+          </section>
+        </div>
+
+        <!-- The public site, index.html?edit=1&theme=<id>&color=<n>; preview.js sets src. -->
+        <div class="preview-stage">
+          <iframe class="preview-frame" id="preview-frame" title="The public site"></iframe>
+        </div>
+      </div>
+    </div>
+
+    <p class="admin-message admin-message-error" id="admin-signout-error" role="alert" hidden></p>
+  </main>
+
+  <script src="comments-config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.js"
+          integrity="sha384-sLWJsCmP+Z4Qn+HgF7Hi64Djta4fZMu0fcgi3uUL3GFV/ubx2G86LPOuMf7+ZIyX"
+          crossorigin="anonymous"></script>
+  <script src="admin.js"></script>
+  <!-- The frame (window.studioPreview), before the section modules that use it. -->
+  <script src="preview.js"></script>
+  <!-- Section modules go here, after admin.js and preview.js. -->
+  <script src="admin-look.js"></script>
+</body>
+</html>

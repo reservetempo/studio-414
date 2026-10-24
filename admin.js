@@ -1,8 +1,8 @@
 /*
-  Owner page (admin.html): email and password sign-in through Supabase Auth, then the
-  owner check.
+  Owner pages (admin.html, and preview.html, which has the same views and ids): email
+  and password sign-in through Supabase Auth, then the owner check.
 
-  Uses supabase-js (loaded from jsDelivr in admin.html) for sign-in and, in the section
+  Uses supabase-js (loaded from jsDelivr in the page) for sign-in and, in the section
   modules, for owner data. The public site doesn't load it; it keeps plain fetch. The
   Supabase URL and publishable key come from comments-config.js.
 
@@ -17,7 +17,7 @@
     studioAdmin.session    the current Supabase session, or null (kept up to date)
     studioAdmin.isReady()  true while the owner page is showing
     studioAdmin.registerSection(name, render)
-        name    the data-section of a <section> in admin.html ("wallpaper", "workshops")
+        name    the data-section of a <section> in the page ("wallpaper", "workshops")
         render  function (body, admin): fills body, the section's content element
                 (emptied first), each time the owner page opens. It may return a
                 function, called when the owner signs out, to clean up (timers,
@@ -322,7 +322,7 @@
     }
     var section = sections[name];
     if (!section) {
-      console.error('studioAdmin.registerSection: admin.html has no data-section="' + name + '"');
+      console.error('studioAdmin.registerSection: this page has no data-section="' + name + '"');
       return;
     }
     if (section.render) {

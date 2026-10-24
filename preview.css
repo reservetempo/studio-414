@@ -1,0 +1,121 @@
+/*
+  Owner preview page (preview.html), on top of admin.css: only the layout. The menu bar,
+  the alerts and the section windows are admin.css's (and each theme's), unchanged.
+
+  While the owner page shows, the desktop under the menu bar holds a narrow column of
+  section windows at the left, scrolling on its own, and the public site in a frame
+  filling the rest, so the page itself doesn't scroll. On phones and narrow windows the
+  column goes above the frame and the page scrolls as usual. The sign-in, loading and
+  error alerts sit in the middle as on admin.html.
+*/
+
+/* "Owner page" in the menu bar: a link drawn as the menu bar's buttons. */
+.preview-back {
+  flex: none;
+  text-decoration: none;
+}
+
+/* The owner page fills the desktop edge to edge (admin.css keeps .admin a centred
+   column with room around it, which the alerts still get). */
+.preview:has(> .preview-owner:not([hidden])) {
+  max-width: none;
+  padding: 0;
+}
+
+/* #admin-owner is a column in admin.css (and the themes); its one child,
+   .preview-layout, holds the column of windows and the frame. */
+.preview-owner {
+  flex: 1 0 auto;
+  min-width: 0;
+}
+
+.preview-layout {
+  flex: 1 0 auto;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.preview-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  min-width: 0;
+  padding: 20px 16px 28px;
+}
+
+.preview-stage {
+  display: flex;
+  min-width: 0;
+  height: 85vh;
+  height: 85dvh;
+  min-height: 420px;
+  border-top: 1px solid rgb(0 0 0 / 0.42);
+}
+
+.preview-frame {
+  display: block;
+  flex: 1 1 auto;
+  width: 100%;
+  min-width: 0;
+  height: 100%;
+  border: 0;
+  background: var(--title);
+}
+
+/* Each group's label above it, as on phones (admin.css): the column is too narrow to
+   keep it at the left. */
+.preview-panel .look-field {
+  display: flex;
+  flex-direction: column;
+}
+
+.preview-panel .look-label {
+  margin-bottom: 6px;
+  text-align: left;
+}
+
+.preview-panel .look .admin-message,
+.preview-panel .look-actions {
+  margin-left: 0;
+}
+
+/* Wide screens: the column at the left and the frame beside it, both the height of the
+   desktop; the page fits the screen exactly. */
+@media (min-width: 760px) {
+  body:has(> .preview > .preview-owner:not([hidden])) {
+    height: 100vh;
+    height: 100dvh;
+  }
+
+  .preview:has(> .preview-owner:not([hidden])) {
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+
+  .preview-owner {
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+
+  .preview-layout {
+    flex: 1 1 auto;
+    flex-direction: row;
+    min-height: 0;
+  }
+
+  .preview-panel {
+    flex: none;
+    width: clamp(17rem, 30vw, 23rem);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .preview-stage {
+    flex: 1 1 auto;
+    height: auto;
+    min-height: 0;
+    border-top: 0;
+    border-left: 1px solid rgb(0 0 0 / 0.42);
+  }
+}
