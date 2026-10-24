@@ -47,9 +47,10 @@
    with the photo like the card does. */
 @media (min-width: 1100px) and (min-height: 640px) {
   .comments {
-    /* Only a strip of the page colour is left under the hero. */
-    min-height: clamp(96px, 14vw, 180px);
-    padding: 0;
+    /* Its box floats (below), so the section is only the usual 24px of page colour
+       under the hero before Display, the same gap the hero leaves above the comment
+       box on narrower screens. */
+    padding: 24px 0 0;
   }
 
   /* This selector (.comments > .comments__inner) and the 64px top clearance below
