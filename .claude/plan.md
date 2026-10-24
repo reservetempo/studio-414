@@ -4,6 +4,34 @@ Managed by the main session (see CLAUDE.md). `/z <items>` adds tasks; `/z` works
 
 ## Next
 
+### Bouncing 414 (tasks 77-78): facts both tasks share
+
+- The user's answers (2026-10-24):
+  - Like an old-school screensaver: the big 414 drifts slowly and bounces off the edges and corners of the **first screen** (the hero over the photo, `main.hero` in index.html). It scrolls away with the page as today; it doesn't follow the visitor down to the comments.
+  - On load it heads off at a random angle 15-35° above or below the horizontal, going left or right (all four combinations possible).
+  - A tap makes it faster: each tap adds speed (taps add up, with a top speed), and over a few seconds it eases back to its gentle drift.
+  - Visitors can throw it: pick it up as today (mouse/pen at once, finger after the hold), and on release the fling's speed and direction become its own; a fast throw then eases back to the gentle drift like a tap does. A drop with no fling carries on at the speed and direction it had.
+  - With "reduce motion" on (`prefers-reduced-motion: reduce`) it doesn't bounce: today's behaviour exactly (drag, remembered spot, Layout row). Follow changes to that setting while the page is open (stops where it is / starts from where it is).
+- Today: the 414 is `#big-414` (`.big-414`, styles.css ~249-400), absolutely positioned in the hero, z-index 0, under the windows and over the photo and "Opening soon!". boxes.js (650 lines; its header comment explains it all) drags it (mouse/pen at once, finger after `HOLD` 450ms within `SLOP` 10px, a swipe scrolls the page), adds the keyboard "Move 414" button (`.big-414__handle`, arrows move it), places it with `is-placed` + left/top px from the hero's corner, stores it under "414" in `studio414.layout`, and sizes it from the owner's layout (`studio414SiteLayout.current().big414`, layout.js) as a font size. `studio414:sitelayout` re-places unmoved boxes; `studio414:layoutreset`/`studio414:layoutchange` drive Display's Layout row (switcher.js). `?edit=1` (the owner's preview page frame) is driven by edit.js instead.
+- Decided defaults (no need to ask): it starts from its default spot and size (the owner's layout, else the CSS's); it stays wholly inside the first screen, flipping across on a side and down/up on the top/bottom (both on a corner); if it's wider (or taller) than the hero it stays centred on that axis and only moves on the other. It stays under the card and the Workshops button and never blocks them. Time-based motion (px per second, same at any frame rate), requestAnimationFrame, frame time capped (~50ms) so it doesn't jump after the tab was hidden; no layout reads in the loop beyond what's needed; transform is fine if it keeps the drag code simple. While bouncing, the visitor's stored "414" spot is neither read nor written and the 414 no longer counts towards Display's Layout row (Reset only brings the card back); stored entries are kept for reduce-motion visitors. With `?edit=1` it holds still exactly as today, so the owner can still move and resize it on the preview page; that spot is where it starts on the site. Window resize, rotation, a font change or a new owner layout keep it inside the screen and moving.
+- These tasks touch the same files (boxes.js, the new motion code, styles.css), so they run in order.
+
+### 77. Make the 414 bounce slowly around the first screen
+
+Goal: the screensaver drift from the shared facts above. Files: a new `bounce.js` for the motion (loaded after boxes.js in index.html; if putting it in boxes.js turns out clearly simpler, do that and say why), small hooks in boxes.js, styles.css if needed, `admin-layout.js` (add a few words to the Layout section's hint line: on the site the 414 starts here and bounces around), and the comment headers / README paragraphs that describe the 414 (grep README for "414").
+- Gentle speed: a named constant at the top of the file, so it crosses the first screen's width in about 12-15 seconds on any screen (at least ~30px/s).
+- Pressing on it (mouse, pen or finger) stops it at once so it can be caught; if a finger's press turns out to be a swipe that scrolls the page, it carries on. Dragging works as today; on release it bounces on from the drop spot at the speed and direction it had (task 78 adds throwing and the tap speed-up). The "Move 414" arrows nudge it and it carries on from there.
+- Done when: on load it drifts at a random 15-35° angle and bounces off all four edges and corners of the first screen, at 375px and on a wide screen; drag and drop still work and it bounces on; reduce motion (test by stubbing `matchMedia` in the page) and `?edit=1` keep today's behaviour; Layout row/Reset still work for the card; no console errors. Verify with javascript_tool position samples over time rather than many screenshots.
+
+### 78. Tap the 414 to speed it up, and throw it
+
+Goal: the tap speed-up and throwing from the shared facts above, on top of task 77's motion (`bounce.js` or wherever task 77 put it; read its header comment first). Files: that motion code and boxes.js (the 414's drag code), plus the comment headers / README lines for the 414.
+- A tap: a press and release on the 414 that doesn't move past `SLOP` and, for a finger, ends before the `HOLD` lift (a mouse click with no movement counts too). Each tap adds about 1.5x the gentle speed to its current speed, up to about 10x the gentle speed; the extra speed fades smoothly (for example exponentially) so it's back to the gentle drift within about 4 seconds. Direction is unchanged by a tap. Constants named at the top for tuning.
+- A throw: velocity from the last ~100ms of pointer moves before release becomes its velocity (capped at the same top speed); any direction is fine. If the fling is slower than the gentle speed, it keeps the direction of the fling at the gentle speed; a release with no movement continues as it was. The extra speed then fades like a tap's.
+- Keyboard: Enter or Space on the "Move 414" button counts as a tap (silently; no screen-reader message needed). Arrows still nudge it.
+- Under reduce motion and with `?edit=1`, taps and throws do nothing new (today's behaviour). A swipe over it still scrolls the page.
+- Done when: taps on mouse and touch (emulated) speed it up, repeated taps add up to the cap, it eases back within ~4s; a throw sends it off in the thrown direction and eases back; drag-and-drop without fling still works; reduce motion and `?edit=1` unchanged; no console errors. Verify with javascript_tool speed samples and synthetic pointer events rather than many screenshots.
+
 ### Display rework and owner preview page (tasks 62-72): facts every task shares
 
 - The user's answers (2026-10-24):
