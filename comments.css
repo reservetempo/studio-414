@@ -173,6 +173,31 @@
   overflow-wrap: anywhere;
 }
 
+/* The owner's Delete under each comment, only in the preview page's ?edit=1 frame
+   (comments.js): "Delete", or "Delete the comment by <name>?" with Delete and Cancel,
+   and the reason when a delete fails. */
+.comment__delete {
+  margin: 3px 0 0;
+  font-size: 1rem;
+  line-height: 1.4;
+}
+
+/* Space after each part rather than before, so a part that wraps starts flush. */
+.comment__question,
+.comment__delete .comments__link {
+  margin-right: 0.6em;
+}
+
+.comment__question {
+  overflow-wrap: anywhere;
+}
+
+/* Upright in the full text colour, as the form's error is. */
+.comment__error {
+  font-style: normal;
+  color: var(--page-text);
+}
+
 /* Loading, empty and error states of the list ("Try again" follows the text). */
 .comments__state {
   font-size: 1rem;
@@ -285,7 +310,8 @@
   color: var(--page-text);
 }
 
-/* Text buttons: "Post comment", "change" (the name) and "Try again" (loading). */
+/* Text buttons: "Post comment", "change" (the name), "Try again" (loading) and the
+   owner's Delete and Cancel. */
 .comments__link,
 .comments__submit {
   margin: 0;
@@ -307,7 +333,8 @@
   font-size: 1.0625rem;
 }
 
-.comments__submit:disabled {
+.comments__submit:disabled,
+.comment__delete .comments__link:disabled {
   color: var(--page-text-muted);
   text-decoration-style: dotted;
   cursor: progress;

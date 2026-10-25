@@ -14,6 +14,11 @@
   Where the section floats over the first screen (comments.css), the owners' layout
   (layout.js, its "comments" part) sets its spot and size, as it does the card's
   (boxes.js); see "Where it floats" below. Visitors can't move it.
+
+  In the owners' preview page (preview.html, which frames the site with ?edit=1), each
+  comment gets a Delete button once the page says the owner is signed in. This page
+  can't delete (it has only the publishable key), so it asks the preview page by
+  postMessage, which deletes with the owner's session and answers; see "Deleting".
 */
 (function () {
   'use strict';
@@ -195,6 +200,8 @@
 
   var comments = [];
   var loaded = false;
+  // Set once the owners' preview page says the owner is signed in (see "Deleting").
+  var owner = false;
 
   function element(tag, className, text) {
     var node = document.createElement(tag);
@@ -205,9 +212,12 @@
 
   function renderComment(comment) {
     var item = element('li', 'comment');
+    // The id as the database returns it, for the owner's Delete (see "Deleting").
+    item.dataset.id = String(comment.id);
     item.appendChild(element('p', 'comment__name', comment.name));
     // white-space: pre-wrap in comments.css keeps the line breaks.
     item.appendChild(element('p', 'comment__body', comment.body));
+    if (owner) item.appendChild(renderDelete(comment));
     return item;
   }
 
@@ -230,6 +240,11 @@
 
   function showComments() {
     renderList();
+    showEmpty();
+  }
+
+  // The status line says so when the list is empty (and is empty itself otherwise).
+  function showEmpty() {
     setStatus(comments.length ? '' : 'No comments yet. Be the first.', false);
   }
 
@@ -374,6 +389,160 @@
       }
     });
   });
+
+  /* ---------- Deleting: the owner, in the preview page's ?edit=1 frame ---------- */
+
+  // The owners' preview page (preview.html) frames the site with ?edit=1 and, once the
+  // owner is signed in, posts { type: 'studio414:owner' }. Only then does each comment
+  // (and each one loaded or posted later) get a Delete button, which asks "Delete the
+  // comment by <name>?" in place, with Delete and Cancel. This page has only the
+  // publishable key, so it can't delete anything itself: the confirming Delete posts
+  // { type: 'studio414:commentdelete', id } (the id as the database returns it) to the
+  // parent, which deletes the comment with the owner's session and answers
+  // { type: 'studio414:commentdeleted', id, ok: true } (the comment leaves the list) or
+  // { ..., ok: false, message } (it stays, with the message). Messages count only from
+  // the parent page, on this origin. Visitors, and a bare ?edit=1, never get the buttons.
+
+  var editing = new URLSearchParams(window.location.search).get('edit') === '1';
+  var framed = window.parent !== window;
+  var DELETE_TIMEOUT_MS = REQUEST_TIMEOUT_MS + 5000;
+  // Each asked-about comment's step, by id: 'confirm' (asking) or 'waiting' (the parent
+  // was asked), with the message of a failed delete. Kept apart from the elements, so
+  // they survive the list being drawn again (a reload after posting).
+  var deleteStates = {};
+  var deleteTimers = {};
+
+  function findComment(key) {
+    for (var i = 0; i < comments.length; i += 1) {
+      if (String(comments[i].id) === key) return comments[i];
+    }
+    return null;
+  }
+
+  function findItem(key) {
+    var items = listEl.children;
+    for (var i = 0; i < items.length; i += 1) {
+      if (items[i].dataset.id === key) return items[i];
+    }
+    return null;
+  }
+
+  // A text button (comments__link, which the themes style), named by data-role so
+  // focus can be put back on it after the line is drawn again.
+  function textButton(text, role, onPress) {
+    var node = element('button', 'comments__link', text);
+    node.type = 'button';
+    node.dataset.role = role;
+    node.addEventListener('click', onPress);
+    return node;
+  }
+
+  // The comment's Delete, or the question with its Delete and Cancel.
+  function renderDelete(comment) {
+    var key = String(comment.id);
+    var state = deleteStates[key];
+    var line = element('p', 'comment__delete');
+    if (!state) {
+      var start = textButton('Delete', 'start', function () {
+        setDeleteState(key, { step: 'confirm' }, 'cancel');
+      });
+      start.setAttribute('aria-label', 'Delete the comment by ' + comment.name);
+      line.appendChild(start);
+      return line;
+    }
+    var waiting = state.step === 'waiting';
+    line.appendChild(element('span', 'comment__question', 'Delete the comment by ' + comment.name + '?'));
+    var confirmButton = textButton(waiting ? 'Deleting…' : 'Delete', 'confirm', function () {
+      requestDelete(key);
+    });
+    var cancelButton = textButton('Cancel', 'cancel', function () {
+      setDeleteState(key, null, 'start');
+    });
+    confirmButton.disabled = waiting;
+    cancelButton.disabled = waiting;
+    line.appendChild(confirmButton);
+    line.appendChild(cancelButton);
+    if (state.message) {
+      var note = element('span', 'comment__error', state.message);
+      note.setAttribute('role', 'alert');
+      line.appendChild(note);
+    }
+    return line;
+  }
+
+  // Draws the comment's Delete line again for its new step, and focuses the button
+  // named by focusRole, if any.
+  function setDeleteState(key, state, focusRole) {
+    if (state) deleteStates[key] = state;
+    else delete deleteStates[key];
+    var comment = findComment(key);
+    var item = findItem(key);
+    if (!comment || !item) return;
+    var line = renderDelete(comment);
+    var old = item.querySelector('.comment__delete');
+    if (old) item.replaceChild(line, old);
+    else item.appendChild(line);
+    var target = focusRole && line.querySelector('[data-role="' + focusRole + '"]');
+    if (target && !target.disabled) target.focus({ preventScroll: true });
+  }
+
+  function focusLost() {
+    return !document.activeElement || document.activeElement === document.body;
+  }
+
+  function requestDelete(key) {
+    var comment = findComment(key);
+    var state = deleteStates[key];
+    if (!comment || !state || state.step === 'waiting') return;
+    setDeleteState(key, { step: 'waiting' });
+    // Should the parent never answer, the buttons come back rather than stay disabled.
+    clearTimeout(deleteTimers[key]);
+    deleteTimers[key] = setTimeout(function () {
+      deleteFailed(key, 'The preview page didn’t answer. Please try again.');
+    }, DELETE_TIMEOUT_MS);
+    window.parent.postMessage({ type: 'studio414:commentdelete', id: comment.id }, window.location.origin);
+  }
+
+  function deleteFailed(key, message) {
+    clearTimeout(deleteTimers[key]);
+    delete deleteTimers[key];
+    if (!deleteStates[key] || deleteStates[key].step !== 'waiting') return;
+    // Disabling the focused button dropped focus to the page; put it back.
+    setDeleteState(key, { step: 'confirm', message: message }, focusLost() ? 'confirm' : null);
+  }
+
+  function deleteDone(key) {
+    clearTimeout(deleteTimers[key]);
+    delete deleteTimers[key];
+    delete deleteStates[key];
+    comments = comments.filter(function (comment) { return String(comment.id) !== key; });
+    var item = findItem(key);
+    if (!item) return;
+    item.remove();
+    listEl.hidden = comments.length === 0;
+    showEmpty();
+    if (focusLost()) listEl.parentNode.focus({ preventScroll: true });
+  }
+
+  function onMessage(event) {
+    if (event.source !== window.parent || event.origin !== window.location.origin) return;
+    var data = event.data;
+    if (!data || typeof data !== 'object') return;
+    if (data.type === 'studio414:owner') {
+      if (owner) return;
+      owner = true;
+      Array.prototype.forEach.call(listEl.children, function (item) {
+        var comment = findComment(item.dataset.id);
+        if (comment) item.appendChild(renderDelete(comment));
+      });
+    } else if (data.type === 'studio414:commentdeleted' && data.id != null) {
+      var key = String(data.id);
+      if (data.ok === true) deleteDone(key);
+      else deleteFailed(key, String(data.message || '').trim() || 'Couldn’t delete the comment.');
+    }
+  }
+
+  if (editing && framed) window.addEventListener('message', onMessage);
 
   /* ---------- Where it floats: the owners' layout (layout.js) ---------- */
 
