@@ -62,14 +62,14 @@
 
     // Loading (and a failed first load).
     var loadingPanel = el('div', 'workshops-loading');
-    var loadingText = el('p', 'admin-status', 'Loading workshops…');
+    var loadingText = el('p', 'admin-status', 'Loading events…');
     var loadError = message('error');
     var retryButton = button('Try again', true);
     loadingPanel.append(loadingText, loadError, retryButton);
 
     // The list.
     var listPanel = el('div', 'workshops-list-panel');
-    var addButton = button('Add workshop', true);
+    var addButton = button('Add event', true);
     var listTop = el('div', 'admin-actions workshops-top');
     listTop.appendChild(addButton);
     var listOk = message('ok');
@@ -130,7 +130,7 @@
       field(priceInput, 'Price per spot (CAD)', '$0.50 to $10,000', priceBox)
     );
     var formNote = el('p', 'admin-hint workshops-form-note',
-      'Dates and times are studio time (Toronto). The workshop shows on the site as soon ' +
+      'Dates and times are studio time (Toronto). The event shows on the site as soon ' +
       'as it\'s saved, unless it\'s hidden.');
     var formError = message('error');
     formError.id = 'workshops-form-error';
@@ -239,7 +239,7 @@
           if (disposed || seq !== loadSeq) return;
           if (!loaded) {
             loadingText.hidden = true;
-            say(loadError, 'The workshops couldn\'t load. ' + describeDbError(err));
+            say(loadError, 'The events couldn\'t load. ' + describeDbError(err));
             retryButton.hidden = false;
           } else {
             say(listError, 'The list couldn\'t refresh. ' + describeDbError(err));
@@ -292,12 +292,12 @@
       past.forEach(function (w) { pastList.appendChild(renderItem(w, true)); });
 
       upcomingEmpty.textContent = workshops.length
-        ? 'No upcoming workshops.'
-        : 'No workshops yet. Add one with "Add workshop".';
+        ? 'No upcoming events.'
+        : 'No events yet. Add one with "Add event".';
       upcomingEmpty.hidden = upcoming.length > 0;
       upcomingList.hidden = upcoming.length === 0;
       pastToggle.hidden = past.length === 0;
-      pastToggle.textContent = 'Past workshops (' + past.length + ')';
+      pastToggle.textContent = 'Past events (' + past.length + ')';
       pastToggle.setAttribute('aria-expanded', showPast ? 'true' : 'false');
       pastList.hidden = !showPast || past.length === 0;
 
@@ -550,7 +550,7 @@
       returnFocus = focusBack;
       formOpen = true;
       clearListMessages();
-      formTitle.textContent = w ? 'Edit "' + w.name + '"' : 'Add a workshop';
+      formTitle.textContent = w ? 'Edit "' + w.name + '"' : 'Add an event';
       nameInput.value = w ? w.name : '';
       dateInput.value = w ? w.date : '';
       startInput.value = w ? hhmm(w.start_time) : '';
@@ -603,7 +603,7 @@
         .catch(function (err) {
           if (disposed) return;
           setSaving(false);
-          say(formError, (wasEditing ? 'Couldn\'t save the changes. ' : 'Couldn\'t add the workshop. ') +
+          say(formError, (wasEditing ? 'Couldn\'t save the changes. ' : 'Couldn\'t add the event. ') +
             describeDbError(err));
           saveButton.focus();
         });
@@ -611,7 +611,7 @@
 
     function setSaving(on) {
       saving = on;
-      saveButton.textContent = on ? 'Saving…' : (editing ? 'Save changes' : 'Add workshop');
+      saveButton.textContent = on ? 'Saving…' : (editing ? 'Save changes' : 'Add event');
       saveButton.disabled = on;
       cancelButton.disabled = on;
       formFields.forEach(function (node) { node.readOnly = on; });
@@ -623,14 +623,14 @@
     function readForm() {
       var name = nameInput.value.trim();
       var nameLength = Array.from(name).length;
-      if (!name) return problem(nameInput, 'Give the workshop a name.');
+      if (!name) return problem(nameInput, 'Give the event a name.');
       if (nameLength > MAX_NAME) {
         return problem(nameInput, 'Keep the name to ' + MAX_NAME + ' characters or fewer (it\'s ' +
           nameLength + ').');
       }
 
       var date = dateInput.value;
-      if (!date) return problem(dateInput, 'Choose the date of the workshop.');
+      if (!date) return problem(dateInput, 'Choose the date of the event.');
       if (!isDate(date)) return problem(dateInput, 'That date isn\'t valid. Choose it again.');
       if (!editing && date < todayInStudio()) {
         return problem(dateInput, 'That date has passed. Choose today or a later date.');
@@ -662,7 +662,7 @@
         var taken = editing.paid + editing.held;
         if (spots < taken) {
           return problem(spotsInput, plural(taken, 'spot is', 'spots are') + ' already taken ' +
-            '(paid, or held while someone pays), so the workshop needs at least ' + taken + '.');
+            '(paid, or held while someone pays), so the event needs at least ' + taken + '.');
         }
       }
 
@@ -874,7 +874,7 @@
   }
 
   function gone() {
-    var err = new Error('That workshop isn\'t there any more; someone may have deleted it. ' +
+    var err = new Error('That event isn\'t there any more; someone may have deleted it. ' +
       'The list has been refreshed.');
     err.code = 'gone';
     return err;
@@ -884,14 +884,14 @@
     var code = err && err.code;
     var text = (err && err.message) || '';
     if (code === 'gone') return text;
-    if (code === '42501') return 'This account isn\'t allowed to see or change workshops (only owners can).';
+    if (code === '42501') return 'This account isn\'t allowed to see or change events (only owners can).';
     if (code === '42P01' || code === 'PGRST205' || code === 'PGRST202' || code === '42883') {
-      return 'The workshops table isn\'t set up yet (run supabase/workshops.sql).';
+      return 'Events aren\'t set up yet (run supabase/workshops.sql).';
     }
     if (code === 'PGRST301' || code === 'PGRST303' || /jwt/i.test(text)) {
       return 'Your sign-in has run out. Reload the page and sign in again.';
     }
-    if (code === '23505') return 'A workshop with that id already exists. Try again.';
+    if (code === '23505') return 'An event with that id already exists. Try again.';
     if (/violates check constraint/i.test(text)) {
       return 'The database refused one of the details. Check them and try again.';
     }

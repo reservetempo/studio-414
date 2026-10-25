@@ -125,7 +125,7 @@
       return {
         title: 'Payment cancelled, nothing was charged.',
         text: w ? 'Your spot isn’t booked. You can try again below.'
-          : 'Your spot isn’t booked. You can pick a workshop below and try again.'
+          : 'Your spot isn’t booked. You can pick an event below and try again.'
       };
     }
   };
@@ -454,8 +454,8 @@
       return availabilityOf(w) === 'soldout';
     });
     launcher.hidden = false;
-    launcherLabel.textContent = soldOut ? 'Sold out' : 'Workshops';
-    launcher.setAttribute('aria-label', soldOut ? 'Workshops sold out' : 'Workshops');
+    launcherLabel.textContent = soldOut ? 'Sold out' : 'Events';
+    launcher.setAttribute('aria-label', soldOut ? 'Events sold out' : 'Events');
     if (soldOut) launcher.dataset.state = 'soldout';
     else delete launcher.dataset.state;
   }
@@ -601,8 +601,8 @@
     };
   }
 
-  var listWindow = makeWindow(listDialog, listClose, 'Move the Workshops window');
-  var signupWindow = makeWindow(dialog, closeButton, 'Move the workshop sign-up window');
+  var listWindow = makeWindow(listDialog, listClose, 'Move the Events window');
+  var signupWindow = makeWindow(dialog, closeButton, 'Move the event sign-up window');
 
   /* ---------- The message after Stripe ---------- */
 
@@ -689,9 +689,9 @@
       return { w: w, button: button, spots: spots };
     });
     listEl.hidden = !rows.length;
-    var status = shape === 'loading' ? 'Loading workshops…'
-      : shape === 'unavailable' ? 'Couldn’t load the workshops. Try again later.'
-      : shape === 'empty' ? 'No workshops coming up — check back soon.' : '';
+    var status = shape === 'loading' ? 'Loading events…'
+      : shape === 'unavailable' ? 'Couldn’t load the events. Try again later.'
+      : shape === 'empty' ? 'No events coming up — check back soon.' : '';
     if (listStatus.textContent !== status) listStatus.textContent = status;
     listStatus.hidden = !status;
     retryButton.hidden = shape !== 'unavailable';
@@ -806,7 +806,7 @@
   function spotsText(availability) {
     if (availability === 'loading') return 'Checking spots…';
     if (availability === 'unavailable') return 'Couldn’t check the spots. Try again later.';
-    if (availability === 'gone') return 'This workshop is no longer available.';
+    if (availability === 'gone') return 'This event is no longer available.';
     return '';
   }
 
@@ -1163,7 +1163,7 @@
         loadWorkshops(true);
         setMessage('Fewer spots are left than that. Please choose fewer; nothing was charged.', 'error');
       } else if (data.error === 'already_signed_up') {
-        setMessage('That email is already signed up for this workshop, so there’s nothing to pay. Look for the Stripe receipt in its inbox.', 'error');
+        setMessage('That email is already signed up for this event, so there’s nothing to pay. Look for the Stripe receipt in its inbox.', 'error');
       } else if (data.error === 'full' || leftKnown) {
         var spots = spotsById[w.id];
         spotsById[w.id] = { capacity: spots ? spots.capacity : 10, remaining: 0 };
@@ -1180,8 +1180,8 @@
         renderAll();
         loadWorkshops(true);
         setMessage(data.error === 'workshop_past'
-          ? 'Sorry, sign-ups for this workshop have closed. Nothing was charged.'
-          : 'Sorry, this workshop has just been taken off the list. Nothing was charged.', 'error');
+          ? 'Sorry, sign-ups for this event have closed. Nothing was charged.'
+          : 'Sorry, this event has just been taken off the list. Nothing was charged.', 'error');
       } else {
         console.warn('Workshop checkout could not be started:', result.status, data);
         setMessage('Something went wrong on our side and nothing was charged. Please try again in a moment.', 'error');
