@@ -11,6 +11,11 @@
     puts it in the unsaved layout (blank removes big414Text: 414) and applies that to
     the frame at once, which edit mode doesn't post back. The field follows the
     unsaved layout, else the saved one (Undo changes, Back to the default layout).
+  - "Show the comment section": a check box, ticked unless the layout hides the
+    section (commentsHidden, layout.js). Unticking puts commentsHidden: true in the
+    unsaved layout and applies it to the frame at once, as "414 text" does, so the
+    frame shows the site without it, as visitors will see it; ticking removes it. The
+    comments themselves are kept. It follows the layout like the field does.
   - Reads the saved layout: the site_settings row 'layout' (supabase/layout.sql); no
     row means the default (CSS) layout, null. The section shows once the row is read
     and the frame has loaded (the frame's studio414SiteLayout checks values, layout.js).
@@ -83,6 +88,20 @@
     textHint.id = 'layout-414-text-hint';
     textInput.setAttribute('aria-describedby', textHint.id);
     textField.append(textLabel, textInput, textHint);
+    // "Show the comment section": the sign-up window's check box (.workshop__check,
+    // admin.css and the themes), as the Workshops section's are.
+    var commentsField = el('div', 'admin-signin-field layout-field');
+    var commentsLabel = el('label', 'workshop__check layout-check');
+    var commentsInput = el('input');
+    commentsInput.type = 'checkbox';
+    commentsInput.id = 'layout-comments-shown';
+    commentsInput.checked = true;
+    commentsLabel.append(commentsInput, el('span', 'admin-label', 'Show the comment section'));
+    var commentsHint = el('span', 'admin-hint layout-check-hint',
+      'Untick it to hide the comment section from visitors. Its comments are kept.');
+    commentsHint.id = 'layout-comments-shown-hint';
+    commentsInput.setAttribute('aria-describedby', commentsHint.id);
+    commentsField.append(commentsLabel, commentsHint);
 
     var state = el('p', 'admin-status layout-state');
     state.setAttribute('aria-live', 'polite');
@@ -97,13 +116,14 @@
     var actions = el('div', 'admin-actions layout-actions');
     actions.append(saveButton, undoButton, defaultButton);
 
-    form.append(intro, textField, state, loadError, error, ok, actions);
+    form.append(intro, textField, commentsField, state, loadError, error, ok, actions);
     root.append(loading, form);
     body.appendChild(root);
 
     var back = document.querySelector('.preview-back');
 
     textInput.addEventListener('input', onText);
+    commentsInput.addEventListener('change', onComments);
     saveButton.addEventListener('click', save);
     undoButton.addEventListener('click', undo);
     defaultButton.addEventListener('click', toDefault);
@@ -170,6 +190,7 @@
       form.hidden = false;
       sync();
       showText();
+      showComments();
       update();
     }
 
@@ -198,6 +219,7 @@
       if (data.layout !== null && !(api ? api.valid(data.layout) : isObject(data.layout))) return;
       draft = clean(data.layout);
       showText();
+      showComments();
       say(error, '');
       say(ok, '');
       update();
@@ -228,6 +250,30 @@
       if (textOf(textInput.value) !== text) textInput.value = text;
     }
 
+    // "Show the comment section" ticked or unticked: into the unsaved layout
+    // (commentsHidden: true, or removed), and the frame, at once.
+    function onComments() {
+      var api = disposed || !shown || busy ? null : lib();
+      var next = clean(draft !== undefined ? draft : saved) || {};
+      if (commentsInput.checked) delete next.commentsHidden;
+      else next.commentsHidden = true;
+      if (!api || !api.valid(next)) {
+        showComments();
+        return;
+      }
+      draft = clean(next);
+      api.apply(draft);
+      say(error, '');
+      say(ok, '');
+      update();
+    }
+
+    // The check box shows the unsaved layout, else the saved one: ticked unless hidden.
+    function showComments() {
+      var v = draft !== undefined ? draft : saved;
+      commentsInput.checked = !(v && v.commentsHidden === true);
+    }
+
     function unsaved() {
       return draft !== undefined && !same(draft, saved);
     }
@@ -238,6 +284,7 @@
       undoButton.disabled = busy || !changed;
       defaultButton.disabled = busy || !shown || (saved === null && !changed);
       textInput.disabled = busy || !shown;
+      commentsInput.disabled = busy || !shown;
       state.textContent = '';
       if (changed) {
         state.append(el('strong', null, 'Unsaved changes.'),
@@ -290,6 +337,7 @@
       var api = lib();
       if (api) api.apply(saved);
       showText();
+      showComments();
       say(error, '');
       say(ok, '');
       update();
@@ -328,6 +376,7 @@
         api.save(null);
       }
       showText();
+      showComments();
       say(loadError, '');
       say(error, '');
       say(ok, text);

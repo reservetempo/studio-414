@@ -13,7 +13,9 @@
 
   Where the section floats over the first screen (comments.css), the owners' layout
   (layout.js, its "comments" part) sets its spot and size, as it does the card's
-  (boxes.js); see "Where it floats" below. Visitors can't move it.
+  (boxes.js); see "Where it floats" below. Visitors can't move it. The owners can also
+  hide it (the layout's "commentsHidden"): then it isn't shown and its comments aren't
+  fetched until they show it again; see "Hidden by the owners".
 
   In the owners' preview page (preview.html, which frames the site with ?edit=1), each
   comment gets a Delete button once the page says the owner is signed in. This page
@@ -592,7 +594,8 @@
     ['left', 'top', 'width', 'height'].forEach(function (property) {
       boxEl.style.removeProperty(property);
     });
-    var r = floating() ? ownerRect() : null;
+    // Hidden (see "Hidden by the owners"): it is placed again when shown.
+    var r = !root.hidden && floating() ? ownerRect() : null;
     if (!r) return;
     // The first screen, which the hero fills.
     var screenW = html.clientWidth;
@@ -607,7 +610,10 @@
     boxEl.style.top = Math.round(clamp(r.y, 0, Math.max(0, screenH - h)) - o.y) + 'px';
   }
 
-  document.addEventListener('studio414:sitelayout', place);
+  document.addEventListener('studio414:sitelayout', function () {
+    follow();
+    place();
+  });
 
   // Once per frame at most.
   var placeQueued = false;
@@ -630,9 +636,34 @@
 
   window.studio414Comments = { place: place, floating: floating };
 
-  /* ---------- Start ---------- */
+  /* ---------- Hidden by the owners: the owners' layout (layout.js) ---------- */
 
-  place();
+  // With the layout's "commentsHidden" the section is hidden (comments.css), so it is
+  // neither seen nor read by screen readers, wherever it sits, and its comments aren't
+  // fetched (they stay in the database). It follows the layout live, as place() does
+  // (the fetched row, or apply() in the preview page's frame, where the section is
+  // then not floating for edit.js, so it can't be picked or dragged): shown again, it
+  // loads its comments then, the first time only; hidden again, it is just hidden. A
+  // first visit has no copy of the layout yet (layout.js), so there the comments load
+  // at once and the section hides when the fetched layout says so.
+
+  var requested = false; // loadComments() has run
+
+  function ownersHide() {
+    var site = window.studio414SiteLayout;
+    var layout = site && typeof site.current === 'function' ? site.current() : null;
+    return Boolean(layout && layout.commentsHidden === true);
+  }
+
+  function follow() {
+    var hide = ownersHide();
+    if (root.hidden !== hide) root.hidden = hide;
+    if (hide || requested) return;
+    requested = true;
+    loadComments();
+  }
+
+  /* ---------- Start ---------- */
 
   if (!connected) {
     noteEl.textContent = 'Comments aren’t connected yet, so anything posted here is saved only in this browser.';
@@ -642,5 +673,6 @@
   if (savedName) showIdentity();
   else showNameField();
 
-  loadComments();
+  follow();
+  place();
 })();

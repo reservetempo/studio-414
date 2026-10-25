@@ -11,7 +11,9 @@
      toned away from the text colour, so the text reads on the photo without a fill
      or an edge round the letters;
    - otherwise it sits in the page under the hero, full width less 16px gutters (at
-     most 432px). */
+     most 432px).
+   Hidden by the owners (layout.js "commentsHidden"; comments.js sets hidden on the
+   section), it isn't there at all, wherever it would sit. */
 
 .comments {
   /* The section's height when it sits in the page. */
@@ -24,8 +26,15 @@
      .hero::before), and the section carries straight on in it. */
 }
 
+.comments[hidden],
 .comments [hidden] {
   display: none !important;
+}
+
+/* Hidden, it leaves Display (switcher.js, at the end of the page) the 24px of page
+   colour under the hero that it otherwise has above it. */
+.comments[hidden] ~ .switcher {
+  padding-top: 24px;
 }
 
 /* The line box. */
