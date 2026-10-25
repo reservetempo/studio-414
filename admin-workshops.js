@@ -1,18 +1,25 @@
 /*
-  Owner page, "Workshops" section (admin.html): the workshops on the site and who has
-  signed up for them.
+  Owner page, "Events" section (admin.html): the events on the site (workshops, sales
+  and the like; the table and the code keep the workshop names) and who has signed up
+  for them.
 
   - Lists every row of public.workshops (supabase/workshops.sql), upcoming ones first
     (soonest first). Past ones (their day has ended in the studio's time zone) are
-    greyed and folded away under "Past workshops (N)". Spots taken (paid, and held
-    while someone is in checkout) come from workshop_spots_taken().
-  - "Add workshop" / "Edit": a form for the name, date, times, description, spots and
-    price, checked against the table's limits before it's sent. A new workshop's id is
-    made from its name and date ("paint-a-piece-2026-11-07", then "-2", "-3"... if
-    that's taken). Ids never change: sign-ups are stored under them.
+    greyed and folded away under "Past events (N)". Spots taken (signed up, paid or
+    free, and held while someone is in checkout) come from workshop_spots_taken().
+    A free event shows "Free" for its price, and one without sign-ups "No sign-up"
+    for its spots.
+  - "Add event" / "Edit": a form for the name, date, times, description, spots and
+    price, checked against the table's limits before it's sent. "Free" hides the price
+    and stores 0; a free event can then untick "People sign up", which hides the spots
+    and stores signups false with no capacity (the database refuses that while spots
+    are taken, and its message is shown). Unticking "Free" turns sign-ups back on. A
+    new event's id is made from its name and date ("paint-a-piece-2026-11-07", then
+    "-2", "-3"... if that's taken). Ids never change: sign-ups are stored under them.
   - "Hide" / "Show on site" flips hidden. "Delete" is offered only while nothing is
-    paid or held; the database refuses otherwise, and its message is shown.
-  - "Show sign-ups": the paid rows of public.workshop_signups for that workshop.
+    signed up or held; the database refuses otherwise, and its message is shown.
+  - "Show sign-ups": the paid and the free (confirmed) rows of public.workshop_signups
+    for that event. Events without sign-ups don't have the button.
 
   Everything owners or customers typed is shown with textContent, never as HTML. The
   list is loaded again after every change.
@@ -35,7 +42,10 @@
   var MIN_CENTS = 50;
   var MAX_CENTS = 1000000;
   var MAX_ID = 64;
-  var COLUMNS = 'id, name, date, start_time, end_time, description, capacity, price_cents, hidden';
+  var COLUMNS = 'id, name, date, start_time, end_time, description, capacity, price_cents, ' +
+    'signups, hidden';
+  // Sign-ups that hold their spots for good: paid in Stripe, or confirmed (free events).
+  var SIGNED_UP = ['paid', 'confirmed'];
   var DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   var MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
@@ -118,17 +128,23 @@
     var priceSymbol = el('span', 'workshops-price-symbol', '$');
     priceSymbol.setAttribute('aria-hidden', 'true');
     priceBox.append(priceSymbol, priceInput);
+    // "Free" decides whether the price shows; for a free event, "People sign up"
+    // decides whether the spots do (paid events always have sign-ups).
+    var freeInput = checkbox('workshops-free');
+    var signupsInput = checkbox('workshops-signups');
+    var freeField = checkField(freeInput, 'Free');
+    var signupsField = checkField(signupsInput, 'People sign up',
+      'Untick for an event people just come to, like a sale: no spots, no sign-up');
 
     var times = el('div', 'workshops-form-row');
     times.append(
       field(startInput, 'Start time', 'Optional'),
       field(endInput, 'End time', 'Optional, needs a start time')
     );
+    var spotsField = field(spotsInput, 'Spots', MIN_SPOTS + ' to ' + MAX_SPOTS);
+    var priceField = field(priceInput, 'Price per spot (CAD)', '$0.50 to $10,000', priceBox);
     var numbers = el('div', 'workshops-form-row');
-    numbers.append(
-      field(spotsInput, 'Spots', MIN_SPOTS + ' to ' + MAX_SPOTS),
-      field(priceInput, 'Price per spot (CAD)', '$0.50 to $10,000', priceBox)
-    );
+    numbers.append(spotsField, priceField);
     var formNote = el('p', 'admin-hint workshops-form-note',
       'Dates and times are studio time (Toronto). The event shows on the site as soon ' +
       'as it\'s saved, unless it\'s hidden.');
@@ -145,6 +161,8 @@
       field(dateInput, 'Date'),
       times,
       field(descriptionInput, 'Short description', 'Optional, up to 2,000 characters'),
+      freeField,
+      signupsField,
       numbers,
       formNote,
       formError,
@@ -180,6 +198,11 @@
     formFields.forEach(function (node) {
       node.addEventListener('input', function () { markInvalid(node, false); });
     });
+    freeInput.addEventListener('change', function () {
+      if (!freeInput.checked) signupsInput.checked = true;
+      showPriceAndSpots();
+    });
+    signupsInput.addEventListener('change', showPriceAndSpots);
 
     showPanel('loading');
     load();
@@ -224,9 +247,10 @@
           });
           loaded = true;
           listRetry.hidden = true;
-          // Sign-ups showing are loaded again too; forget the rest.
+          // Sign-ups showing are loaded again too; forget the rest (and those of events
+          // that no longer have sign-ups).
           var ids = {};
-          workshops.forEach(function (w) { ids[w.id] = true; });
+          workshops.forEach(function (w) { if (hasSignups(w)) ids[w.id] = true; });
           Object.keys(openSignups).forEach(function (id) {
             if (!ids[id]) delete openSignups[id];
           });
@@ -254,12 +278,16 @@
       admin.client.from('workshop_signups')
         .select('name, email, friend_name, quantity, paid_at, created_at')
         .eq('workshop', id)
-        .eq('status', 'paid')
-        .order('paid_at', { ascending: true })
+        .in('status', SIGNED_UP)
+        .order('created_at', { ascending: true })
         .then(function (result) {
           if (disposed || signups[id] !== started) return;
           if (result.error) throw result.error;
-          signups[id] = { state: 'ready', rows: result.data || [] };
+          // In the order they signed up: when paid, or when confirmed (free, no paid_at).
+          var rows = (result.data || []).slice().sort(function (a, b) {
+            return signedUpAt(a) - signedUpAt(b);
+          });
+          signups[id] = { state: 'ready', rows: rows };
           renderList();
         })
         .catch(function (err) {
@@ -331,15 +359,16 @@
       var whenLine = el('p', 'workshops-item-when', when + (clock ? ' · ' + clock : ''));
 
       var taken = w.paid + w.held;
-      var spots = taken + ' of ' + w.capacity + ' spots taken' +
+      var spots = !hasSignups(w) ? 'No sign-up' : taken + ' of ' + w.capacity + ' spots taken' +
         (w.held ? ' (' + w.held + ' held while someone pays)' : '');
+      var price = isFree(w) ? 'Free' : formatPrice(w.price_cents) + ' a spot';
       // Spots and price: two lines in a right-hand column on wide screens, one line
       // (with the dot between them) on phones.
       var metaLine = el('p', 'workshops-item-meta');
       metaLine.append(
         el('span', 'workshops-item-spots', spots),
         el('span', 'workshops-item-sep', ' · '),
-        el('span', 'workshops-item-price', formatPrice(w.price_cents) + ' a spot')
+        el('span', 'workshops-item-price', price)
       );
 
       var editButton = actionButton(w, 'edit', 'Edit');
@@ -383,7 +412,9 @@
       });
 
       var actions = el('div', 'admin-actions workshops-item-actions');
-      actions.append(editButton, hideButton, deleteButton, signupsButton);
+      actions.append(editButton, hideButton, deleteButton);
+      if (hasSignups(w)) actions.appendChild(signupsButton);
+      else delete focusables[w.id + ':signups'];
       li.append(head, whenLine, metaLine, actions);
       if (reasonLine) li.appendChild(reasonLine);
 
@@ -393,7 +424,7 @@
         li.appendChild(error);
       }
 
-      if (openSignups[w.id]) {
+      if (openSignups[w.id] && hasSignups(w)) {
         var panel = renderSignups(w, signups[w.id] || { state: 'loading' });
         panel.id = 'workshops-signups-' + n;
         li.appendChild(panel);
@@ -411,7 +442,7 @@
 
     function renderSignups(w, info) {
       var panel = el('div', 'workshops-signups');
-      panel.appendChild(el('h4', 'workshops-signups-title', 'Paid sign-ups'));
+      panel.appendChild(el('h4', 'workshops-signups-title', 'Sign-ups'));
       if (info.state === 'loading') {
         panel.appendChild(el('p', 'admin-status workshops-signups-status', 'Loading sign-ups…'));
         return panel;
@@ -436,12 +467,12 @@
       var table = el('table', 'workshops-signups-table');
       // Roles kept explicit: on phones the rows are restyled as stacked blocks.
       table.setAttribute('role', 'table');
-      var caption = el('caption', 'workshops-visually-hidden', 'Paid sign-ups for ' + w.name);
+      var caption = el('caption', 'workshops-visually-hidden', 'Sign-ups for ' + w.name);
       var thead = el('thead');
       thead.setAttribute('role', 'rowgroup');
       var headRow = el('tr');
       headRow.setAttribute('role', 'row');
-      var labels = ['Name', 'Email', 'Spots', 'Friend', 'Paid'];
+      var labels = ['Name', 'Email', 'Spots', 'Friend', 'Signed up'];
       labels.forEach(function (label) {
         var th = el('th', null, label);
         th.scope = 'col';
@@ -461,13 +492,13 @@
         var email = String(row.email || '');
         var link = el('a', 'workshops-signups-email', email);
         link.href = 'mailto:' + encodeURIComponent(email).replace(/%40/g, '@');
-        var paid = row.paid_at || row.created_at;
+        var when = row.paid_at || row.created_at;   // confirmed (free) rows have no paid_at
         tr.append(
           cell('Name', row.name || ''),
           cell('Email', link),
           cell('Spots', String(quantity), 'workshops-signups-number'),
           cell('Friend', row.friend_name || '—'),
-          cell('Paid', paid ? formatDate(dateInStudio(paid)) : '—', 'workshops-signups-date')
+          cell('Signed up', when ? formatDate(dateInStudio(when)) : '—', 'workshops-signups-date')
         );
         tbody.appendChild(tr);
       });
@@ -538,7 +569,7 @@
 
     // Why it can't be deleted, or null if it can.
     function deleteBlocked(w) {
-      if (w.paid > 0) return 'Has paid sign-ups — hide it instead';
+      if (w.paid > 0) return 'Has sign-ups — hide it instead';
       if (w.held > 0) return 'Someone is paying for it right now — hide it, or try again in about half an hour';
       return null;
     }
@@ -556,8 +587,12 @@
       startInput.value = w ? hhmm(w.start_time) : '';
       endInput.value = w ? hhmm(w.end_time) : '';
       descriptionInput.value = w && w.description ? w.description : '';
-      spotsInput.value = w ? String(w.capacity) : '';
-      priceInput.value = w ? (w.price_cents / 100).toFixed(2) : '';
+      spotsInput.value = w && w.capacity != null ? String(w.capacity) : '';
+      // A free event's price field starts empty (0 isn't a price a paid event can have).
+      priceInput.value = w && !isFree(w) ? (w.price_cents / 100).toFixed(2) : '';
+      freeInput.checked = !!w && isFree(w);
+      signupsInput.checked = !w || hasSignups(w);
+      showPriceAndSpots();
       formFields.forEach(function (node) { markInvalid(node, false); });
       say(formError, '');
       setSaving(false);
@@ -615,7 +650,22 @@
       saveButton.disabled = on;
       cancelButton.disabled = on;
       formFields.forEach(function (node) { node.readOnly = on; });
+      // Check boxes can't be read-only: they're disabled instead.
+      freeInput.disabled = on;
+      signupsInput.disabled = on;
       form.setAttribute('aria-busy', on ? 'true' : 'false');
+    }
+
+    // Shows the price only for paid events, "People sign up" only for free ones, and
+    // the spots only for events with sign-ups. A field that goes is no longer marked.
+    function showPriceAndSpots() {
+      var free = freeInput.checked;
+      var withSignups = !free || signupsInput.checked;
+      priceField.hidden = free;
+      signupsField.hidden = !free;
+      spotsField.hidden = !withSignups;
+      if (free) markInvalid(priceInput, false);
+      if (!withSignups) markInvalid(spotsInput, false);
     }
 
     // The form's values as a row for the table, or { problem, field } for the first
@@ -652,24 +702,35 @@
           '(it\'s ' + descriptionLength.toLocaleString('en-CA') + ').');
       }
 
-      var spotsText = spotsInput.value.trim();
-      var spots = /^\d+$/.test(spotsText) ? parseInt(spotsText, 10) : NaN;
-      if (!(spots >= MIN_SPOTS && spots <= MAX_SPOTS)) {
-        return problem(spotsInput, 'Enter the number of spots: a whole number from ' + MIN_SPOTS +
-          ' to ' + MAX_SPOTS + '.');
-      }
-      if (editing) {
-        var taken = editing.paid + editing.held;
-        if (spots < taken) {
-          return problem(spotsInput, plural(taken, 'spot is', 'spots are') + ' already taken ' +
-            '(paid, or held while someone pays), so the event needs at least ' + taken + '.');
+      // Paid events always have sign-ups; a free one has them if the box is ticked. Turning
+      // them off while spots are taken is left to the database, whose message is shown.
+      var free = freeInput.checked;
+      var withSignups = !free || signupsInput.checked;
+
+      var spots = null;
+      if (withSignups) {
+        var spotsText = spotsInput.value.trim();
+        spots = /^\d+$/.test(spotsText) ? parseInt(spotsText, 10) : NaN;
+        if (!(spots >= MIN_SPOTS && spots <= MAX_SPOTS)) {
+          return problem(spotsInput, 'Enter the number of spots: a whole number from ' + MIN_SPOTS +
+            ' to ' + MAX_SPOTS + '.');
+        }
+        if (editing) {
+          var taken = editing.paid + editing.held;
+          if (spots < taken) {
+            return problem(spotsInput, plural(taken, 'spot is', 'spots are') + ' already taken ' +
+              '(signed up, or held while someone pays), so the event needs at least ' + taken + '.');
+          }
         }
       }
 
-      var cents = parsePrice(priceInput.value);
-      if (cents === null) return problem(priceInput, 'Enter the price in dollars, like 59.99.');
-      if (cents < MIN_CENTS || cents > MAX_CENTS) {
-        return problem(priceInput, 'The price needs to be from $0.50 to $10,000 a spot.');
+      var cents = 0;
+      if (!free) {
+        cents = parsePrice(priceInput.value);
+        if (cents === null) return problem(priceInput, 'Enter the price in dollars, like 59.99.');
+        if (cents < MIN_CENTS || cents > MAX_CENTS) {
+          return problem(priceInput, 'The price needs to be from $0.50 to $10,000 a spot.');
+        }
       }
 
       return {
@@ -680,7 +741,8 @@
           end_time: end || null,
           description: description || null,
           capacity: spots,
-          price_cents: cents
+          price_cents: cents,
+          signups: withSignups
         }
       };
     }
@@ -760,6 +822,23 @@
       box.appendChild(wrapper || control);
       return box;
     }
+
+    // A check box with its words, in the fields' column, and any hint under it. The box
+    // is the sign-up window's (.workshop__check) and the words are set as the labels
+    // (.workshops-label), so themes draw both as they already do those.
+    function checkField(control, label, hint) {
+      var box = el('div', 'workshops-field workshops-check-field');
+      if (hint) {
+        var hintNode = el('span', 'workshops-field-hint', hint);
+        hintNode.id = control.id + '-hint';
+        control.setAttribute('aria-describedby', hintNode.id);
+        box.appendChild(hintNode);
+      }
+      var labelNode = el('label', 'workshop__check workshops-check');
+      labelNode.append(control, el('span', 'workshops-label', label));
+      box.appendChild(labelNode);
+      return box;
+    }
   }
 
   // ---- Formatting and parsing (no state) --------------------------------------------
@@ -770,6 +849,22 @@
     var bt = b.start_time || '';
     if (at !== bt) return at < bt ? -1 : 1;
     return String(a.name).localeCompare(String(b.name));
+  }
+
+  function isFree(w) {
+    return Number(w.price_cents) === 0;
+  }
+
+  // Whether people sign up for it (signups is false only for some free events).
+  function hasSignups(w) {
+    return w.signups !== false;
+  }
+
+  // When a sign-up went through, in ms: paid_at, or created_at for a free (confirmed)
+  // one, which has no paid_at.
+  function signedUpAt(row) {
+    var time = new Date(row.paid_at || row.created_at).getTime();
+    return isNaN(time) ? 0 : time;
   }
 
   // Today's date in the studio, 'YYYY-MM-DD'.
@@ -916,6 +1011,13 @@
   function input(type, id) {
     var node = el('input', 'workshops-input aqua-field');
     node.type = type;
+    node.id = id;
+    return node;
+  }
+
+  function checkbox(id) {
+    var node = el('input');
+    node.type = 'checkbox';
     node.id = id;
     return node;
   }

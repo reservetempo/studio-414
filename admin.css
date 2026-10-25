@@ -1147,6 +1147,91 @@ body::before {
   flex: 1 1 auto;
 }
 
+/* "Free" and "People sign up": check boxes in the fields' column, with no label at the
+   left. The box is the sign-up window's (.workshop__check, workshop.css, which this
+   page doesn't load), drawn the same here, so a theme that styles that box styles these
+   too: a small white Aqua gel square with rounded corners; ticked, the gel takes a light
+   shade of the colour, so the black tick reads on every colour. The words are a
+   .workshops-label (so they take a theme's label type), less its colon and the
+   padding that lines it up with a field. */
+.workshops-field > .workshops-check {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.workshop__check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.workshops-check {
+  justify-self: start;
+  align-self: flex-start;
+  min-height: 26px;
+  margin: 0;
+}
+
+.workshops-form .workshops-check > span.workshops-label {
+  margin: 0;
+  padding: 0;
+  text-align: left;
+}
+
+.workshops-check > .workshops-label::after {
+  content: none;
+}
+
+.workshop__check input {
+  --check-top: #ffffff;
+  --check-bottom: var(--aqua-plain-deep);
+  -webkit-appearance: none;
+  appearance: none;
+  flex: none;
+  width: 15px;
+  height: 15px;
+  margin: 0;
+  border: 1px solid var(--aqua-plain-rim);
+  border-radius: 4px;
+  background:
+    no-repeat center / 9px 9px,
+    linear-gradient(to bottom, rgb(255 255 255 / 0.85), rgb(255 255 255 / 0.15) 50%, transparent 50%),
+    linear-gradient(to bottom, var(--check-top), var(--check-bottom));
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.25), inset 0 1px 1px rgb(0 0 0 / 0.15);
+  cursor: pointer;
+}
+
+.workshop__check input:checked {
+  --check-top: color-mix(in srgb, var(--aqua-tint) 30%, #ffffff);
+  --check-bottom: color-mix(in srgb, var(--aqua-tint) 55%, #ffffff);
+  border-color: var(--aqua-tint-rim);
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='9' viewBox='0 0 9 9'%3E%3Cpath d='M1.2 4.6l2.3 2.5L7.9 1.4' stroke='%23000' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E"),
+    linear-gradient(to bottom, rgb(255 255 255 / 0.85), rgb(255 255 255 / 0.15) 50%, transparent 50%),
+    linear-gradient(to bottom, var(--check-top), var(--check-bottom));
+}
+
+.workshop__check input:active:not(:disabled) {
+  --check-bottom: color-mix(in srgb, var(--aqua-plain-pressed) 85%, #000000);
+}
+
+.workshop__check input:focus-visible {
+  outline: 2px solid transparent;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.25), var(--aqua-focus-ring);
+}
+
+/* Disabled while the event is being saved. */
+.workshop__check input:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.workshop__check:has(input:disabled) {
+  color: var(--face-muted);
+  cursor: not-allowed;
+}
+
 .workshops-form-note {
   margin: 4px 0 12px;
   font-size: 11px;
@@ -1169,6 +1254,10 @@ body::before {
 
   .workshops-label {
     padding-top: 10px;
+  }
+
+  .workshops-check {
+    min-height: 40px;
   }
 
   .workshops-past-toggle {
@@ -1483,10 +1572,13 @@ body::before {
   }
 }
 
-/* High contrast: the system's own radio buttons; the swatches keep their colours, the
-   picked name is highlighted in the system's colours, and focus is an outline. */
+/* High contrast: the system's own radio buttons and check boxes (the events form's);
+   the swatches keep their colours, the picked name is highlighted in the system's
+   colours, and focus is an outline. */
 @media (forced-colors: active) {
-  .look-theme-input {
+  .look-theme-input,
+  .workshop__check input {
+    -webkit-appearance: auto;
     appearance: auto;
   }
 
