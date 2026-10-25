@@ -119,6 +119,12 @@ Owners arrange the public site for every visitor: how big the photo is, and wher
 
 1. **SQL Editor**: paste in [`supabase/layout.sql`](supabase/layout.sql) and click **Run** (after `wallpaper.sql`, which makes the settings table).
 
+## Set up comment deleting
+
+Owners delete visitors' comments on the preview page (`/preview.html`): once an owner is signed in there, each comment in the framed site gets a **Delete** button. The public site still can't delete anything; the preview page does it with the owner's sign-in, and the database lets only owners. Set up the owner page first.
+
+1. **SQL Editor**: paste in [`supabase/comments-owner.sql`](supabase/comments-owner.sql) and click **Run** (after `setup.sql` and `owners.sql`). If you ever run `setup.sql` again, run `comments-owner.sql` again after it.
+
 ## Still to do
 
 - The "Join the mailing list" form isn't connected to any service yet: it only shows a thank-you message.
