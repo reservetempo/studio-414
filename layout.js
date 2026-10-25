@@ -1,8 +1,10 @@
 /*
   The site layout: how the owners arranged the public site on the preview page
-  (preview.html), which is every visitor's starting layout: the photo's size, and
-  where the mailing-list card and the big 414 start. Visitors can still drag the card
-  and the 414 for themselves (boxes.js, "studio414.layout"), and that wins.
+  (preview.html), which is every visitor's starting layout: the photo's size, where
+  the mailing-list card, the big 414 and the comment section start, the 414's text,
+  and whether the comment section is shown. Visitors can still drag the card and the
+  414 for themselves (boxes.js, "studio414.layout"), and that wins; they can't move
+  the comment section.
 
   It is the "layout" row of the Supabase table site_settings (see supabase/layout.sql),
   read with the publishable key in comments-config.js. No row means today's CSS
@@ -11,9 +13,12 @@
   The value. Every part is optional, and {} is the same as no row:
 
     {
-      "photo":  { "scale": 0.8 },
-      "card":   { "x": 0.34, "y": 0.86, "w": 0.32, "h": 0.3 },
-      "big414": { "x": 0.18, "y": -0.2, "w": 0.64 }
+      "photo":    { "scale": 0.8 },
+      "card":     { "x": 0.34, "y": 0.86, "w": 0.32, "h": 0.3 },
+      "big414":   { "x": 0.18, "y": -0.2, "w": 0.64 },
+      "comments": { "x": 0.6, "y": 0.1, "w": 0.3, "h": 0.5 },
+      "big414Text": "SALE",
+      "commentsHidden": true
     }
 
     photo.scale  the photo's width, as a share of the hero's width: 0.25 to 2. 1 is
@@ -23,6 +28,17 @@
                  width and height.
     big414       the big 414's box (#big-414): x, y its top-left corner, w its width.
                  Its height follows from its font, so it keeps its shape.
+    comments     the comment section (#comments) where it floats over the first
+                 screen: x, y its top-left corner, w, h its width and height, exactly
+                 like card. Where it sits under the first screen (phones) it is not
+                 used. Left out: its CSS spot.
+    big414Text   the text shown in place of the big 414: a string of 1 to 20
+                 characters (Unicode code points), on one line: no control characters
+                 (U+0000-U+001F, U+007F-U+009F) and no U+2028 or U+2029. It is stored
+                 trimmed: text that starts or ends with white space (what JavaScript's
+                 trim() removes) is refused, so trim it before saving. Left out: 414.
+    commentsHidden  true hides the comment section from visitors (its comments are
+                 kept). Only true is allowed; left out: shown.
   No other keys, and all the numbers of a part are there. x and y run from -10 to
   10, w and h from above 0 up to 10 (they are fractions, see below, and a box may lie
   outside the photo).
@@ -83,8 +99,33 @@
     big414: {
       keys: ['x', 'y', 'w'],
       check: function (b) { return position(b.x) && position(b.y) && size(b.w); }
+    },
+    comments: {
+      keys: ['x', 'y', 'w', 'h'],
+      check: function (c) { return position(c.x) && position(c.y) && size(c.w) && size(c.h); }
     }
   };
+
+  // The other keys (not objects), in order, and their checks.
+  var FLAGS = {
+    big414Text: function (t) { return typeof t === 'string' && goodText(t); },
+    commentsHidden: function (h) { return h === true; }
+  };
+
+  // The checks of big414Text; supabase/layout.sql makes exactly the same ones.
+  var SURROGATE_PAIR = /[\uD800-\uDBFF][\uDC00-\uDFFF]/g;
+  var LONE_SURROGATE = /[\uD800-\uDFFF]/;
+  // Control characters (C0, DEL, C1) and the line and paragraph separators.
+  var NOT_ONE_LINE = /[\u0000-\u001F\u007F-\u009F\u2028\u2029]/;
+  // White space at either end: what String.prototype.trim() removes that is left once
+  // the characters above are refused (the space separators and U+FEFF).
+  var UNTRIMMED = /^[ \u00A0\u1680\u2000-\u200A\u202F\u205F\u3000\uFEFF]|[ \u00A0\u1680\u2000-\u200A\u202F\u205F\u3000\uFEFF]$/;
+
+  function goodText(t) {
+    var single = t.replace(SURROGATE_PAIR, '_'); // one unit per code point, as Postgres counts
+    return single.length >= 1 && single.length <= 20 &&
+      !LONE_SURROGATE.test(single) && !NOT_ONE_LINE.test(t) && !UNTRIMMED.test(t);
+  }
 
   function isObject(v) { return !!v && typeof v === 'object' && !Array.isArray(v); }
   // v has no keys but these.
@@ -93,17 +134,23 @@
     return true;
   }
 
+  var KEYS = Object.keys(PARTS).concat(Object.keys(FLAGS));
+
   function valid(v) {
-    if (!isObject(v) || !only(v, ['photo', 'card', 'big414'])) return false;
+    if (!isObject(v) || !only(v, KEYS)) return false;
     for (var name in PARTS) {
       if (!has.call(v, name)) continue;
       var part = v[name];
       if (!isObject(part) || !only(part, PARTS[name].keys) || !PARTS[name].check(part)) return false;
     }
+    for (var flag in FLAGS) {
+      if (has.call(v, flag) && !FLAGS[flag](v[flag])) return false;
+    }
     return true;
   }
 
-  // A clean copy of a valid value (its parts, keys in order), or null when it has none.
+  // A clean copy of a valid value (its parts, keys in order, then big414Text and
+  // commentsHidden), or null when it has none.
   function copy(v) {
     if (!v) return null;
     var out = {};
@@ -114,6 +161,11 @@
       for (var i = 0; i < PARTS[name].keys.length; i++) {
         out[name][PARTS[name].keys[i]] = v[name][PARTS[name].keys[i]];
       }
+      any = true;
+    }
+    for (var flag in FLAGS) {
+      if (!has.call(v, flag)) continue;
+      out[flag] = v[flag];
       any = true;
     }
     return any ? out : null;
