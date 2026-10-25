@@ -4,12 +4,12 @@
 
 html.is-editing {
   --edit-line: var(--aqua-focus, var(--page-text));
-  --edit-grab: 12px;    /* how thick the photo's edges and the corners are to grab */
+  --edit-knob: 10px;    /* the handles at the middle of a selected thing's sides */
 }
 
 @media (pointer: coarse) {
   html.is-editing {
-    --edit-grab: 24px;
+    --edit-knob: 14px;
   }
 }
 
@@ -19,10 +19,26 @@ html.is-editing footer.switcher-credit {
   display: none !important;
 }
 
+/* A double-click selects a thing, never text (the fields still take it), and a double
+   tap doesn't zoom. */
+html.is-editing .hero,
+html.is-editing .hero * {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+html.is-editing .hero :is(input, textarea) {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+html.is-editing .hero {
+  touch-action: manipulation;
+}
+
 /* A light outline on what the pointer is over, a firmer one on what it drags. */
 html.is-editing #signup:hover,
 html.is-editing #big-414:hover,
-html.is-editing .edit-photo:has(> .edit-edge:hover),
 html.is-editing .edit-photo:focus-within {
   outline: 1px dashed var(--edit-line);
   outline-offset: 2px;
@@ -32,6 +48,11 @@ html.is-editing .is-edit-active,
 html.is-editing .is-edit-active:hover {
   outline: 2px solid var(--edit-line);
   outline-offset: 2px;
+}
+
+/* The photo's own outline would run outside the hero: the selection's shows. */
+html.is-editing .edit-photo.is-edit-active {
+  outline: none;
 }
 
 /* While dragging: the drag's cursor everywhere, and no text selection. */
@@ -49,20 +70,85 @@ html.is-editing #big-414 {
   -webkit-touch-callout: none;
 }
 
-/* Corners of the card and the 414 (the card's bottom-right one is its grip). */
-.edit-corner {
+/* The card is resized from its sides once selected: its grip is only for the
+   keyboard (a press on it is a press on the card). */
+html.is-editing #signup .box__grip {
+  pointer-events: none;
+}
+
+/* The selected thing (edit.js places these in page px): an outline, and a strip along
+   each side to drag (24px wide, mostly outside it), with a handle at its middle. Over
+   the boxes and the 414, under the windows that open over the site (z-index 10). */
+.edit-select {
   position: absolute;
-  z-index: 10;
-  width: var(--edit-grab);
-  height: var(--edit-grab);
+  top: 0;
+  left: 0;
+  z-index: 9;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+.edit-select[hidden] {
+  display: none;
+}
+
+.edit-select__box {
+  position: absolute;
+  outline: 2px solid var(--edit-line);
+  outline-offset: 2px;
+}
+
+/* The photo fills the hero, so its outline runs just inside it. */
+.edit-select--inside .edit-select__box {
+  outline-offset: -2px;
+}
+
+.edit-side {
+  position: absolute;
+  pointer-events: auto;
   touch-action: none;
   -webkit-touch-callout: none;
 }
 
-.edit-corner--nw { top: 0; left: 0; cursor: nwse-resize; }
-.edit-corner--ne { top: 0; right: 0; cursor: nesw-resize; }
-.edit-corner--sw { bottom: 0; left: 0; cursor: nesw-resize; }
-.edit-corner--se { bottom: 0; right: 0; cursor: nwse-resize; }
+.edit-side--n,
+.edit-side--s {
+  cursor: ns-resize;
+}
+
+.edit-side--e,
+.edit-side--w {
+  cursor: ew-resize;
+}
+
+/* --at: where the outline crosses the strip (edit.js). */
+.edit-side::after {
+  content: "";
+  position: absolute;
+  box-sizing: border-box;
+  width: var(--edit-knob);
+  height: var(--edit-knob);
+  translate: -50% -50%;
+  border: 2px solid var(--edit-line);
+  border-radius: 2px;
+  background: var(--page-bg, #fff);
+}
+
+.edit-side--n::after,
+.edit-side--s::after {
+  left: 50%;
+  top: var(--at, 50%);
+}
+
+.edit-side--e::after,
+.edit-side--w::after {
+  top: 50%;
+  left: var(--at, 50%);
+}
+
+.edit-side:hover::after {
+  background: var(--edit-line);
+}
 
 /* The visible photo (placed by edit.js), under the card and the 414. No z-index of its
    own, so its keyboard handle can rise over them. */
@@ -73,24 +159,6 @@ html.is-editing #big-414 {
 
 .edit-photo[hidden] {
   display: none;
-}
-
-.edit-edge {
-  position: absolute;
-  z-index: 0;
-  pointer-events: auto;
-  touch-action: none;
-  -webkit-touch-callout: none;
-}
-
-.edit-edge--n { top: 0; left: 0; right: 0; height: var(--edit-grab); cursor: ns-resize; }
-.edit-edge--s { bottom: 0; left: 0; right: 0; height: var(--edit-grab); cursor: ns-resize; }
-.edit-edge--w { top: 0; bottom: 0; left: 0; width: var(--edit-grab); cursor: ew-resize; }
-.edit-edge--e { top: 0; bottom: 0; right: 0; width: var(--edit-grab); cursor: ew-resize; }
-
-.edit-edge:hover,
-.edit-photo.is-edit-active .edit-edge {
-  background: color-mix(in srgb, var(--edit-line) 22%, transparent);
 }
 
 /* "Resize the photo": out of sight until the keyboard reaches it. */

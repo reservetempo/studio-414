@@ -3,21 +3,37 @@
   index.html?edit=1. index.html loads this file and edit.css only with ?edit=1, the
   script once the page's deferred scripts (boxes.js among them) have run.
 
-  The owners hold and drag to arrange the site, and every change goes into the site
-  layout (layout.js) through studio414SiteLayout.apply(), which places the photo, the
-  card and the 414 (boxes.js follows "studio414:sitelayout"). So apply() stays the
-  one source of where things are, and current() always matches the page.
-  - The card (#signup): moved by its title bar, resized from any corner.
-  - The big 414 (#big-414): moved by holding it anywhere, resized from any corner; it
-    keeps its shape.
-  - The photo: resized by holding and dragging any edge of it (the visible photo, see
-    frame() in layout.js); it keeps its proportions and stays centred.
-  A mouse, a finger and a pen alike (pointer events; the handles take touch-action:
-  none, so a finger drags at once). Escape during a drag puts everything back.
+  The owners arrange the site, and every change goes into the site layout (layout.js)
+  through studio414SiteLayout.apply(), which places the photo, the card and the 414
+  (boxes.js follows "studio414:sitelayout"). So apply() stays the one source of where
+  things are, and current() always matches the page.
+
+  Moving. The card (#signup) is moved by its title bar, the big 414 (#big-414) by
+  holding it anywhere; the photo doesn't move. A press that moves less than SLOP px
+  moves nothing (it is a tap).
+
+  Selecting and resizing. A double-click (a double tap with a finger) on the card, the
+  414 or the photo (the visible photo, see frame() in layout.js, where nothing else
+  is) selects it: one thing at a time (the list THINGS, each with its own rules). A
+  selected thing shows an outline with a handle at the middle of each side, and the
+  whole side drags (a GRAB px wide strip, mostly outside the side where the page has
+  room), so it still moves as above. A tap or click anywhere else, starting to move
+  another thing, or Escape (once no drag is under way) unselects it.
+  - The card: a side resizes it on its own axis; the opposite side stays put.
+  - The 414 keeps its shape: the opposite side stays put, and it stays centred the
+    other way.
+  - The photo keeps its proportions and stays centred: the side follows the pointer
+    (where it is not cut off by the hero, else the photo grows in proportion).
+  A double-click selects no text: edit.css keeps text in the hero from being selected
+  (the fields aside) and stops a double tap from zooming.
+
+  A mouse, a finger and a pen alike (pointer events; the 414, the title bar and the
+  sides take touch-action: none, so a finger drags at once). Escape during a drag
+  puts everything back.
   Keyboard: the card's title bar (arrow keys move it, Shift+arrow keys resize it) and
-  its grip (arrow keys resize it), "Move 414" (arrow keys move it, Shift+arrow keys
-  resize it) and "Resize photo" (up or right: larger, down or left: smaller), each
-  shown when Tab reaches it.
+  its grip (arrow keys resize it; edit.css leaves the grip to the keyboard), "Move 414"
+  (arrow keys move it, Shift+arrow keys resize it) and "Resize photo" (up or right:
+  larger, down or left: smaller), each shown when Tab reaches it.
   Sizes stay within: the card no smaller than its content needs (and its CSS
   min-width) and no wider than the screen; the 414 from MIN_414 px to the screen's
   width; the photo from 0.25 to 2 (layout.js's range).
@@ -62,11 +78,18 @@
   var MAX_SCALE = 2;
   var MIN_414 = 60;         // px wide
   var KEYS = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] };
-  // Which way each corner and edge grows: [x, y].
-  var CORNERS = { nw: [-1, -1], ne: [1, -1], sw: [-1, 1], se: [1, 1] };
-  var EDGES = { n: [0, -1], e: [1, 0], s: [0, 1], w: [-1, 0] };
+  // Which way each side grows: [x, y].
+  var SIDES = { n: [0, -1], e: [1, 0], s: [0, 1], w: [-1, 0] };
+  var GRAB = 24;            // px: how wide a side's strip is to grab (a finger's width)
+  var OUTSIDE = 18;         // px of it outside the side, where the page has room
+  var SLOP = { mouse: 4, pen: 6, touch: 10 };   // px a press moves before it drags
+  var DOUBLE_MS = 500;      // the most between the two taps of a double tap
+  var DOUBLE_PX = { mouse: 8, pen: 16, touch: 32 };   // and how far apart they may be
+  // Controls in the hero, which don't select the photo.
+  var CONTROLS = 'a, button, input, textarea, select, label, summary, [contenteditable]';
 
-  var gesture = null;
+  var gesture = null;       // the drag under way
+  var selected = null;      // the selected thing (one of THINGS), or null
 
   /* ---------- Helpers ---------- */
 
@@ -144,16 +167,18 @@
     };
   }
 
-  // Resized from the corner that grows (sx, sy); the opposite corner stays put.
+  // Resized from the side (sx or sy 0) or corner that grows (sx, sy); the opposite
+  // side or corner stays put. A side leaves the other axis alone, but for the height
+  // the content needs at the new width (it grows down).
   function cardSized(start, sx, sy, dx, dy) {
     var right = start.x + start.w;
     var bottom = start.y + start.h;
-    var w = clamp(start.w + sx * dx, cardMinWidth(), sx > 0 ? viewportWidth() - start.x : right);
+    var w = sx ? clamp(start.w + sx * dx, cardMinWidth(), sx > 0 ? viewportWidth() - start.x : right) : start.w;
     var minH = cardMinHeight(w);
     var maxH = Math.max(window.innerHeight, start.h);
     if (sy < 0) maxH = Math.min(maxH, bottom);
     var h = clamp(start.h + sy * dy, minH, maxH);
-    return { x: sx > 0 ? start.x : right - w, y: sy > 0 ? start.y : bottom - h, w: w, h: h };
+    return { x: sx < 0 ? right - w : start.x, y: sy < 0 ? bottom - h : start.y, w: w, h: h };
   }
 
   /* ---------- The 414 ---------- */
@@ -162,17 +187,33 @@
     return { x: clamp(start.x + dx, 0, viewportWidth() - start.w), y: Math.max(0, start.y + dy), w: start.w };
   }
 
-  // Resized from a corner, keeping its shape: the corner follows the pointer along
-  // the diagonal, and the opposite corner stays put.
+  // Resized keeping its shape. From a corner (the keyboard's), the corner follows the
+  // pointer along the diagonal and the opposite corner stays put. From a side (sx or
+  // sy 0), the side follows the pointer, the opposite side stays put and it stays
+  // centred the other way.
   function signSized(start, sx, sy, dx, dy) {
     var right = start.x + start.w;
     var bottom = start.y + start.h;
-    var t = (sx * dx * start.w + sy * dy * start.h) / (start.w * start.w + start.h * start.h);
-    var max = sx > 0 ? viewportWidth() - start.x : right;
-    if (sy < 0) max = Math.min(max, bottom * start.w / start.h);
-    var w = clamp(start.w * (1 + t), MIN_414, max);
-    var h = w * start.h / start.w;
-    return { x: sx > 0 ? start.x : right - w, y: sy > 0 ? start.y : bottom - h, w: w };
+    var ratio = start.h / start.w;
+    var vw = viewportWidth();
+    var w, max;
+    if (sx && sy) {
+      var t = (sx * dx * start.w + sy * dy * start.h) / (start.w * start.w + start.h * start.h);
+      w = start.w * (1 + t);
+      max = sx > 0 ? vw - start.x : right;
+      if (sy < 0) max = Math.min(max, bottom / ratio);
+    } else if (sx) {
+      w = start.w + sx * dx;
+      max = sx > 0 ? vw - start.x : right;
+    } else {
+      w = (start.h + sy * dy) / ratio;
+      max = sy < 0 ? bottom / ratio : vw;
+    }
+    w = clamp(w, MIN_414, Math.min(max, vw));
+    var h = w * ratio;
+    var x = sx > 0 ? start.x : sx < 0 ? right - w : clamp(start.x + (start.w - w) / 2, 0, vw - w);
+    var y = sy > 0 ? start.y : sy < 0 ? bottom - h : Math.max(0, start.y + (start.h - h) / 2);
+    return { x: x, y: y, w: w };
   }
 
   /* ---------- The photo ---------- */
@@ -249,35 +290,55 @@
 
   /* ---------- Dragging ---------- */
 
-  // Makes target start a drag of active (outlined meanwhile) with the given cursor.
-  // begin() is called as the drag starts and returns step(dx, dy), which applies the
-  // layout for the pointer moved by dx, dy px.
-  function draggable(target, active, cursor, begin) {
+  // True once a press of this pointer type has moved dx, dy px: past SLOP it is a
+  // drag, else a tap.
+  function beyond(dx, dy, type) {
+    var s = SLOP[type] || SLOP.mouse;
+    return Math.abs(dx) >= s || Math.abs(dy) >= s;
+  }
+
+  // Makes target start a drag of the thing owner() returns (outlined meanwhile) with
+  // the given cursor. begin() is called as the press starts and returns step(dx, dy),
+  // which applies the layout for the pointer moved by dx, dy px. Pressing another
+  // thing than the selected one unselects it.
+  function draggable(target, owner, cursor, begin) {
     target.addEventListener('pointerdown', function (event) {
       if (gesture || !event.isPrimary || event.button !== 0) return;
       // No text selection, no focus change, no scrolling.
       event.preventDefault();
+      var thing = owner();
+      if (selected && thing !== selected) select(null);
       gesture = {
         target: target,
-        active: active,
+        thing: thing,
+        cursor: cursor,
         pointerId: event.pointerId,
+        type: event.pointerType,
         x: event.clientX,
         y: event.clientY,
+        moved: false,
         before: site.current(),
         step: begin()
       };
       try {
         target.setPointerCapture(event.pointerId);
       } catch (error) {
-        // Without capture the drag still follows the pointer over the handle.
+        // Without capture the drag still follows the pointer over the target.
       }
-      root.classList.add('is-edit-dragging');
-      root.style.setProperty('--edit-cursor', cursor);
-      active.classList.add('is-edit-active');
     });
     target.addEventListener('pointermove', function (event) {
-      if (!gesture || gesture.target !== target || event.pointerId !== gesture.pointerId) return;
-      gesture.step(event.clientX - gesture.x, event.clientY - gesture.y);
+      var g = gesture;
+      if (!g || g.target !== target || event.pointerId !== g.pointerId) return;
+      var dx = event.clientX - g.x;
+      var dy = event.clientY - g.y;
+      if (!g.moved) {
+        if (!beyond(dx, dy, g.type)) return;
+        g.moved = true;
+        root.classList.add('is-edit-dragging');
+        root.style.setProperty('--edit-cursor', g.cursor);
+        g.thing.el.classList.add('is-edit-active');
+      }
+      g.step(dx, dy);
     });
     ['pointerup', 'pointercancel', 'lostpointercapture'].forEach(function (type) {
       target.addEventListener(type, function (event) {
@@ -286,6 +347,7 @@
     });
   }
 
+  // Ends the drag, put back (cancel) or finished. A tap changed nothing.
   function finish(cancel) {
     var g = gesture;
     if (!g) return;
@@ -295,9 +357,10 @@
     } catch (error) {
       // Already released.
     }
+    if (!g.moved) return;
     root.classList.remove('is-edit-dragging');
     root.style.removeProperty('--edit-cursor');
-    g.active.classList.remove('is-edit-active');
+    g.thing.el.classList.remove('is-edit-active');
     if (cancel) {
       site.apply(g.before);
     } else {
@@ -305,10 +368,15 @@
     }
   }
 
+  // Escape puts a drag back; with no drag under way, it unselects.
   document.addEventListener('keydown', function (event) {
-    if (gesture && event.key === 'Escape') {
+    if (event.key !== 'Escape') return;
+    if (gesture) {
       event.preventDefault();
       finish(true);
+    } else if (selected) {
+      event.preventDefault();
+      select(null);
     }
   });
 
@@ -325,30 +393,190 @@
     });
   }
 
-  function cornerCursor(c) {
-    return c[0] === c[1] ? 'nwse-resize' : 'nesw-resize';
+  /* ---------- Selecting ---------- */
+
+  // What a double-click selects, first come first served (the photo, under the rest,
+  // comes last). Each thing has:
+  //   el                 its element (outlined while it is dragged)
+  //   hit(target, x, y)  true when a press on target, at client x, y, is on it
+  //   rect()             where it is in page px ({ x, y, w, h }), or null if not shown
+  //   resize(sx, sy)     starts a drag of the side that grows (sx, sy), and returns
+  //                      step(dx, dy), as draggable()'s begin() does
+  //   inside             true: the outline runs just inside it (the photo fills the hero)
+  var THINGS = [];
+
+  // The selected thing's outline, and a strip along each side to drag, with a handle
+  // at its middle (edit.css). In page px, in <body>; aria-hidden, as the keyboard has
+  // its own controls.
+  var chosen = make('div', 'edit-select');
+  chosen.hidden = true;
+  chosen.setAttribute('aria-hidden', 'true');
+  var outline = make('div', 'edit-select__box');
+  chosen.appendChild(outline);
+  var strips = {};
+  Object.keys(SIDES).forEach(function (key) {
+    var s = SIDES[key];
+    var strip = make('span', 'edit-side edit-side--' + key);
+    strips[key] = strip;
+    chosen.appendChild(strip);
+    draggable(strip, function () { return selected; }, s[0] ? 'ew-resize' : 'ns-resize', function () {
+      return selected.resize(s[0], s[1]);
+    });
+  });
+  document.body.appendChild(chosen);
+
+  var placed = '';    // where the outline was last placed
+  var frameId = 0;
+
+  function shown(el) {
+    return el.getClientRects().length > 0;
   }
 
-  /* ---------- Setting up ---------- */
+  // Places el in page px; at: where its handle sits across it (edit.css's --at).
+  function setBox(el, x, y, w, h, at) {
+    var s = el.style;
+    s.left = x + 'px';
+    s.top = y + 'px';
+    s.width = w + 'px';
+    s.height = h + 'px';
+    if (at !== undefined) s.setProperty('--at', clamp(at, 7, GRAB - 7) + 'px');
+  }
+
+  // The outline on r, and the strips: GRAB px wide, OUTSIDE px of it out from the side
+  // where the page has room, else moved in. line: where the outline runs, px out from
+  // the sides (edit.css), so the handles sit on it.
+  function arrange(r, vw, vh, line) {
+    var right = r.x + r.w;
+    var bottom = r.y + r.h;
+    var inner = GRAB - OUTSIDE;
+    setBox(outline, r.x, r.y, r.w, r.h);
+    var top = clamp(r.y - OUTSIDE, 0, vh - GRAB);
+    setBox(strips.n, r.x, top, r.w, GRAB, r.y - line - top);
+    top = clamp(bottom - inner, 0, vh - GRAB);
+    setBox(strips.s, r.x, top, r.w, GRAB, bottom + line - top);
+    var left = clamp(r.x - OUTSIDE, 0, vw - GRAB);
+    setBox(strips.w, left, r.y, GRAB, r.h, r.x - line - left);
+    left = clamp(right - inner, 0, vw - GRAB);
+    setBox(strips.e, left, r.y, GRAB, r.h, right + line - left);
+  }
+
+  // Keeps the outline on the selected thing: on each new layout and resize, and every
+  // frame while there is one (new content, the wallpaper, can move it too). A thing no
+  // longer shown is unselected.
+  function place() {
+    if (frameId) window.cancelAnimationFrame(frameId);
+    frameId = 0;
+    if (!selected) return;
+    var r = selected.rect();
+    if (!(r && r.w > 0 && r.h > 0)) {
+      if (!gesture) select(null);
+    } else {
+      var vw = viewportWidth();
+      var vh = Math.max(root.scrollHeight, document.body.scrollHeight);
+      var key = [r.x, r.y, r.w, r.h, vw, vh].join();
+      if (key !== placed) {
+        placed = key;
+        arrange(r, vw, vh, selected.inside ? -1 : 3);
+      }
+    }
+    if (selected) frameId = window.requestAnimationFrame(place);
+  }
+
+  // Selects thing, or nothing (null).
+  function select(thing) {
+    thing = thing || null;
+    if (thing === selected) return;
+    if (selected) selected.el.classList.remove('is-edit-selected');
+    selected = thing;
+    placed = '';
+    chosen.hidden = !thing;
+    if (thing) {
+      thing.el.classList.add('is-edit-selected');
+      chosen.classList.toggle('edit-select--inside', !!thing.inside);
+    }
+    place();
+  }
+
+  document.addEventListener('studio414:sitelayout', place);
+  window.addEventListener('resize', place);
+
+  // The thing a press on target (at client x, y) is on, or null.
+  function thingAt(target, x, y) {
+    if (chosen.contains(target)) return selected;
+    for (var i = 0; i < THINGS.length; i++) {
+      if (THINGS[i].hit(target, x, y)) return THINGS[i];
+    }
+    return null;
+  }
+
+  // Taps: presses that move less than SLOP. Two on the same thing, close together in
+  // time and place, select it; one anywhere but on the selected thing unselects it.
+  // (Capture: seen before the things' own handlers, whatever they do.)
+  var press = null;     // the press under way
+  var lastTap = null;
+
+  document.addEventListener('pointerdown', function (event) {
+    press = null;
+    if (!event.isPrimary || event.button !== 0 || !(event.target instanceof Element)) return;
+    press = {
+      id: event.pointerId,
+      type: event.pointerType,
+      x: event.clientX,
+      y: event.clientY,
+      thing: thingAt(event.target, event.clientX, event.clientY),
+      moved: false
+    };
+  }, true);
+
+  document.addEventListener('pointermove', function (event) {
+    var p = press;
+    if (p && event.pointerId === p.id && !p.moved && beyond(event.clientX - p.x, event.clientY - p.y, p.type)) {
+      p.moved = true;
+    }
+  }, true);
+
+  document.addEventListener('pointercancel', function (event) {
+    if (press && event.pointerId === press.id) press = null;
+  }, true);
+
+  document.addEventListener('pointerup', function (event) {
+    var p = press;
+    if (!p || event.pointerId !== p.id) return;
+    press = null;
+    if (p.moved || beyond(event.clientX - p.x, event.clientY - p.y, p.type)) {
+      lastTap = null;
+      return;
+    }
+    var last = lastTap;
+    var near = DOUBLE_PX[p.type] || DOUBLE_PX.mouse;
+    lastTap = { thing: p.thing, x: p.x, y: p.y, time: event.timeStamp };
+    if (selected && p.thing !== selected) select(null);
+    if (p.thing && last && last.thing === p.thing && event.timeStamp - last.time <= DOUBLE_MS &&
+        Math.abs(p.x - last.x) <= near && Math.abs(p.y - last.y) <= near) {
+      lastTap = null;
+      select(p.thing);
+    }
+  }, true);
+
+  /* ---------- The things ---------- */
 
   if (card) {
-    // The title bar's handle and the grip are boxes.js's (it doesn't drag them here).
+    var cardThing = {
+      el: card,
+      hit: function (target) { return card.contains(target); },
+      rect: function () { return shown(card) ? rectOf(card) : null; },
+      resize: function (sx, sy) {
+        var start = rectOf(card);
+        return function (dx, dy) { set('card', part(cardSized(start, sx, sy, dx, dy))); };
+      }
+    };
+    THINGS.push(cardThing);
+    // The title bar's handle and the grip are boxes.js's (it doesn't drag them here;
+    // edit.css leaves the grip to the keyboard).
     var handle = card.querySelector('.box__handle');
     var grip = card.querySelector('.box__grip');
-    Object.keys(CORNERS).forEach(function (key) {
-      var c = CORNERS[key];
-      var corner = key === 'se' && grip ? grip : make('span', 'edit-corner edit-corner--' + key);
-      if (corner !== grip) {
-        corner.setAttribute('aria-hidden', 'true');
-        card.appendChild(corner);
-      }
-      draggable(corner, card, cornerCursor(c), function () {
-        var start = rectOf(card);
-        return function (dx, dy) { set('card', part(cardSized(start, c[0], c[1], dx, dy))); };
-      });
-    });
     if (handle) {
-      draggable(handle, card, 'move', function () {
+      draggable(handle, function () { return cardThing; }, 'move', function () {
         var start = rectOf(card);
         return function (dx, dy) { set('card', part(cardMoved(start, dx, dy))); };
       });
@@ -367,19 +595,19 @@
   }
 
   if (sign) {
-    sign.title = 'Drag to move it, or drag a corner to resize it.';
-    Object.keys(CORNERS).forEach(function (key) {
-      var c = CORNERS[key];
-      var corner = make('span', 'edit-corner edit-corner--' + key);
-      corner.setAttribute('aria-hidden', 'true');
-      sign.appendChild(corner);
-      draggable(corner, sign, cornerCursor(c), function () {
+    var signThing = {
+      el: sign,
+      hit: function (target) { return sign.contains(target); },
+      rect: function () { return shown(sign) ? rectOf(sign) : null; },
+      resize: function (sx, sy) {
         var start = rectOf(sign);
-        return function (dx, dy) { set('big414', part(signSized(start, c[0], c[1], dx, dy))); };
-      });
-    });
-    // Anywhere else on it (its corners take the pointer first) moves it.
-    draggable(sign, sign, 'grabbing', function () {
+        return function (dx, dy) { set('big414', part(signSized(start, sx, sy, dx, dy))); };
+      }
+    };
+    THINGS.push(signThing);
+    sign.title = 'Drag to move it. Double-click it, then drag a side to resize it.';
+    // Held anywhere, it moves.
+    draggable(sign, function () { return signThing; }, 'grabbing', function () {
       var start = rectOf(sign);
       return function (dx, dy) { set('big414', part(signMoved(start, dx, dy))); };
     });
@@ -395,18 +623,29 @@
     }
   }
 
-  // The photo: an outline over the visible photo, with a strip along each edge.
+  // The photo: an outline over the visible photo while its keyboard handle has focus.
+  // A double-click on the visible photo where nothing else is (not on a control)
+  // selects it; it doesn't move.
   var photo = make('div', 'edit-photo');
   hero.insertBefore(photo, hero.firstChild);
-  Object.keys(EDGES).forEach(function (key) {
-    var e = EDGES[key];
-    var edge = make('span', 'edit-edge edit-edge--' + key);
-    edge.setAttribute('aria-hidden', 'true');
-    photo.appendChild(edge);
-    draggable(edge, photo, e[0] ? 'ew-resize' : 'ns-resize', function () {
-      var start = photoStart(e[0], e[1]);
-      return function (dx, dy) { set('photo', photoSized(start, e[0], e[1], dx, dy)); };
-    });
+  THINGS.push({
+    el: photo,
+    inside: true,
+    hit: function (target, x, y) {
+      var f = site.frame();
+      if (!f || !hero.contains(target) || target.closest(CONTROLS)) return false;
+      x += window.pageXOffset;
+      y += window.pageYOffset;
+      return x >= f.left && x <= f.left + f.width && y >= f.top && y <= f.top + f.height;
+    },
+    rect: function () {
+      var f = site.frame();
+      return f ? { x: f.left, y: f.top, w: f.width, h: f.height } : null;
+    },
+    resize: function (sx, sy) {
+      var start = photoStart(sx, sy);
+      return function (dx, dy) { set('photo', photoSized(start, sx, sy, dx, dy)); };
+    }
   });
   var photoHandle = make('button', 'edit-photo__handle aqua-pill');
   photoHandle.type = 'button';
