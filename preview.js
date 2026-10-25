@@ -16,6 +16,13 @@
     studioPreview.site()  the framed site's window once it has loaded (its
                           studio414Look, studio414SiteLayout...), else null
   To act on each load of the framed site, listen for 'load' on studioPreview.frame.
+
+  The frame always shows the desktop layout, so the owner edits that one (the comment
+  section only floats, and edit mode can only pick it, on a wide and tall enough
+  screen): the site is laid out at least DESK_W x DESK_H CSS px, scaled down with a
+  transform to fit the stage and centred in it. It keeps the stage's proportions, but
+  when scaled it's never taller than wide (phones get a small square desktop). With room
+  enough it's the stage's own size, unscaled. Fitted again whenever the stage resizes.
 */
 (function () {
   'use strict';
@@ -29,6 +36,8 @@
   }
 
   var loaded = false; // the frame has finished loading its current src
+  var stage = frame.parentNode;
+  var DESK_W = 1280, DESK_H = 720;
 
   window.studioPreview = {
     frame: frame,
@@ -46,6 +55,27 @@
     loaded = false;
     frame.src = 'index.html?edit=1&theme=' + encodeURIComponent(v.theme) + '&color=' + v.color;
   });
+
+  if (window.ResizeObserver) new ResizeObserver(fit).observe(stage);
+  else window.addEventListener('resize', fit);
+
+  // Sizes and scales the frame to fit the stage (see the top of this file).
+  function fit() {
+    var W = stage.clientWidth, H = stage.clientHeight;
+    if (!W || !H) return; // hidden
+    var s = Math.min(1, W / DESK_W, H / DESK_H);
+    var w = W / s, h = H / s;
+    if (s < 1 && h > w) h = w;
+    w = Math.round(w);
+    h = Math.round(h);
+    s = Math.min(W / w, H / h);
+    var x = (W - w * s) / 2, y = (H - h * s) / 2;
+    frame.style.width = w + 'px';
+    frame.style.height = h + 'px';
+    frame.style.transform = s < 1 || x || y
+      ? 'translate(' + x + 'px, ' + y + 'px) scale(' + s + ')'
+      : '';
+  }
 
   // look.js sets data-theme and data-color on <html> once a switch is done (after the
   // theme's stylesheet has loaded), whoever asked for it.

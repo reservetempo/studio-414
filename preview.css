@@ -7,6 +7,10 @@
   filling the rest, so the page itself doesn't scroll. On phones and narrow windows the
   column goes above the frame and the page scrolls as usual. The sign-in, loading and
   error alerts sit in the middle as on admin.html.
+
+  The frame shows the site at desktop size, scaled down to fit the stage: preview.js sets
+  its size and transform, the stage clips it. On phones the stage is about square, as the
+  scaled desktop is there.
 */
 
 /* "Owner page" in the menu bar: a link drawn as the menu bar's buttons. */
@@ -45,22 +49,27 @@
 }
 
 .preview-stage {
+  position: relative;
+  overflow: hidden;
   display: flex;
   min-width: 0;
-  height: 85vh;
-  height: 85dvh;
-  min-height: 420px;
+  height: min(85vh, 100vw);
+  height: min(85dvh, 100vw);
+  min-height: min(420px, 100vw);
   border-top: 1px solid rgb(0 0 0 / 0.42);
 }
 
+/* Sized and scaled by preview.js (the full stage until then). */
 .preview-frame {
+  position: absolute;
+  top: 0;
+  left: 0;
   display: block;
-  flex: 1 1 auto;
   width: 100%;
-  min-width: 0;
   height: 100%;
   border: 0;
   background: var(--title);
+  transform-origin: 0 0;
 }
 
 /* Each group's label above it, as on phones (admin.css): the column is too narrow to
