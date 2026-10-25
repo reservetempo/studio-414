@@ -279,7 +279,7 @@
                spellcheck="false" autocapitalize="off" required>
         <label class="workshop__check">
           <input id="workshop-for-friend" type="checkbox" aria-controls="workshop-friend">
-          Buying for a friend
+          <span id="workshop-for-friend-text">Buying for a friend</span>
         </label>
         <!-- Only while the box is ticked; then the friend's name is required. -->
         <div class="workshop__friend" id="workshop-friend" hidden>
@@ -291,6 +291,7 @@
         <p class="workshop__message" id="workshop-message" role="status" aria-live="polite"></p>
       </form>
 
+      <!-- For a paid event; workshop.js has the words for a free one. -->
       <p class="workshop__note" id="workshop-note">You pay on Stripe’s secure checkout page, and Stripe emails you a receipt.</p>
 
       <button class="workshop__pay workshop__ok aqua-pill aqua-pill--tint aqua-pill--pulse" id="workshop-ok" type="button" hidden>OK</button>

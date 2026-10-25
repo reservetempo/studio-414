@@ -496,7 +496,7 @@ async function handlePost(req: Request): Promise<Response> {
     if (error) console.error(`Could not release reservation ${signupId}:`, error.message);
   };
 
-  const productName = `${workshop.name} workshop: ${dateLabel(workshop.date)}`;
+  const productName = `${workshop.name} event: ${dateLabel(workshop.date)}`;
   const metadata = {
     workshop: workshop.id,
     workshop_date: workshop.date,

@@ -1,29 +1,35 @@
 /*
-  Workshops at Studio 414: a calendar and a list of the workshops coming up, and a
-  sign-up window for each, paid with Stripe Checkout (Stripe charges it in CAD, which
-  the windows leave unsaid).
+  Events at Studio 414 (workshops, sales and the like; the code calls them all
+  workshops): a calendar and a list of the events coming up, and a sign-up window for
+  each, paid with Stripe Checkout (Stripe charges it in CAD, which the windows leave
+  unsaid), or free. A free event may take sign-ups or not.
 
-  - The workshops (ids, names, dates, times, descriptions, prices and spots) come from
-    the sign-up server (below), which lists those the owners have put in its table on
-    the owner page (admin.html) and not hidden, until their day has ended in the
-    studio's time zone (STUDIO_TIME_ZONE). A page left open drops a workshop at the
-    same moment. Nothing is listed until the server has answered.
-  - The plain underlined "Workshops" fixed at the top right of the screen (a button,
+  - The workshops (ids, names, dates, times, descriptions, prices, whether they take
+    sign-ups, and spots) come from the sign-up server (below), which lists those the
+    owners have put in its table on the owner page (admin.html) and not hidden, until
+    their day has ended in the studio's time zone (STUDIO_TIME_ZONE). A page left open
+    drops a workshop at the same moment. Nothing is listed until the server has
+    answered.
+  - The plain underlined "Events" fixed at the top right of the screen (a button,
     #workshop-button) opens the Workshops window (#workshops): the month calendar
     (calendar.js, drawn each time the window opens and again when the list comes in,
     through the function it hands setCalendar in window.studioWorkshops, at the end),
     and under it the list, one link per workshop, soonest first: its name, date and
     time if it has one ("Paint a piece, Sat 7 Nov, 1:00–4:00 pm") in the classic web's
     underlined blue, purple once opened, whatever the switcher's colours, then in plain
-    text its spots left ("7 spots left", "Sold out"). A sold-out workshop stays in the
-    list. The links are buttons dressed as links, as they open a window rather than a
-    page. Until the list is in, the window says "Loading workshops…"; if it can't be
-    fetched, that it couldn't, with a "Try again" pill; with none coming up, so.
+    text its spots left ("7 spots left", "Sold out"; nothing for a free event without
+    sign-ups). A sold-out workshop stays in the list. The links are buttons dressed as
+    links, as they open a window rather than a page. Until the list is in, the window
+    says "Loading events…"; if it can't be fetched, that it couldn't, with a "Try
+    again" pill; with none coming up, so.
   - A workshop's link, or its day on the calendar, closes that window and opens its
     sign-up window (#workshop): its name, its description (plain text, its line breaks
-    kept) if it has one, its date, time and price, a form, and an "All workshops"
-    button back to the Workshops window, onto that workshop's link. The dialog is
-    named after the workshop ("Paint a piece sign-up").
+    kept) if it has one, its date, time and price ("Free" for a free event), a form,
+    and an "‹ All events" button back to the Workshops window, onto that workshop's
+    link. The dialog is named after the workshop ("Paint a piece sign-up"). A free
+    event without sign-ups has no form and no spots: its price reads "Free, no
+    sign-up needed", its title bar "Free event", and the dialog is named after it
+    alone.
   - Both windows are modal <dialog>s drawn as Aqua windows like the boxes (boxes.css,
     workshop.css), one open at a time. Each closes with its close button (the red
     gumdrop in its title bar), Escape or a click outside it. Its title bar drags it,
@@ -34,10 +40,12 @@
     set in comments-config.js (the same URL and anon / publishable key). Its API is
     described at the top of supabase/functions/workshop-checkout/index.ts:
       GET  -> 200 { workshops: [{ id, name, date, startTime, endTime, description,
-           price, currency, capacity, taken, remaining }] }, soonest first
+           price, currency, signups, capacity, taken, remaining }] }, soonest first
+           (price 0 when free; capacity and remaining null without sign-ups)
       POST { workshop, email, name, quantity, friendName? } -> 200 { url }: Stripe
-           Checkout, where the visitor is sent to pay for price × quantity; or an
-           { error } (unknown_workshop, workshop_past, invalid_name, invalid_email,
+           Checkout, where the visitor is sent to pay for price × quantity; for a
+           free event 200 { signedUp: true }, the sign-up made; or an { error }
+           (unknown_workshop, workshop_past, no_signups, invalid_name, invalid_email,
            already_signed_up, full, not_enough_spots with { remaining }, ...)
     The list is fetched when either window opens (again only once FRESH_MS have gone
     by since the last answer, and never twice at once). While it is fetched again the
@@ -46,19 +54,21 @@
     the spots and the pay button stays off, as it does for a workshop that has
     dropped off the list. Once in, the sign-up window's title bar says how many are
     left, ticking down quickly from the capacity to that number the first time; until
-    then it says "Workshop sign-up". Screen readers hear the count once, from a live
-    region of its own. Once a workshop is sold out its form is off, and once every
-    listed workshop is, the button at the top right says "Sold out".
-  - The form asks for your name and email, and has a "Buying for a friend" box that
-    shows a "Friend's name" field, required while it's ticked (and not sent when it
-    isn't). Beside the price, "× 1" with − and + sets how many spots the order is for:
-    1 to the spots left (to QUANTITY_MAX until they are in), its buttons greyed at the
-    limits; the pay button gives the total ("Pay $119.98 with Stripe"). The form checks
-    what the server checks before sending; a field that's wrong is marked (aria-invalid,
-    and aria-describedby to the message saying what). If fewer spots are left than
-    asked for (not_enough_spots), the message says how many and the count comes down
-    to that. The count goes back to × 1 each time the window opens; what was typed
-    stays, as the email always has.
+    then it says "Event sign-up" ("Free event" for one without sign-ups). Screen
+    readers hear the count once, from a live region of its own. Once a workshop is
+    sold out its form is off, and once every listed workshop is, the button at the top
+    right says "Sold out".
+  - The form asks for your name and email, and has a "Buying for a friend" box
+    ("Signing up a friend" for a free event) that shows a "Friend's name" field,
+    required while it's ticked (and not sent when it isn't). Beside the price, "× 1"
+    with − and + sets how many spots the order is for: 1 to the spots left (to
+    QUANTITY_MAX until they are in), its buttons greyed at the limits; the pay button
+    gives the total ("Pay $119.98 with Stripe", or "Sign up" for a free event). The
+    form checks what the server checks before sending; a field that's wrong is marked
+    (aria-invalid, and aria-describedby to the message saying what). If fewer spots
+    are left than asked for (not_enough_spots), the message says how many and the
+    count comes down to that. The count goes back to × 1 each time the window opens;
+    what was typed stays, as the email always has.
   - Stripe sends the visitor back to /?workshop=success, or to /?workshop=cancelled if
     they leave the checkout. Either one opens the window on load with a thank-you or a
     "nothing was charged" message, and the parameter is taken out of the address (any
@@ -67,6 +77,9 @@
     sign-up window, once the list is in (RETURN_WAIT_MS at most). Without the id, or
     if the list isn't in by then or no longer has the workshop, a message that names
     no workshop shows in the Workshops window.
+  - A free sign-up goes nowhere: once the server has made it ({ signedUp: true }), the
+    same thank-you, worded for a free event, takes the form's place in its window, its
+    spots come off the count, and that is the confirmation, as no email is sent.
 */
 (function () {
   'use strict';
@@ -110,9 +123,16 @@
   };
 
   // The message after Stripe, for a workshop, or for none when it isn't known which
-  // (then it shows at the top of the Workshops window).
+  // (then it shows at the top of the Workshops window). After a free sign-up there is
+  // no Stripe and no email, so its thank-you is the confirmation.
   var MESSAGES = {
     success: function (w) {
+      if (w && !w.price) {
+        return {
+          title: 'You’re signed up! See you on ' + dayMonth(w) + '.',
+          text: 'Thanks for signing up to ' + w.name + '. This is your confirmation: no email is sent for free events.'
+        };
+      }
       return w ? {
         title: 'You’re in! See you on ' + dayMonth(w) + '.',
         text: 'Thanks for signing up to ' + w.name + '. Stripe has emailed you a receipt.'
@@ -161,11 +181,13 @@
   var quantityUnit = document.getElementById('workshop-quantity-unit');
   var lessButton = document.getElementById('workshop-less');
   var moreButton = document.getElementById('workshop-more');
+  var quantityGroup = lessButton.parentNode;
   var spotsEl = document.getElementById('workshop-spots');
   var form = document.getElementById('workshop-form');
   var yourNameInput = document.getElementById('workshop-your-name');
   var emailInput = document.getElementById('workshop-email');
   var friendCheck = document.getElementById('workshop-for-friend');
+  var friendText = document.getElementById('workshop-for-friend-text');
   var friendBox = document.getElementById('workshop-friend');
   var friendInput = document.getElementById('workshop-friend-name');
   var payButton = document.getElementById('workshop-pay');
@@ -173,6 +195,12 @@
   var noteEl = document.getElementById('workshop-note');
   var okButton = document.getElementById('workshop-ok');
   var TITLE = titleEl.textContent;
+  var FRIEND = friendText.textContent;
+  var NOTE = noteEl.textContent;
+  // For a free event: its title bar without sign-ups, and its words with them.
+  var FREE_TITLE = 'Free event';
+  var FREE_FRIEND = 'Signing up a friend';
+  var FREE_NOTE = 'It’s free, so there’s nothing to pay. This window confirms your sign-up; no email is sent.';
 
   var config = window.COMMENTS_CONFIG || {};
   var supabaseUrl = String(config.supabaseUrl || '').trim().replace(/\/+$/, '');
@@ -255,8 +283,9 @@
     return start.text + (start.half === end.half ? '' : ' ' + start.half) + '–' + end.text + ' ' + end.half;
   }
 
-  // "$59.99" for one spot, or "$119.98" for two.
+  // "$59.99" for one spot, or "$119.98" for two; "Free" for a free event.
   function priceText(w, quantity) {
+    if (!w.price) return 'Free';
     return '$' + (w.price * (quantity || 1) / 100).toFixed(2);
   }
 
@@ -310,7 +339,8 @@
   }
 
   // A workshop from the GET answer, { id, name, date, startTime, endTime, description,
-  // price }, or null if it doesn't make sense. Only text ever goes on the page.
+  // price, signups }, or null if it doesn't make sense. Only text ever goes on the page.
+  // A paid workshop always takes sign-ups; a free one does unless "signups" is false.
   function readWorkshop(item) {
     if (!item || typeof item !== 'object') return null;
     var price = Number(item.price);
@@ -326,22 +356,27 @@
       startTime: startTime,
       endTime: startTime ? readTime(item.endTime) : null,
       description: description || null,
-      price: Math.round(price)
+      price: Math.round(price),
+      signups: Math.round(price) > 0 || item.signups !== false
     };
   }
 
-  // { list, spots } from the GET answer: the workshops in its order, and their
-  // { id: { capacity, remaining } }; or null if it has no list.
+  // { list, spots } from the GET answer: the workshops in its order, and the spots of
+  // those that take sign-ups, { id: { capacity, remaining } } (a free event without
+  // sign-ups has none); or null if it has no list.
   function readWorkshops(data) {
     if (!data || !Array.isArray(data.workshops)) return null;
     var list = [];
     var byId = {};
+    var seen = {};
     data.workshops.forEach(function (item) {
       var w = readWorkshop(item);
-      var spots = w && !Object.prototype.hasOwnProperty.call(byId, w.id) ? readSpots(item) : null;
-      if (!spots) return;
+      if (!w || Object.prototype.hasOwnProperty.call(seen, w.id)) return;
+      var spots = w.signups ? readSpots(item) : null;
+      if (w.signups && !spots) return;
+      seen[w.id] = true;
       list.push(w);
-      byId[w.id] = spots;
+      if (spots) byId[w.id] = spots;
     });
     return { list: list, spots: byId };
   }
@@ -375,12 +410,13 @@
   var loadedAt = 0;               // when the last fetch answered with the list (Date.now())
 
   // A workshop's state: 'loading', 'open', 'soldout', 'gone' (no longer on the list)
-  // or 'unavailable' (sign-ups can't be reached). Spots already in stand while they
-  // are fetched again.
+  // or 'unavailable' (sign-ups can't be reached); 'nosignups' for a free event that
+  // takes none (or 'gone'). Spots already in stand while they are fetched again.
   function availabilityOf(w) {
     var spots = w && spotsById[w.id];
     if (spots) return spots.remaining > 0 ? 'open' : 'soldout';
     if (!w) return 'unavailable';
+    if (!w.signups) return spotsState === 'ready' && !find(w.id, workshops) ? 'gone' : 'nosignups';
     if (spotsState === 'loading') return 'loading';
     return spotsState === 'ready' ? 'gone' : 'unavailable';
   }
@@ -658,7 +694,8 @@
   }
 
   // One link per workshop coming up, "Paint a piece, Sat 7 Nov, 1:00–4:00 pm" (a
-  // button, as it opens a window), then its spots left in plain text; or the line
+  // button, as it opens a window), then its spots left in plain text (none for a free
+  // event without sign-ups); or the line
   // saying the list is loading, couldn't be, or has none, with "Try again" if it
   // couldn't. A link that had the focus has it again.
   function buildList() {
@@ -772,7 +809,7 @@
     if (w) openSignup(w, '');
   });
 
-  // "Try again": the line says "Loading workshops…" and takes the focus (the button
+  // "Try again": the line says "Loading events…" and takes the focus (the button
   // goes) until the list is in.
   retryButton.addEventListener('click', function () {
     focusPending = true;
@@ -815,7 +852,8 @@
   }
 
   // Fills in the workshop: its description (as text, its line breaks kept by the CSS)
-  // and time only if it has them.
+  // and time only if it has them. A free event says so, and one without sign-ups has
+  // no spots to choose (nor a form: see render).
   function setWorkshop(w) {
     current = w;
     nameEl.textContent = w.name;
@@ -827,8 +865,11 @@
     timeEl.textContent = time;
     timeEl.dateTime = time ? w.startTime : '';
     timeRow.forEach(function (el) { el.hidden = !time; });
-    priceEl.textContent = priceText(w);
-    dialog.setAttribute('aria-label', w.name + ' sign-up');
+    priceEl.textContent = w.signups ? priceText(w) : 'Free, no sign-up needed';
+    quantityGroup.hidden = !w.signups;
+    friendText.textContent = w.price ? FRIEND : FREE_FRIEND;
+    noteEl.textContent = w.price ? NOTE : FREE_NOTE;
+    dialog.setAttribute('aria-label', w.signups ? w.name + ' sign-up' : w.name);
   }
 
   // The most spots the order can be for: the spots left once they are in (0 when sold
@@ -854,8 +895,18 @@
     spotsEl.dataset.state = availability;
     spotsEl.hidden = !text || mode === 'success';
 
-    // While the count ticks down (countDown), it sets the title itself.
-    if (!counting) setTitle(spots ? countText(spots.remaining) : TITLE);
+    // While the count ticks down (countDown), it sets the title itself, unless the spots
+    // have gone meanwhile (the event takes no sign-ups now, say).
+    if (!spots) stopCount();
+    var none = !!current && !current.signups;
+    if (!counting) setTitle(spots ? countText(spots.remaining) : none ? FREE_TITLE : TITLE);
+
+    // After a payment or a free sign-up there is nothing left to fill in, so the form
+    // makes way for an OK button; a free event without sign-ups has neither.
+    var done = mode === 'success';
+    form.hidden = done || none;
+    noteEl.hidden = done || none;
+    okButton.hidden = !done;
 
     var soldOut = availability === 'soldout';
     yourNameInput.disabled = soldOut;
@@ -876,8 +927,9 @@
     moreButton.disabled = paying || soldOut || quantity >= max;
 
     payButton.disabled = paying || availability !== 'open';
-    payButton.textContent = paying ? 'Opening Stripe…'
-      : current ? 'Pay ' + priceText(current, quantity) + ' with Stripe' : 'Pay with Stripe';
+    var free = !!current && !current.price;
+    payButton.textContent = paying ? (free ? 'Signing up…' : 'Opening Stripe…')
+      : !current ? 'Pay with Stripe' : free ? 'Sign up' : 'Pay ' + priceText(current, quantity) + ' with Stripe';
     if (paying) payButton.setAttribute('aria-busy', 'true');
     else payButton.removeAttribute('aria-busy');
   }
@@ -928,10 +980,12 @@
   }
 
   // Disabling the focused control (the field once sold out, the pay button while
-  // paying) drops focus to the page; put it back in the window.
+  // paying), or hiding it (the form, once an event takes no sign-ups), drops focus to
+  // the page; put it back in the window.
   function keepFocus() {
     var active = document.activeElement;
-    if (dialog.open && !paying && (!active || active === document.body || active.disabled)) {
+    if (dialog.open && !paying && (!active || active === document.body || active.disabled ||
+        (form.hidden && form.contains(active)))) {
       (payButton.disabled ? closeButton : payButton).focus({ preventScroll: true });
     }
   }
@@ -965,16 +1019,11 @@
     render();
   }
 
-  // The thank-you or "cancelled" box at the top of the window, or none. After a
-  // payment there is nothing left to fill in, so the form makes way for an OK button.
+  // The thank-you or "cancelled" box at the top of the window, or none. Then render
+  // shows the form or the OK button, and the spots line.
   function setMode(next) {
     mode = next;
     showResult(mode, dialog, current);
-    var done = mode === 'success';
-    form.hidden = done;
-    noteEl.hidden = done;
-    okButton.hidden = !done;
-    // The spots line too.
     render();
   }
 
@@ -1000,7 +1049,7 @@
     // bring up the keyboard over the window, onto the close button instead.
     var coarse = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
     if (mode === 'success') okButton.focus();
-    else if (!coarse && !yourNameInput.disabled) yourNameInput.focus();
+    else if (!coarse && !form.hidden && !yourNameInput.disabled) yourNameInput.focus();
     else closeButton.focus();
   }
 
@@ -1088,6 +1137,18 @@
     renderAll();
   }
 
+  // A free sign-up, made: its spots come off the count, and the thank-you takes the
+  // form's place in its window (opened again if it was closed meanwhile). No Stripe
+  // and no email: the window is the confirmation.
+  function signedUp(w, count) {
+    var spots = spotsById[w.id];
+    if (spots) spotsById[w.id] = { capacity: spots.capacity, remaining: Math.max(0, spots.remaining - count) };
+    stopCount();
+    openSignup((workshops && find(w.id, workshops)) || w, 'success');
+    renderAll();
+    okButton.focus();
+  }
+
   form.addEventListener('submit', function (event) {
     event.preventDefault();
     var w = current;
@@ -1117,7 +1178,7 @@
       return;
     }
     if (forFriend && !friendName) {
-      markInvalid(friendInput, 'Please enter your friend’s name, or untick “Buying for a friend”.');
+      markInvalid(friendInput, 'Please enter your friend’s name, or untick “' + friendText.textContent + '”.');
       return;
     }
     if (friendName.length > NAME_MAX) {
@@ -1137,6 +1198,11 @@
 
     request('POST', body).then(function (result) {
       var data = result.data && typeof result.data === 'object' ? result.data : {};
+      if (result.ok && data.signedUp === true) {
+        setPaying(false);
+        signedUp(w, quantity);
+        return;
+      }
       var url = result.ok ? checkoutUrl(data.url) : '';
       if (url) {
         // Off to Stripe; the button keeps saying "Opening Stripe…" while the page goes.
@@ -1150,7 +1216,8 @@
       if (data.error === 'invalid_name') {
         markInvalid(yourNameInput, 'Please check your name: it can be up to ' + NAME_MAX + ' characters.');
       } else if (data.error === 'invalid_email') {
-        markInvalid(emailInput, 'Stripe needs a working email address: please check yours.');
+        markInvalid(emailInput, w.price ? 'Stripe needs a working email address: please check yours.'
+          : 'Please check your email address: it should look like you@example.com.');
       } else if (data.error === 'invalid_friend_name' && forFriend) {
         markInvalid(friendInput, 'Please check your friend’s name: it can be up to ' + NAME_MAX + ' characters.');
       } else if (data.error === 'invalid_quantity') {
@@ -1163,7 +1230,12 @@
         loadWorkshops(true);
         setMessage('Fewer spots are left than that. Please choose fewer; nothing was charged.', 'error');
       } else if (data.error === 'already_signed_up') {
-        setMessage('That email is already signed up for this event, so there’s nothing to pay. Look for the Stripe receipt in its inbox.', 'error');
+        setMessage(w.price ? 'That email is already signed up for this event, so there’s nothing to pay. Look for the Stripe receipt in its inbox.'
+          : 'That email is already signed up for this event, so you’re all set.', 'error');
+      } else if (data.error === 'no_signups') {
+        // Changed since the list came in: the list fetched again shows it as it is.
+        loadWorkshops(true);
+        setMessage('This event no longer takes sign-ups: there’s no need to sign up.', 'error');
       } else if (data.error === 'full' || leftKnown) {
         var spots = spotsById[w.id];
         spotsById[w.id] = { capacity: spots ? spots.capacity : 10, remaining: 0 };
