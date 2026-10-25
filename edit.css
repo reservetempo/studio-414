@@ -36,9 +36,31 @@ html.is-editing .hero {
   touch-action: manipulation;
 }
 
+/* The comment section, while it floats over the first screen (edit.js marks it
+   .edit-movable): held by its title, its border or the space in it, by a finger too,
+   at once (the list, a scroller, still scrolls). No text selected but in the fields
+   and the list, which keep their own cursors and still work. */
+html.is-editing #comments-box.edit-movable {
+  cursor: move;
+  touch-action: none;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+html.is-editing #comments-box.edit-movable :is(input, textarea, .comments__pane) {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+:where(html.is-editing #comments-box.edit-movable) :where(.comments__pane, a, button, input, textarea, select, label) {
+  cursor: auto;
+}
+
 /* A light outline on what the pointer is over, a firmer one on what it drags. */
 html.is-editing #signup:hover,
 html.is-editing #big-414:hover,
+html.is-editing #comments-box.edit-movable:hover,
 html.is-editing .edit-photo:focus-within {
   outline: 1px dashed var(--edit-line);
   outline-offset: 2px;
@@ -71,9 +93,14 @@ html.is-editing #big-414 {
 }
 
 /* The card is resized from its sides once selected: its grip is only for the
-   keyboard (a press on it is a press on the card). */
+   keyboard (a press on it is a press on the card), so it shows only once the keyboard
+   reaches it. */
 html.is-editing #signup .box__grip {
   pointer-events: none;
+}
+
+html.is-editing #signup .box__grip:not(:focus-visible) {
+  opacity: 0;
 }
 
 /* The selected thing (edit.js places these in page px): an outline, and a strip along
@@ -176,6 +203,31 @@ html.is-editing #signup .box__grip {
 }
 
 .edit-photo__handle:not(:focus) {
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+
+/* "Move comments": out of sight until the keyboard reaches it, then a small Aqua pill
+   over the top of the comment section. The arrow keys move the section, Shift+arrow
+   keys resize it. */
+.edit-comments__handle {
+  position: absolute;
+  z-index: 1;
+  top: 8px;
+  left: 50%;
+  translate: -50% 0;
+  height: 32px;
+  margin: 0;
+  padding: 0 16px;
+  white-space: nowrap;
+  cursor: move;
+}
+
+.edit-comments__handle:not(:focus) {
   width: 1px;
   height: 1px;
   padding: 0;

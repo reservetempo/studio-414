@@ -54,16 +54,17 @@
   one (a phone) it is the band of photo across the middle. So the 414 stays on the
   photo's window and the card on its bottom edge on every screen, as the CSS layout
   keeps them. frame(), toPage() and fromPage() below do these sums. The boxes still
-  have to be fitted to the screen and to their content when placed (boxes.js).
+  have to be fitted to the screen and to their content when placed (boxes.js for the
+  card and the 414, comments.js for the comment section).
 
   This file is loaded in <head>, without defer or async (after look.js). While the
   page is still being parsed, so before first paint, it applies the copy kept in
   localStorage under "studio414.siteLayout" (or nothing: the CSS layout). It applies
   only the photo's size itself (--photo-scale on <html>); the card and the 414 are
-  placed from current() by boxes.js. Once the page has loaded it fetches the row,
-  keeps the copy (or forgets it when no row is saved) and, unless another script has
-  already called apply(), switches to it if it differs. If the request fails it
-  leaves everything as it is. ?edit=1 (the preview page's frame) changes nothing here.
+  placed from current() by boxes.js, and the comment section by comments.js. Once the
+  page has loaded it fetches the row, keeps the copy (or forgets it when no row is
+  saved) and, unless another script has already called apply(), switches to it if it
+  differs. If the request fails it leaves everything as it is. ?edit=1 (the preview page's frame) changes nothing here.
 
   window.studio414SiteLayout:
     KEY        the localStorage key of the copy

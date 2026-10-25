@@ -4,39 +4,49 @@
   script once the page's deferred scripts (boxes.js among them) have run.
 
   The owners arrange the site, and every change goes into the site layout (layout.js)
-  through studio414SiteLayout.apply(), which places the photo, the card and the 414
-  (boxes.js follows "studio414:sitelayout"). So apply() stays the one source of where
-  things are, and current() always matches the page.
+  through studio414SiteLayout.apply(), which places the photo, the card, the 414
+  (boxes.js follows "studio414:sitelayout") and the comment section (comments.js
+  does). So apply() stays the one source of where things are, and current() always
+  matches the page.
 
   Moving. The card (#signup) is moved by its title bar, the big 414 (#big-414) by
-  holding it anywhere; the photo doesn't move. A press that moves less than SLOP px
-  moves nothing (it is a tap).
+  holding it anywhere, and the comment section (#comments-box) by its title, its
+  border or the space in it, never by its list, fields or buttons, which still work;
+  the photo doesn't move. The comment section moves only while it floats over the
+  first screen (studio414Comments.floating(), wide screens); where it sits under the
+  first screen, edit mode leaves it alone. A press that moves less than SLOP px moves
+  nothing (it is a tap).
 
   Selecting and resizing. A double-click (a double tap with a finger) on the card, the
-  414 or the photo (the visible photo, see frame() in layout.js, where nothing else
-  is) selects it: one thing at a time (the list THINGS, each with its own rules). A
+  414, the comment section (where it moves from) or the photo (the visible photo, see
+  frame() in layout.js, where nothing else is) selects it: one thing at a time (the
+  list THINGS, each with its own rules). A
   selected thing shows an outline with a handle at the middle of each side, and the
   whole side drags (a GRAB px wide strip, mostly outside the side where the page has
   room), so it still moves as above. A tap or click anywhere else, starting to move
   another thing, or Escape (once no drag is under way) unselects it.
-  - The card: a side resizes it on its own axis; the opposite side stays put.
+  - The card and the comment section: a side resizes it on its own axis; the
+    opposite side stays put.
   - The 414 keeps its shape: the opposite side stays put, and it stays centred the
     other way.
   - The photo keeps its proportions and stays centred: the side follows the pointer
     (where it is not cut off by the hero, else the photo grows in proportion).
-  A double-click selects no text: edit.css keeps text in the hero from being selected
-  (the fields aside) and stops a double tap from zooming.
+  A double-click selects no text: edit.css keeps text in the hero and the floating
+  comment section from being selected (the fields and the comment list aside) and
+  stops a double tap from zooming.
 
-  A mouse, a finger and a pen alike (pointer events; the 414, the title bar and the
-  sides take touch-action: none, so a finger drags at once). Escape during a drag
-  puts everything back.
+  A mouse, a finger and a pen alike (pointer events; the 414, the title bar, the
+  floating comment section and the sides take touch-action: none, so a finger drags
+  at once; the comment list still scrolls). Escape during a drag puts everything back.
   Keyboard: the card's title bar (arrow keys move it, Shift+arrow keys resize it) and
-  its grip (arrow keys resize it; edit.css leaves the grip to the keyboard), "Move 414"
-  (arrow keys move it, Shift+arrow keys resize it) and "Resize photo" (up or right:
-  larger, down or left: smaller), each shown when Tab reaches it.
-  Sizes stay within: the card no smaller than its content needs (and its CSS
-  min-width) and no wider than the screen; the 414 from MIN_414 px to the screen's
-  width; the photo from 0.25 to 2 (layout.js's range).
+  its grip (arrow keys resize it; edit.css hides the grip until the keyboard reaches
+  it, as it no longer drags here), "Move 414" and "Move comments" (arrow keys move
+  them, Shift+arrow keys resize them) and "Resize photo" (up or right: larger, down or
+  left: smaller), each shown when Tab reaches it.
+  Sizes stay within: the card and the comment section no smaller than their content
+  needs (and their CSS min-width) and no wider than the screen, the comment section
+  also wholly on the first screen (as comments.js keeps it); the 414 from MIN_414 px
+  to the screen's width; the photo from 0.25 to 2 (layout.js's range).
 
   The message. After each finished change (a drag let go, an arrow key) that changed
   the layout, the page tells the page framing it, on the same origin only:
@@ -69,6 +79,7 @@
   var hero = document.querySelector('.hero');
   var card = document.getElementById('signup');
   var sign = document.getElementById('big-414');
+  var box = document.getElementById('comments-box');
   if (!site || !hero || !window.PointerEvent) return;
   root.classList.add('is-editing');
 
@@ -139,24 +150,31 @@
     site.apply(v);
   }
 
-  /* ---------- The card ---------- */
-
-  function cardMinWidth() {
-    return parseFloat(window.getComputedStyle(card).minWidth) || 0;
+  // Whether two rects ({ x, y, w, h }) are more than a px apart anywhere.
+  function apart(a, b) {
+    return Math.abs(a.x - b.x) > 1 || Math.abs(a.y - b.y) > 1 ||
+      Math.abs(a.w - b.w) > 1 || Math.abs(a.h - b.h) > 1;
   }
 
-  // The height the card's content needs at width w (boxes.css: min-height:
-  // min-content, so no height at all gives exactly that), as boxes.js measures it.
-  function cardMinHeight(w) {
-    var width = card.style.width;
-    var height = card.style.height;
-    card.style.width = w + 'px';
-    card.style.height = '0px';
-    var h = Math.max(card.offsetHeight, card.scrollHeight + card.offsetHeight - card.clientHeight);
-    card.style.width = width;
-    card.style.height = height;
+  function minWidth(el) {
+    return parseFloat(window.getComputedStyle(el).minWidth) || 0;
+  }
+
+  // The height el's content needs at width w (the card and the comment section have
+  // min-height: min-content, so no height at all gives exactly that), as boxes.js
+  // measures it.
+  function contentHeight(el, w) {
+    var width = el.style.width;
+    var height = el.style.height;
+    el.style.width = w + 'px';
+    el.style.height = '0px';
+    var h = Math.max(el.offsetHeight, el.scrollHeight + el.offsetHeight - el.clientHeight);
+    el.style.width = width;
+    el.style.height = height;
     return h;
   }
+
+  /* ---------- The card ---------- */
 
   function cardMoved(start, dx, dy) {
     return {
@@ -173,8 +191,8 @@
   function cardSized(start, sx, sy, dx, dy) {
     var right = start.x + start.w;
     var bottom = start.y + start.h;
-    var w = sx ? clamp(start.w + sx * dx, cardMinWidth(), sx > 0 ? viewportWidth() - start.x : right) : start.w;
-    var minH = cardMinHeight(w);
+    var w = sx ? clamp(start.w + sx * dx, minWidth(card), sx > 0 ? viewportWidth() - start.x : right) : start.w;
+    var minH = contentHeight(card, w);
     var maxH = Math.max(window.innerHeight, start.h);
     if (sy < 0) maxH = Math.min(maxH, bottom);
     var h = clamp(start.h + sy * dy, minH, maxH);
@@ -214,6 +232,37 @@
     var x = sx > 0 ? start.x : sx < 0 ? right - w : clamp(start.x + (start.w - w) / 2, 0, vw - w);
     var y = sy > 0 ? start.y : sy < 0 ? bottom - h : Math.max(0, start.y + (start.h - h) / 2);
     return { x: x, y: y, w: w };
+  }
+
+  /* ---------- The comment section ---------- */
+
+  // Whether it floats over the first screen now (comments.js), so edit mode moves it.
+  function commentsFloat() {
+    var c = window.studio414Comments;
+    return !!(box && c && typeof c.floating === 'function' && c.floating() && shown(box));
+  }
+
+  // The first screen's height: comments.js keeps the section wholly on it.
+  function screenHeight() {
+    return root.clientHeight;
+  }
+
+  function commentsMoved(start, dx, dy) {
+    return {
+      x: clamp(start.x + dx, 0, viewportWidth() - start.w),
+      y: clamp(start.y + dy, 0, screenHeight() - start.h),
+      w: start.w,
+      h: start.h
+    };
+  }
+
+  // As the card, but kept on the first screen.
+  function commentsSized(start, sx, sy, dx, dy) {
+    var right = start.x + start.w;
+    var bottom = start.y + start.h;
+    var w = sx ? clamp(start.w + sx * dx, minWidth(box), sx > 0 ? viewportWidth() - start.x : right) : start.w;
+    var h = clamp(start.h + sy * dy, contentHeight(box, w), sy < 0 ? bottom : screenHeight() - start.y);
+    return { x: sx < 0 ? right - w : start.x, y: sy < 0 ? bottom - h : start.y, w: w, h: h };
   }
 
   /* ---------- The photo ---------- */
@@ -257,10 +306,18 @@
     if (v.card && card) {
       var want = site.toPage(v.card);
       var got = rectOf(card);
-      if (want && (Math.abs(want.x - got.x) > 1 || Math.abs(want.y - got.y) > 1 ||
-          Math.abs(want.w - got.w) > 1 || Math.abs(want.h - got.h) > 1)) {
+      if (want && apart(want, got)) {
         var c = part(got);
         if (c) { v.card = c; changed = true; }
+      }
+    }
+    // comments.js fits the comment section to its content and the first screen too.
+    if (v.comments && commentsFloat()) {
+      var aim = site.toPage(v.comments);
+      var at = rectOf(box);
+      if (aim && apart(aim, at)) {
+        var m = part(at);
+        if (m) { v.comments = m; changed = true; }
       }
     }
     if (v.big414 && sign) {
@@ -300,10 +357,12 @@
   // Makes target start a drag of the thing owner() returns (outlined meanwhile) with
   // the given cursor. begin() is called as the press starts and returns step(dx, dy),
   // which applies the layout for the pointer moved by dx, dy px. Pressing another
-  // thing than the selected one unselects it.
-  function draggable(target, owner, cursor, begin) {
+  // thing than the selected one unselects it. accept(event), if given, says whether
+  // a press starts the drag at all (else it is left alone).
+  function draggable(target, owner, cursor, begin, accept) {
     target.addEventListener('pointerdown', function (event) {
       if (gesture || !event.isPrimary || event.button !== 0) return;
+      if (accept && !accept(event)) return;
       // No text selection, no focus change, no scrolling.
       event.preventDefault();
       var thing = owner();
@@ -572,7 +631,8 @@
     };
     THINGS.push(cardThing);
     // The title bar's handle and the grip are boxes.js's (it doesn't drag them here;
-    // edit.css leaves the grip to the keyboard).
+    // edit.css hides the grip until the keyboard reaches it, and a press on it is a
+    // press on the card).
     var handle = card.querySelector('.box__handle');
     var grip = card.querySelector('.box__grip');
     if (handle) {
@@ -621,6 +681,62 @@
           : signMoved(start, dx * STEP, dy * STEP)));
       });
     }
+  }
+
+  // The comment section, only while it floats over the first screen: held by its
+  // title, its border or the space in it (and its "Move comments" button), never by
+  // the list, the fields or the buttons, so the list still scrolls and the form still
+  // works. A double-click on the same parts selects it.
+  if (box) {
+    var FIXED = CONTROLS + ', .comments__pane';
+    var commentsTitle = box.querySelector('.comments__title');
+    var commentsHandle = make('button', 'edit-comments__handle aqua-pill');
+    commentsHandle.type = 'button';
+    commentsHandle.textContent = 'Move comments with the arrow keys, resize them with Shift';
+    box.insertBefore(commentsHandle, box.firstChild);
+    var grabs = function (target) {
+      if (!commentsFloat() || !box.contains(target)) return false;
+      if (target === commentsHandle) return true;
+      var fixed = target.closest(FIXED);
+      return !(fixed && box.contains(fixed));
+    };
+    var commentsThing = {
+      el: box,
+      hit: grabs,
+      rect: function () { return commentsFloat() ? rectOf(box) : null; },
+      resize: function (sx, sy) {
+        var start = rectOf(box);
+        return function (dx, dy) { set('comments', part(commentsSized(start, sx, sy, dx, dy))); };
+      }
+    };
+    THINGS.push(commentsThing);
+    draggable(box, function () { return commentsThing; }, 'move', function () {
+      var start = rectOf(box);
+      return function (dx, dy) { set('comments', part(commentsMoved(start, dx, dy))); };
+    }, function (event) {
+      return grabs(event.target);
+    });
+    keyed(commentsHandle, function (dx, dy, shift) {
+      if (!commentsFloat()) return;
+      var start = rectOf(box);
+      set('comments', part(shift
+        ? commentsSized(start, 1, 1, dx * STEP, dy * STEP)
+        : commentsMoved(start, dx * STEP, dy * STEP)));
+    });
+    // edit.css styles it as movable (.edit-movable) only while it floats, and the
+    // keyboard's button is there only then.
+    var markComments = function () {
+      var on = commentsFloat();
+      box.classList.toggle('edit-movable', on);
+      commentsHandle.hidden = !on;
+      if (commentsTitle) {
+        if (on) commentsTitle.title = 'Drag to move it. Double-click it, then drag a side to resize it.';
+        else commentsTitle.removeAttribute('title');
+      }
+    };
+    document.addEventListener('studio414:sitelayout', markComments);
+    window.addEventListener('resize', markComments);
+    markComments();
   }
 
   // The photo: an outline over the visible photo while its keyboard handle has focus.
