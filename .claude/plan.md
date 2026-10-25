@@ -19,10 +19,8 @@ Managed by the main session (see CLAUDE.md). `/z <items>` adds tasks; `/z` works
   - The 414's box keeps its width when its text changes; the letters are sized so the text fills it (longer text, smaller letters, until the owner resizes it). Screen readers hear "Studio 414" when the text is 414, else "Studio 414: <text>".
   - Free events: `price_cents` 0 means free (paid stays 50-1000000); new column `signups boolean not null default true` (false only for free events). A free sign-up counts exactly like a paid one (taken spots, one per email, deleting refused while it has sign-ups). No email is sent for a free sign-up (there's no email service); the window confirms it on the page.
   - Subagents never run SQL or deploy functions: they report what the user must run (SQL Editor) or deploy.
-- Order: tasks 79-90 are done; 91 is a one-file comment fix.
+- Order: tasks 79-91 are all done.
 
-
-- **91. Fix setup.sql's header about deleting comments.** Files: `supabase/setup.sql` (comments only, no SQL changes). Its header still says nobody can delete comments through the API; since task 90, `supabase/comments-owner.sql` lets owners delete (and read) them. Say so and that comments-owner.sql must be run again whenever setup.sql is re-run (setup.sql takes the signed-in permissions back). No SQL to run.
 
 ### Bouncing 414 (tasks 77-78): facts both tasks share
 
@@ -74,6 +72,7 @@ Every theme task: start from `themes/README.md` (the guide) and the shared facts
 
 ## Done
 
+- 91. Fix setup.sql's header about deleting comments: `31b7e0e`. Comment only: visitors can't delete comments; owners can once comments-owner.sql is run; re-run it whenever setup.sql is re-run (setup.sql revokes all from anon and authenticated).
 - 84. Hide the comment section: `6bd2842`. Layout section "Show the comment section" checkbox (live, unsaved until Save; Undo/Back reset it); with `commentsHidden` the section is hidden (also from screen readers) and comments aren't fetched; loads once when shown again; edit mode unselects it. Limit: on a first visit (no cached layout) comments may show briefly before the saved layout hides them.
 - 90. Owner deletes comments: SQL and the preview page's side: `4843898`. New `supabase/comments-owner.sql` (owners can read and delete comments; visitors can't), new `admin-comments.js` (tells the frame the owner is signed in on each load, deletes with the owner's session, answers ok/failed with short messages), script tag in preview.html, README "Set up comment deleting". User must run `supabase/comments-owner.sql` after setup.sql and owners.sql (and again whenever setup.sql is re-run).
 - 83. Change the 414's text: `bc1a354`. `big414Text` replaces the 414 (textContent), fills the same box width (longer text, smaller letters; re-measured on font change and resize; cached text shown from the start); aria "Studio 414: <text>" with a hidden span. Preview Layout section: "414 text" field (`#layout-414-text`), live, trimmed, blank removes it; Save/Undo/Back work. preview.css spacing. Also fixed `clean()` in admin-layout.js, which dropped `comments` (task 82's moves weren't saved); it now keeps `comments`, `big414Text`, `commentsHidden`. Note: with today's narrow 414 (13% of the frame) a 20-character text is tiny until the owner makes the 414 bigger. Ran ~152k tokens.
