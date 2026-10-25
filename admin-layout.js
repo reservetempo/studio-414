@@ -6,6 +6,11 @@
     drag the photo's edges, the mailing-list window and the 414. After each finished
     change the frame posts { type: 'studio414:layoutedit', layout } to this page, and
     that layout (the whole layout in force there) becomes the unsaved one shown here.
+  - "414 text": the text shown in place of the big 414 (big414Text, layout.js), up to
+    20 characters. Each keystroke trims it (control characters become spaces first),
+    puts it in the unsaved layout (blank removes big414Text: 414) and applies that to
+    the frame at once, which edit mode doesn't post back. The field follows the
+    unsaved layout, else the saved one (Undo changes, Back to the default layout).
   - Reads the saved layout: the site_settings row 'layout' (supabase/layout.sql); no
     row means the default (CSS) layout, null. The section shows once the row is read
     and the frame has loaded (the frame's studio414SiteLayout checks values, layout.js).
@@ -34,8 +39,10 @@
   var PARTS = {
     photo: ['scale'],
     card: ['x', 'y', 'w', 'h'],
-    big414: ['x', 'y', 'w']
+    big414: ['x', 'y', 'w'],
+    comments: ['x', 'y', 'w', 'h']
   };
+  var TEXT_MAX = 20; // big414Text's most characters (code points), layout.js
   var MESSAGE = 'studio414:layoutedit';
 
   admin.registerSection('layout', render);
@@ -60,6 +67,23 @@
       'its title bar or a corner, and the 414 to move it or by a corner to resize it. ' +
       'Visitors see the new layout once you save. On the site the 414 starts where ' +
       'you place it here, then drifts and bounces around the first screen.');
+    // "414 text", laid out as the sign-in dialog's fields (admin.css, the themes).
+    var textField = el('div', 'admin-signin-field layout-field');
+    var textLabel = el('label', 'admin-label', '414 text');
+    textLabel.htmlFor = 'layout-414-text';
+    var textInput = el('input', 'admin-field aqua-field layout-text');
+    textInput.id = 'layout-414-text';
+    textInput.type = 'text';
+    textInput.maxLength = TEXT_MAX;
+    textInput.placeholder = '414';
+    textInput.autocomplete = 'off';
+    textInput.spellcheck = false;
+    var textHint = el('span', 'admin-hint layout-text-hint',
+      'Shown in place of the big 414. Leave it blank for 414.');
+    textHint.id = 'layout-414-text-hint';
+    textInput.setAttribute('aria-describedby', textHint.id);
+    textField.append(textLabel, textInput, textHint);
+
     var state = el('p', 'admin-status layout-state');
     state.setAttribute('aria-live', 'polite');
 
@@ -73,12 +97,13 @@
     var actions = el('div', 'admin-actions layout-actions');
     actions.append(saveButton, undoButton, defaultButton);
 
-    form.append(intro, state, loadError, error, ok, actions);
+    form.append(intro, textField, state, loadError, error, ok, actions);
     root.append(loading, form);
     body.appendChild(root);
 
     var back = document.querySelector('.preview-back');
 
+    textInput.addEventListener('input', onText);
     saveButton.addEventListener('click', save);
     undoButton.addEventListener('click', undo);
     defaultButton.addEventListener('click', toDefault);
@@ -144,6 +169,7 @@
       loading.hidden = true;
       form.hidden = false;
       sync();
+      showText();
       update();
     }
 
@@ -171,9 +197,35 @@
       var api = lib();
       if (data.layout !== null && !(api ? api.valid(data.layout) : isObject(data.layout))) return;
       draft = clean(data.layout);
+      showText();
       say(error, '');
       say(ok, '');
       update();
+    }
+
+    // "414 text" typed: into the unsaved layout, and the frame, at once.
+    function onText() {
+      if (disposed || !shown || busy) return;
+      var api = lib();
+      if (!api) return;
+      var next = clean(draft !== undefined ? draft : saved) || {};
+      var text = textOf(textInput.value);
+      if (text) next.big414Text = text;
+      else delete next.big414Text;
+      if (!api.valid(next)) return;
+      draft = clean(next);
+      api.apply(draft);
+      say(error, '');
+      say(ok, '');
+      update();
+    }
+
+    // The field shows the unsaved layout's text, else the saved one's ('' for 414).
+    // Left as typed while it means the same (white space at the ends).
+    function showText() {
+      var v = draft !== undefined ? draft : saved;
+      var text = v && v.big414Text ? v.big414Text : '';
+      if (textOf(textInput.value) !== text) textInput.value = text;
     }
 
     function unsaved() {
@@ -185,6 +237,7 @@
       saveButton.disabled = busy || !changed;
       undoButton.disabled = busy || !changed;
       defaultButton.disabled = busy || !shown || (saved === null && !changed);
+      textInput.disabled = busy || !shown;
       state.textContent = '';
       if (changed) {
         state.append(el('strong', null, 'Unsaved changes.'),
@@ -236,6 +289,7 @@
       draft = undefined;
       var api = lib();
       if (api) api.apply(saved);
+      showText();
       say(error, '');
       say(ok, '');
       update();
@@ -273,6 +327,7 @@
         api.apply(null);
         api.save(null);
       }
+      showText();
       say(loadError, '');
       say(error, '');
       say(ok, text);
@@ -318,7 +373,8 @@
     return !!v && typeof v === 'object' && !Array.isArray(v);
   }
 
-  // A clean copy of a layout (its known parts, keys in order), or null when it has none.
+  // A clean copy of a layout (its known parts, keys in order, then big414Text and
+  // commentsHidden, as layout.js orders them), or null when it has none.
   function clean(v) {
     if (!isObject(v)) return null;
     var out = {};
@@ -329,7 +385,23 @@
       PARTS[name].forEach(function (key) { out[name][key] = v[name][key]; });
       any = true;
     });
+    if (typeof v.big414Text === 'string' && v.big414Text) {
+      out.big414Text = v.big414Text;
+      any = true;
+    }
+    if (v.commentsHidden === true) {
+      out.commentsHidden = true;
+      any = true;
+    }
     return any ? out : null;
+  }
+
+  // The 414's text as layout.js takes it: one line (control characters and line or
+  // paragraph separators become spaces), at most TEXT_MAX characters, trimmed. '' is 414.
+  function textOf(value) {
+    var text = String(value == null ? '' : value)
+      .replace(/[\u0000-\u001F\u007F-\u009F\u2028\u2029]/g, ' ');
+    return Array.from(text.trim()).slice(0, TEXT_MAX).join('').trim();
   }
 
   function same(a, b) {

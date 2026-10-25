@@ -80,9 +80,11 @@
   margin-left: 0;
 }
 
-/* The Layout section (admin-layout.js): its lines (admin.css and the themes style its
-   notices and buttons with the other sections'). */
+/* The Layout section (admin-layout.js): its lines and its "414 text" field (laid out as
+   the sign-in fields; admin.css and the themes style its notices, buttons and field with
+   the other sections'). */
 .layout-intro,
+.layout-field,
 .layout-state {
   margin: 0 0 12px;
 }

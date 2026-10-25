@@ -60,6 +60,16 @@
     big414, their width (no wider than the screen). Its height follows its font, so
     that width is set as a font size: width / --big-w (the advance width of "414" in
     em, styles.css and fonts.css), worked out again when the font changes.
+  - Its text: the owners' big414Text where their layout has one (set with
+    textContent, so never as HTML), else 414. It is set whenever the 414 is sized,
+    so from the copy layout.js keeps (before the row is fetched) as soon as this
+    file runs, and again on each "studio414:sitelayout" (the preview page's field,
+    live). Its box keeps the width it has with 414 (the owners', else the CSS's) and
+    the letters fill it: the font size is that width over the text's own advance
+    width, measured in em on the page, so longer text gets smaller letters (and short
+    text bigger ones, though never taller than the first screen). Measured
+    again when the font changes, a face finishes loading and on a resize. The heading
+    reads "Studio 414" with 414, else "Studio 414: " (visually hidden) and the text.
   - Unless the visitor asks for reduced motion (and never with ?edit=1) it bounces
     around the hero, the first screen (bounce.js). bounce.js frees it from the layout
     with window.studio414Sign.free(hooks): from then on bounce.js moves it, and this
@@ -111,6 +121,9 @@
   // Everything that moves: the boxes, and the big 414, which stays under them.
   var signEl = document.getElementById('big-414');
   var sign = signEl ? { id: '414', el: signEl, grip: false, stacked: false } : null;
+  // Its visible text, and the visually hidden words read before it (index.html).
+  var signText = signEl && signEl.querySelector('.big-414__text');
+  var signLabel = signEl && signEl.querySelector('.big-414__label');
   var items = sign ? boxes.concat(sign) : boxes.slice();
   if (!items.length || !window.PointerEvent) return;
 
@@ -315,15 +328,46 @@
     return part ? site.toPage(part) : null;
   }
 
+  // The 414's text: the owners' big414Text, else 414. Only ever textContent.
+  function setSignText() {
+    if (!signText) return;
+    var site = window.studio414SiteLayout;
+    var layout = site && typeof site.current === 'function' ? site.current() : null;
+    var text = layout && typeof layout.big414Text === 'string' ? layout.big414Text.trim() : '';
+    if (!text) text = '414';
+    if (signText.textContent !== text) signText.textContent = text;
+    var label = text === '414' ? 'Studio ' : 'Studio 414: ';
+    if (signLabel && signLabel.textContent !== label) signLabel.textContent = label;
+  }
+
   // Sizes the 414 to the owners' width r.w (no wider than the screen), or gives it
-  // back the size the CSS gives it (no r). Its box is --big-w em wide.
+  // back the size the CSS gives it (no r). With 414 its box is --big-w em wide. With
+  // other text the box keeps that width (r.w, else the CSS's size times --big-w) and
+  // the font size is that width over the text's advance width, measured in em at the
+  // CSS's size (capped to the hero's height).
   function sizeSign(r) {
     var bigW = parseFloat(window.getComputedStyle(signEl).getPropertyValue('--big-w'));
-    if (r && bigW > 0) {
-      signEl.style.fontSize = (Math.min(r.w, viewport().width) / bigW) + 'px';
-    } else {
-      signEl.style.removeProperty('font-size');
+    if (!(bigW > 0)) bigW = 0;
+    if (!signText || signText.textContent === '414') {
+      if (r && bigW) {
+        signEl.style.fontSize = (Math.min(r.w, viewport().width) / bigW) + 'px';
+      } else {
+        signEl.style.removeProperty('font-size');
+      }
+      return;
     }
+    signEl.style.removeProperty('font-size');
+    var size = parseFloat(window.getComputedStyle(signEl).fontSize);
+    var w = r ? Math.min(r.w, viewport().width) : size * bigW;
+    var em = size > 0 ? signText.getBoundingClientRect().width / size : 0;
+    if (!(w > 0 && em > 0)) return;
+    // Short text could make it taller than the hero (the first screen, where bounce.js
+    // keeps it): no taller than that (--big-h em), narrower then.
+    var font = w / em;
+    var bigH = parseFloat(window.getComputedStyle(signEl).getPropertyValue('--big-h'));
+    var room = signEl.offsetParent ? signEl.offsetParent.clientHeight : 0;
+    if (bigH > 0 && room > 0) font = Math.min(font, room / bigH);
+    signEl.style.fontSize = font + 'px';
   }
 
   /* ---------- Rendering ---------- */
@@ -344,7 +388,10 @@
   // else where the owners put it, else in the CSS layout.
   function refit(item) {
     var owner = ownerRect(item);
-    if (item === sign) sizeSign(owner);
+    if (item === sign) {
+      setSignText();
+      sizeSign(owner);
+    }
     // Bouncing, it is only sized: bounce.js keeps it in the hero, wherever it is.
     if (item === sign && motion) {
       motion.measure();
@@ -738,8 +785,8 @@
 
   if (sign) {
 
-    // Its size follows the font: size it (to the owners' width) and fit it to the
-    // screen again when the font changes, or a face finishes loading.
+    // Its size follows the font: size it (to the owners' width, and to its text) and
+    // fit it to the screen again when the font changes, or a face finishes loading.
     var refitSign = function () {
       if (!gesture) refit(sign);
     };
@@ -764,7 +811,7 @@
   });
 
   // The owners' layout changed (fetched, or apply() from the preview page): what the
-  // visitor hasn't moved goes to its new place, and the 414 takes its new size.
+  // visitor hasn't moved goes to its new place, and the 414 takes its new size and text.
   document.addEventListener('studio414:sitelayout', function () {
     if (!gesture) applyAll();
   });
