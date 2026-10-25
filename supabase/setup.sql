@@ -4,8 +4,10 @@
 -- It is safe to run again (it skips or replaces what already exists).
 --
 -- There is no login: the public "anon" key may read every comment and add new ones,
--- and nothing else. Nobody can edit or delete comments through the API; the owner
--- moderates by deleting rows in the dashboard (Table Editor -> comments).
+-- and nothing else. Visitors can't edit or delete comments through the API. Owners
+-- can delete them from the preview page once comments-owner.sql has been run; run it
+-- again whenever this file is run again, as this file takes those signed-in
+-- permissions back. Rows can also be deleted in the dashboard (Table Editor -> comments).
 
 create table if not exists public.comments (
   id         bigint generated always as identity primary key,
