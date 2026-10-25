@@ -1,13 +1,15 @@
 /* Comment section: plain text in the theme's font (--aqua-font) and the page's text
    colour, inside one thin line in that colour round the heading, the list and the
    form; no fill of its own (the colours are the tokens in aqua.css). The comments scroll inside it, with
-   the form at the bottom. It stays where it is: nothing drags or resizes it.
+   the form at the bottom. Visitors can't drag or resize it.
 
    Where it sits:
    - on wide, tall enough screens it floats over the hero, centred on the white wall
-     to the right of the photo's window, clear of the window and the sign-up card;
-     there the wall behind it is blurred and toned away from the text colour, so the
-     text reads on the photo without a fill or an edge round the letters;
+     to the right of the photo's window, clear of the window and the sign-up card, or
+     where the owners' layout puts it (layout.js "comments", placed by comments.js
+     with inline left, top, width and height); there the wall behind it is blurred and
+     toned away from the text colour, so the text reads on the photo without a fill
+     or an edge round the letters;
    - otherwise it sits in the page under the hero, full width less 16px gutters (at
      most 432px). */
 
@@ -70,6 +72,9 @@
        the Workshop button in the top-right corner (workshop.css). */
     top: max(64px, (100% - var(--h)) / 2);
     width: var(--w);
+    /* Narrower, the form and the list get cramped: the owners' layout can't go under
+       it either. */
+    min-width: 280px;
     max-width: none;
     height: var(--h);
     margin: 0;

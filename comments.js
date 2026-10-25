@@ -10,6 +10,10 @@
   empty, a demo store keeps comments in this browser's localStorage instead.
 
   User content is only ever rendered with textContent, never as HTML.
+
+  Where the section floats over the first screen (comments.css), the owners' layout
+  (layout.js, its "comments" part) sets its spot and size, as it does the card's
+  (boxes.js); see "Where it floats" below. Visitors can't move it.
 */
 (function () {
   'use strict';
@@ -371,7 +375,95 @@
     });
   });
 
+  /* ---------- Where it floats: the owners' layout (layout.js) ---------- */
+
+  // While the box floats over the first screen (comments.css: wide screens that are
+  // tall enough), the owners' "comments" part, fractions of the visible photo turned
+  // into page px by toPage(), gives its spot and size. It is never smaller than the
+  // CSS lets it be (its min-width, and min-height: min-content, so the form and a
+  // usable list always fit), no bigger than the first screen, and kept wholly on it.
+  // With no such part, or where the section sits under the first screen, the box has
+  // no inline styles: exactly the CSS spot. place() runs again whenever the layout
+  // changes (fetched, or apply(), as the preview page does in its ?edit=1 frame), the
+  // window is resized (which also switches between floating and not) or the font
+  // changes; window.studio414Comments.place runs it on demand.
+
+  var boxEl = document.getElementById('comments-box');
+  var html = document.documentElement;
+
+  function clamp(value, min, max) {
+    return Math.max(min, Math.min(value, max));
+  }
+
+  // Whether the box floats over the first screen now (comments.css positions it so).
+  function floating() {
+    return window.getComputedStyle(boxEl).position === 'absolute';
+  }
+
+  // Where the owners put the box, in page px ({ x, y, w, h }), or null where they
+  // leave it to the CSS.
+  function ownerRect() {
+    var site = window.studio414SiteLayout;
+    var layout = site && typeof site.current === 'function' ? site.current() : null;
+    return layout && layout.comments ? site.toPage(layout.comments) : null;
+  }
+
+  // Where left: 0; top: 0 puts the box: the corner of the page, as a rule.
+  function origin() {
+    var parent = boxEl.offsetParent;
+    if (!parent || parent === document.body || parent === html) return { x: 0, y: 0 };
+    var r = parent.getBoundingClientRect();
+    return {
+      x: r.left + window.pageXOffset + parent.clientLeft,
+      y: r.top + window.pageYOffset + parent.clientTop
+    };
+  }
+
+  function place() {
+    ['left', 'top', 'width', 'height'].forEach(function (property) {
+      boxEl.style.removeProperty(property);
+    });
+    var r = floating() ? ownerRect() : null;
+    if (!r) return;
+    // The first screen, which the hero fills.
+    var screenW = html.clientWidth;
+    var screenH = html.clientHeight;
+    boxEl.style.width = Math.round(Math.min(r.w, screenW)) + 'px';
+    boxEl.style.height = Math.round(Math.min(r.h, screenH)) + 'px';
+    // Its size as the CSS lets it be, so never under its minimum.
+    var w = boxEl.offsetWidth;
+    var h = boxEl.offsetHeight;
+    var o = origin();
+    boxEl.style.left = Math.round(clamp(r.x, 0, Math.max(0, screenW - w)) - o.x) + 'px';
+    boxEl.style.top = Math.round(clamp(r.y, 0, Math.max(0, screenH - h)) - o.y) + 'px';
+  }
+
+  document.addEventListener('studio414:sitelayout', place);
+
+  // Once per frame at most.
+  var placeQueued = false;
+  window.addEventListener('resize', function () {
+    if (placeQueued) return;
+    placeQueued = true;
+    window.requestAnimationFrame(function () {
+      placeQueued = false;
+      place();
+    });
+  });
+
+  // The font changes its minimum height, so where it has to sit to stay on screen.
+  if (window.MutationObserver) {
+    new MutationObserver(place).observe(html, { attributes: true, attributeFilter: ['data-font'] });
+  }
+  if (document.fonts && document.fonts.addEventListener) {
+    document.fonts.addEventListener('loadingdone', place);
+  }
+
+  window.studio414Comments = { place: place, floating: floating };
+
   /* ---------- Start ---------- */
+
+  place();
 
   if (!connected) {
     noteEl.textContent = 'Comments aren’t connected yet, so anything posted here is saved only in this browser.';
