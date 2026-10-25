@@ -1,69 +1,88 @@
 /*
-  Workshop sign-ups for Studio 414: the workshops, spots left, and paying through
-  Stripe Checkout.
+  Event sign-ups for Studio 414 (workshops, sales and the like): the events, spots
+  left, paying through Stripe Checkout, and signing up for free events.
 
     GET  /functions/v1/workshop-checkout
          200 { "workshops": [
                { "id": "paint-a-piece", "name": "Paint a piece", "date": "2026-11-07",
                  "startTime": "13:00", "endTime": "15:30",
                  "description": "Paint a piece of bisque pottery ...",
-                 "price": 5999, "currency": "cad",
+                 "price": 5999, "currency": "cad", "signups": true,
                  "capacity": 10, "taken": 3, "remaining": 7 },
+               { "id": "winter-sale", "name": "Winter sale", "date": "2026-12-12",
+                 "startTime": "10:00", "endTime": null, "description": null,
+                 "price": 0, "currency": "cad", "signups": false,
+                 "capacity": null, "taken": 0, "remaining": null },
                ...
              ] }
 
-         The workshops in the public.workshops table (supabase/workshops.sql; the
+         The events in the public.workshops table (supabase/workshops.sql; the
          owners edit it on admin.html) that aren't hidden and are still upcoming,
-         soonest first (an empty list when there are none). "date" is the workshop's
+         soonest first (an empty list when there are none). "date" is the event's
          day (YYYY-MM-DD, studio time); it stays listed until that day has ended in
          STUDIO_TIME_ZONE. "startTime" and "endTime" are "HH:MM" (24-hour clock,
          studio time) or null when not set; "description" is text or null. "price"
-         is per spot, in cents.
+         is per spot, in cents; 0 means free (no Stripe).
+
+         "signups" says whether people sign up. It is always true for paid events.
+         A free event with sign-ups takes sign-ups like a paid one (same POST, no
+         payment). A free event without them is just shown with its details:
+         "capacity" and "remaining" are null for it, "taken" is 0, and POST refuses
+         it (no_signups).
 
     POST /functions/v1/workshop-checkout
          body { "workshop": "paint-a-piece", "email": "someone@example.com",
                 "name": "Sam Lee", "quantity": 2, "friendName": "Alex Kim" }
 
-           workshop    an id from the GET list
+           workshop    an id from the GET list (an event with "signups": true)
            email       up to 254 characters; stored trimmed and lower-cased
            name        required; up to 100 characters (runs of spaces become one)
            quantity    a whole number (a JSON number) of spots, 1 to "remaining"
            friendName  optional, up to 100 characters; leave it out, or send null or
                        "", when there's no friend
 
-         200 { "url": "https://checkout.stripe.com/..." }   send the visitor there;
-                                                           Stripe charges price × quantity
-         400 { "error": "unknown_workshop" }      missing, not a workshop, or hidden
+         200 { "url": "https://checkout.stripe.com/..." }   a paid event: send the
+                                                           visitor there; Stripe
+                                                           charges price × quantity
+         200 { "signedUp": true }                 a free event: the sign-up is made and
+                                                  confirmed (no Stripe, no email sent)
+         400 { "error": "unknown_workshop" }      missing, not an event, or hidden
          409 { "error": "workshop_past" }         its day has ended
+         400 { "error": "no_signups" }            a free event that takes no sign-ups
          400 { "error": "invalid_email" }
          400 { "error": "invalid_name" }          missing, blank, not text or too long
          400 { "error": "invalid_friend_name" }   not text, or too long
          400 { "error": "invalid_quantity" }      not a whole number from 1 to "capacity"
-         409 { "error": "already_signed_up" }     this email has already paid for this workshop
+         409 { "error": "already_signed_up" }     this email has already paid for, or
+                                                  signed up for, this event
          409 { "error": "full" }                  no spots left
          409 { "error": "not_enough_spots", "remaining": 2 }   fewer spots left than asked for
          405 { "error": "method_not_allowed" }    not GET, POST or OPTIONS
          500 { "error": "server_error" }          details go to the function's logs
 
-         Checks run in the order listed; the first that fails is the answer. After
-         paying, Stripe sends the visitor to SITE_URL/?workshop=success; leaving the
-         checkout sends them to SITE_URL/?workshop=cancelled.
+         Checks run in the order listed, for paid and free events alike; the first
+         that fails is the answer. After paying, Stripe sends the visitor to
+         SITE_URL/?workshop=success; leaving the checkout sends them to
+         SITE_URL/?workshop=cancelled.
 
-  "taken" counts spots, not orders: those of paid sign-ups plus those of checkouts
-  still in progress (their spots are held until the Stripe session expires), so the
-  last spots can't be sold twice. The stripe-webhook function marks sign-ups paid or
-  expired when Stripe reports back.
+  "taken" counts spots, not orders: those of paid sign-ups and of free (confirmed)
+  ones, plus those of checkouts still in progress (their spots are held until the
+  Stripe session expires), so the last spots can't be sold twice. The stripe-webhook
+  function marks sign-ups paid or expired when Stripe reports back; a free sign-up is
+  stored as confirmed straight away.
 
-  One order per email per workshop: a new checkout closes the same email's unfinished
-  one for that workshop, and once an email has paid for a workshop it gets
-  already_signed_up there (it can still book the other workshops).
+  One order per email per event: a new checkout or free sign-up closes the same
+  email's unfinished checkout for that event, and once an email has paid for or
+  signed up for an event it gets already_signed_up there (it can still book the
+  other events).
 
   Runs with JWT verification off (see supabase/config.toml): the site calls it with
   its publishable key, which is not a JWT. It reads the workshops table and reads and
   writes the sign-ups table with the service role key, which never leaves the server.
 
-  Environment: STRIPE_SECRET_KEY and SITE_URL (set with `supabase secrets set`), plus
-  SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY, which Supabase provides.
+  Environment: STRIPE_SECRET_KEY and SITE_URL (set with `supabase secrets set`; only
+  paid events need them), plus SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY, which
+  Supabase provides.
 */
 import Stripe from "npm:stripe@17";
 import { createClient } from "npm:@supabase/supabase-js@2";
@@ -80,11 +99,13 @@ type Workshop = {
   startTime: string | null; // "HH:MM", 24-hour clock, studio time
   endTime: string | null;
   description: string | null;
-  capacity: number; // spots
-  priceCents: number; // per spot (Stripe amounts are in cents)
+  priceCents: number; // per spot (Stripe amounts are in cents); 0 = free
+  signups: boolean; // whether people sign up (always true for paid events)
+  capacity: number | null; // spots; null exactly when signups is false
 };
 
-const WORKSHOP_COLUMNS = "id, name, date, start_time, end_time, description, capacity, price_cents, hidden";
+const WORKSHOP_COLUMNS =
+  "id, name, date, start_time, end_time, description, capacity, price_cents, signups, hidden";
 
 const CURRENCY = "cad"; // Canadian dollars
 
@@ -177,13 +198,16 @@ function timeOfDay(value: unknown, row: unknown): string | null {
 
 /** A row of public.workshops as a Workshop (checked, in case the table changes shape). */
 function toWorkshop(row: Record<string, unknown>): Workshop {
-  const { id, name, date, description, capacity, price_cents: priceCents } = row;
+  const { id, name, date, description, capacity, price_cents: priceCents, signups } = row;
   if (
     typeof id !== "string" || typeof name !== "string" ||
     typeof date !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(date) ||
     (description !== null && typeof description !== "string") ||
-    typeof capacity !== "number" || !Number.isInteger(capacity) || capacity < 1 ||
-    typeof priceCents !== "number" || !Number.isInteger(priceCents) || priceCents < 1
+    typeof priceCents !== "number" || !Number.isInteger(priceCents) || priceCents < 0 ||
+    typeof signups !== "boolean" || (!signups && priceCents !== 0) ||
+    (signups
+      ? typeof capacity !== "number" || !Number.isInteger(capacity) || capacity < 1
+      : capacity !== null)
   ) {
     throw new Error(`Unexpected workshop row ${JSON.stringify(row)}`);
   }
@@ -194,8 +218,9 @@ function toWorkshop(row: Record<string, unknown>): Workshop {
     startTime: timeOfDay(row.start_time, row),
     endTime: timeOfDay(row.end_time, row),
     description: description || null,
-    capacity,
     priceCents,
+    signups,
+    capacity: capacity as number | null,
   };
 }
 
@@ -388,9 +413,10 @@ async function handleGet(): Promise<Response> {
         description: w.description,
         price: w.priceCents,
         currency: CURRENCY,
+        signups: w.signups,
         capacity: w.capacity,
-        taken: spotsTaken,
-        remaining: Math.max(0, w.capacity - spotsTaken),
+        taken: w.capacity === null ? 0 : spotsTaken,
+        remaining: w.capacity === null ? null : Math.max(0, w.capacity - spotsTaken),
       };
     }),
   });
@@ -409,6 +435,9 @@ async function handlePost(req: Request): Promise<Response> {
   const workshop = await findWorkshop(input.workshop);
   if (!workshop) return json(400, { error: "unknown_workshop" });
   if (workshop.date < studioToday()) return json(409, { error: "workshop_past" });
+  const capacity = workshop.capacity;
+  if (!workshop.signups || capacity === null) return json(400, { error: "no_signups" });
+  const free = workshop.priceCents === 0;
 
   const email = normalizeEmail(input.email);
   if (!email) return json(400, { error: "invalid_email" });
@@ -423,18 +452,20 @@ async function handlePost(req: Request): Promise<Response> {
   const quantity = input.quantity;
   if (
     typeof quantity !== "number" || !Number.isInteger(quantity) || quantity < 1 ||
-    quantity > workshop.capacity
+    quantity > capacity
   ) {
     return json(400, { error: "invalid_quantity" });
   }
 
-  const success = `${siteUrl()}/?workshop=success`;
-  const cancel = `${siteUrl()}/?workshop=cancelled`;
+  // Paid events only: free ones work without Stripe or SITE_URL set up.
+  const success = free ? "" : `${siteUrl()}/?workshop=success`;
+  const cancel = free ? "" : `${siteUrl()}/?workshop=cancelled`;
 
   await settlePending(workshop.id, email);
 
-  // Hold the spots. The row's expires_at matches the Stripe session's, so they are
-  // held for exactly as long as the visitor can pay.
+  // Take the spots. For a paid event they are held: the row's expires_at matches the
+  // Stripe session's, so they are held for exactly as long as the visitor can pay. For
+  // a free event the sign-up is confirmed at once.
   const expiresAt = Math.floor(Date.now() / 1000) + CHECKOUT_SECONDS;
   const { data: reservation, error: reserveError } = await supabase.rpc("workshop_reserve", {
     p_workshop: workshop.id,
@@ -442,8 +473,9 @@ async function handlePost(req: Request): Promise<Response> {
     p_name: name,
     p_friend_name: friendName,
     p_quantity: quantity,
-    p_capacity: workshop.capacity,
-    p_expires_at: new Date(expiresAt * 1000).toISOString(),
+    p_capacity: capacity,
+    p_expires_at: free ? null : new Date(expiresAt * 1000).toISOString(),
+    p_confirmed: free,
   });
   if (reserveError) throw new Error(`workshop_reserve failed: ${reserveError.message}`);
 
@@ -456,6 +488,7 @@ async function handlePost(req: Request): Promise<Response> {
   if (result.result !== "reserved" || !result.id) {
     throw new Error(`workshop_reserve returned ${JSON.stringify(reservation)}`);
   }
+  if (free) return json(200, { signedUp: true });
   const signupId = result.id;
 
   const release = async () => {

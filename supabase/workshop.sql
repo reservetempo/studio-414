@@ -12,14 +12,19 @@
 -- workshops.sql, run after this file, also lets owners read them from the owner page
 -- (running this file again takes that back, so run workshops.sql again after it).
 --
--- Each row is one order: one email booking `quantity` spots in one workshop (its id
--- in public.workshops, see workshops.sql), under
--- `name`, with an optional `friend_name` for whoever comes along.
+-- Each row is one order: one email booking `quantity` spots in one event (its id in
+-- public.workshops, see workshops.sql), under `name`, with an optional `friend_name`
+-- for whoever comes along.
 --
 -- A row's status:
---   pending  someone is in Stripe Checkout; its spots are held until expires_at
---   paid     Stripe confirmed the payment (set by the stripe-webhook function)
---   expired  the checkout was abandoned or timed out; its spots are free again
+--   pending    someone is in Stripe Checkout; its spots are held until expires_at
+--   paid       Stripe confirmed the payment (set by the stripe-webhook function)
+--   confirmed  a sign-up for a free event (price 0): confirmed when it is made
+--              (created_at), with no Stripe session, expires_at or paid_at
+--   expired    the checkout was abandoned or timed out; its spots are free again
+--
+-- paid and confirmed are booked for good and count the same everywhere: as taken
+-- spots, for one order per email per event, and to refuse deleting the event.
 
 create table if not exists public.workshop_signups (
   id                uuid primary key default gen_random_uuid(),
@@ -35,13 +40,19 @@ create table if not exists public.workshop_signups (
                     constraint workshop_signups_quantity_check check (quantity >= 1),
   stripe_session_id text unique,
   status            text not null default 'pending'
-                    constraint workshop_signups_status_check check (status in ('pending', 'paid', 'expired')),
+                    constraint workshop_signups_status_check
+                    check (status in ('pending', 'paid', 'confirmed', 'expired')),
   created_at        timestamptz not null default now(),
   expires_at        timestamptz,
   paid_at           timestamptz
 );
 
--- Spots are counted per workshop and status; duplicates are found by email.
+-- A table made by an earlier version of this file: allow the confirmed status.
+alter table public.workshop_signups drop constraint if exists workshop_signups_status_check;
+alter table public.workshop_signups add constraint workshop_signups_status_check
+  check (status in ('pending', 'paid', 'confirmed', 'expired'));
+
+-- Spots are counted per event and status; duplicates are found by email.
 create index if not exists workshop_signups_workshop_status_idx
   on public.workshop_signups (workshop, status);
 create index if not exists workshop_signups_workshop_email_idx
@@ -56,9 +67,9 @@ alter table public.workshop_signups enable row level security;
 revoke all on table public.workshop_signups from anon, authenticated;
 grant select, insert, update, delete on table public.workshop_signups to service_role;
 
--- Spots taken in each of the given workshops: the spots of paid sign-ups, plus those
--- of pending ones still inside their checkout window (so spots held by someone paying
--- right now aren't sold twice). Workshops with nothing taken have no row.
+-- Spots taken in each of the given events: the spots of paid and confirmed sign-ups,
+-- plus those of pending ones still inside their checkout window (so spots held by
+-- someone paying right now aren't sold twice). Events with nothing taken have no row.
 create or replace function public.workshop_taken(p_workshops text[])
 returns table (workshop text, taken integer)
 language sql
@@ -69,17 +80,26 @@ as $$
   select s.workshop, sum(s.quantity)::integer
   from public.workshop_signups as s
   where s.workshop = any (p_workshops)
-    and (s.status = 'paid' or (s.status = 'pending' and s.expires_at > now()))
+    and (s.status in ('paid', 'confirmed') or (s.status = 'pending' and s.expires_at > now()))
   group by s.workshop;
 $$;
 
--- Holds p_quantity spots for one checkout. Counting and inserting happen under a lock
--- per workshop, so when two people go for the last spots at the same moment, the
--- second waits for the first and then sees them taken.
+-- Takes p_quantity spots for one order. Counting and inserting happen under a lock
+-- per event, so when two people go for the last spots at the same moment, the second
+-- waits for the first and then sees them taken.
 --
--- Returns {"result": "reserved", "id": "<uuid>"}, {"result": "already_signed_up"},
--- {"result": "full"} or {"result": "not_enough_spots", "remaining": <n>}. The email
--- should already be trimmed and lower-cased, and the names tidied.
+-- By default the spots are held for a checkout: the row is pending until p_expires_at.
+-- With p_confirmed (a free event) the row is confirmed straight away and p_expires_at
+-- is ignored.
+--
+-- Returns {"result": "reserved", "id": "<uuid>"} (held, or confirmed with
+-- p_confirmed), {"result": "already_signed_up"}, {"result": "full"} or
+-- {"result": "not_enough_spots", "remaining": <n>}. The email should already be
+-- trimmed and lower-cased, and the names tidied.
+
+-- The earlier version, without p_confirmed (two versions would make calls ambiguous).
+drop function if exists public.workshop_reserve(text, text, text, text, integer, integer, timestamptz);
+
 create or replace function public.workshop_reserve(
   p_workshop    text,
   p_email       text,
@@ -87,7 +107,8 @@ create or replace function public.workshop_reserve(
   p_friend_name text,
   p_quantity    integer,
   p_capacity    integer,
-  p_expires_at  timestamptz
+  p_expires_at  timestamptz,
+  p_confirmed   boolean default false
 )
 returns jsonb
 language plpgsql
@@ -107,7 +128,7 @@ begin
     from public.workshop_signups as s
     where s.workshop = p_workshop
       and s.email = p_email
-      and s.status = 'paid'
+      and s.status in ('paid', 'confirmed')
   ) then
     return jsonb_build_object('result', 'already_signed_up');
   end if;
@@ -124,7 +145,11 @@ begin
   end if;
 
   insert into public.workshop_signups (workshop, email, name, friend_name, quantity, status, expires_at)
-  values (p_workshop, p_email, p_name, p_friend_name, p_quantity, 'pending', p_expires_at)
+  values (
+    p_workshop, p_email, p_name, p_friend_name, p_quantity,
+    case when p_confirmed then 'confirmed' else 'pending' end,
+    case when p_confirmed then null else p_expires_at end
+  )
   returning id into v_id;
 
   return jsonb_build_object('result', 'reserved', 'id', v_id);
@@ -134,10 +159,10 @@ $$;
 -- Only the service role (the edge functions) may call these. Supabase grants execute
 -- on new functions to anon and authenticated by default, and Postgres to public.
 revoke all on function public.workshop_taken(text[]) from public, anon, authenticated;
-revoke all on function public.workshop_reserve(text, text, text, text, integer, integer, timestamptz)
+revoke all on function public.workshop_reserve(text, text, text, text, integer, integer, timestamptz, boolean)
   from public, anon, authenticated;
 grant execute on function public.workshop_taken(text[]) to service_role;
-grant execute on function public.workshop_reserve(text, text, text, text, integer, integer, timestamptz)
+grant execute on function public.workshop_reserve(text, text, text, text, integer, integer, timestamptz, boolean)
   to service_role;
 
 -- Let the API see the new functions straight away.

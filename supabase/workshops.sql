@@ -1,5 +1,6 @@
--- Studio 414 workshops: the workshops people can sign up for, which the owners add and
--- edit on the owner page, plus owner-only access to the sign-ups.
+-- Studio 414 events (workshops, sales and the like): the events on the site, which the
+-- owners add and edit on the owner page, plus owner-only access to the sign-ups. The
+-- table and functions keep their workshop names.
 --
 -- Run in the Supabase dashboard after owners.sql (it uses public.is_owner()) and
 -- workshop.sql (it uses public.workshop_signups and public.workshop_taken()):
@@ -7,22 +8,30 @@
 -- replaces what already exists). If you ever run workshop.sql again, run this file
 -- again afterwards: workshop.sql takes back the owners' read access to the sign-ups.
 --
--- public.workshops holds one row per workshop:
+-- public.workshops holds one row per event:
 --
 --   id           its id, stored with each sign-up (workshop_signups.workshop); spots
 --                are counted by it. Lower-case letters and digits in groups joined by
 --                single hyphens ("paint-a-piece"), at most 64 characters. It can't be
---                changed once the workshop exists.
+--                changed once the event exists.
 --   name         1 to 100 characters (spaces at either end are trimmed)
---   date         the day of the workshop, in the studio's time zone (America/Toronto,
+--   date         the day of the event, in the studio's time zone (America/Toronto,
 --                STUDIO_TIME_ZONE in the workshop-checkout function). It is listed and
 --                bookable until that day has ended there.
 --   start_time   optional times of day, studio time; end_time only with a start_time,
 --   end_time     and later than it. Shown as "HH:MM" (24-hour clock).
 --   description  optional, up to 2000 characters (trimmed; blank becomes null)
---   capacity     spots, 1 to 500. It can't go below the spots already taken.
---   price_cents  per spot, in cents (Canadian dollars): 50 ($0.50, Stripe's smallest
---                charge) to 1000000 ($10,000)
+--   price_cents  per spot, in cents (Canadian dollars): 0 for a free event, else 50
+--                ($0.50, Stripe's smallest charge) to 1000000 ($10,000). Paid events
+--                are paid for in Stripe Checkout; free ones need no Stripe. Changing
+--                it later leaves the sign-ups already made as they are.
+--   signups      true (the default): people sign up (name, email, spots). A free
+--                event can set it to false: then nobody signs up and the event is
+--                just shown with its details. Paid events always have sign-ups.
+--   capacity     spots, 1 to 500, for events with sign-ups; null for events without
+--                (the database sets it to null when signups is false, whatever was
+--                sent). It can't go below the spots already taken, and sign-ups
+--                can't be turned off while any are taken.
 --   hidden       true keeps it off the site and out of checkout (sign-ups are kept)
 --   created_at   set by the database
 --   updated_at   set by the database on every change
@@ -33,15 +42,19 @@
 --                                                   them, and see every sign-up
 --   the edge functions (service role)               everything, as before
 --
--- Deleting a workshop is refused while it has paid sign-ups (hide it instead) or while
--- someone is in Stripe Checkout for it (spots held, not yet expired). Otherwise it is
--- deleted and its leftover sign-ups (expired or lapsed checkouts) stay in
--- workshop_signups. They don't count as taken spots, so a later workshop with the same
--- id starts with all its spots free.
+-- A sign-up for a free event is stored as confirmed (see workshop.sql) and counts
+-- exactly like a paid one, everywhere below.
+--
+-- Deleting an event is refused while it has paid or confirmed sign-ups (hide it
+-- instead) or while someone is in Stripe Checkout for it (spots held, not yet
+-- expired). Otherwise it is deleted and its leftover sign-ups (expired or lapsed
+-- checkouts) stay in workshop_signups. They don't count as taken spots, so a later
+-- event with the same id starts with all its spots free.
 --
 -- Spots taken are counted as workshop_taken() in workshop.sql counts them: the spots
--- of paid sign-ups plus those of pending ones still inside their checkout window.
--- workshop_spots_taken() below gives owners both numbers for every workshop.
+-- of paid and confirmed sign-ups plus those of pending ones still inside their
+-- checkout window. workshop_spots_taken() below gives owners both numbers for every
+-- event.
 
 create table if not exists public.workshops (
   id          text primary key
@@ -55,10 +68,11 @@ create table if not exists public.workshops (
   end_time    time,
   description text
               constraint workshops_description_length check (char_length(description) between 1 and 2000),
-  capacity    integer not null
+  capacity    integer
               constraint workshops_capacity_range check (capacity between 1 and 500),
   price_cents integer not null
-              constraint workshops_price_range check (price_cents between 50 and 1000000),
+              constraint workshops_price_range check (price_cents = 0 or price_cents between 50 and 1000000),
+  signups     boolean not null default true,
   hidden      boolean not null default false,
   created_at  timestamptz not null default now(),
   updated_at  timestamptz not null default now(),
@@ -66,12 +80,32 @@ create table if not exists public.workshops (
   constraint workshops_times_check check (
     (start_time is null or start_time < '24:00')
     and (end_time is null or (start_time is not null and end_time > start_time and end_time < '24:00'))
-  )
+  ),
+  -- Only free events can go without sign-ups.
+  constraint workshops_signups_free check (signups or price_cents = 0),
+  -- Spots exactly when people sign up.
+  constraint workshops_capacity_signups check ((capacity is not null) = signups)
 );
 
--- Before every insert and update: tidy the text, keep id and created_at fixed, set
--- updated_at, and refuse a capacity below the spots already taken. Runs as the table
--- owner so it can count sign-ups whoever makes the change.
+-- A table made by an earlier version of this file (paid workshops only, capacity
+-- always set): add free events and the signups column. On a table that already has
+-- them this changes nothing. Existing rows keep their sign-ups.
+alter table public.workshops add column if not exists signups boolean not null default true;
+alter table public.workshops alter column capacity drop not null;
+alter table public.workshops drop constraint if exists workshops_price_range;
+alter table public.workshops add constraint workshops_price_range
+  check (price_cents = 0 or price_cents between 50 and 1000000);
+alter table public.workshops drop constraint if exists workshops_signups_free;
+alter table public.workshops add constraint workshops_signups_free
+  check (signups or price_cents = 0);
+alter table public.workshops drop constraint if exists workshops_capacity_signups;
+alter table public.workshops add constraint workshops_capacity_signups
+  check ((capacity is not null) = signups);
+
+-- Before every insert and update: tidy the text, clear the capacity of an event
+-- without sign-ups, keep id and created_at fixed, set updated_at, and refuse a
+-- capacity below the spots already taken (or turning sign-ups off while any are
+-- taken). Runs as the table owner so it can count sign-ups whoever makes the change.
 create or replace function public.workshops_before_write()
 returns trigger
 language plpgsql
@@ -84,16 +118,22 @@ declare
 begin
   new.name := btrim(new.name);
   new.description := nullif(btrim(new.description), '');
+  -- Spots only apply to events people sign up for.
+  if new.signups is false then
+    new.capacity := null;
+  end if;
 
   if tg_op = 'UPDATE' then
     if new.id is distinct from old.id then
       raise exception using
         errcode = 'check_violation',
-        message = 'A workshop''s id can''t be changed: its sign-ups are stored under it.',
-        hint = 'Add a new workshop instead, and hide or delete this one.';
+        message = 'An event''s id can''t be changed: its sign-ups are stored under it.',
+        hint = 'Add a new event instead, and hide or delete this one.';
     end if;
     new.created_at := old.created_at;
-    v_check_capacity := new.capacity < old.capacity;
+    -- Count when the spots go down, or sign-ups are turned off (null) or on.
+    v_check_capacity := new.capacity is distinct from old.capacity
+                        and coalesce(new.capacity < old.capacity, true);
   else
     new.created_at := now();
     v_check_capacity := true;
@@ -102,19 +142,29 @@ begin
 
   if v_check_capacity then
     -- The same lock workshop_reserve() takes, so spots being held at this moment are
-    -- counted. (workshop-checkout reads the capacity just before it reserves, so a
-    -- checkout started in the very same instant can still go by the old capacity.)
+    -- counted. (workshop-checkout reads the event just before it reserves, so a
+    -- sign-up started in the very same instant can still go by the old capacity or
+    -- sign-ups setting.)
     perform pg_advisory_xact_lock(hashtext('public.workshop_signups:' || new.id));
 
     select coalesce(sum(t.taken), 0)::integer
     into v_taken
     from public.workshop_taken(array[new.id]) as t;
 
+    if new.capacity is null and v_taken > 0 then
+      raise exception using
+        errcode = 'check_violation',
+        message = format(
+          'Spots already taken: %s (signed up, or held while someone pays), so this event needs its sign-ups.',
+          v_taken
+        ),
+        hint = 'Keep sign-ups on, or hide the event instead.';
+    end if;
     if new.capacity < v_taken then
       raise exception using
         errcode = 'check_violation',
         message = format(
-          'Spots already taken: %s (paid, or held while someone pays). The workshop needs at least that many spots.',
+          'Spots already taken: %s (signed up, or held while someone pays). The event needs at least that many spots.',
           v_taken
         );
     end if;
@@ -129,8 +179,9 @@ create trigger workshops_before_write
   before insert or update on public.workshops
   for each row execute function public.workshops_before_write();
 
--- Before a delete: refuse while the workshop has paid sign-ups or spots held for a
--- checkout in progress. Leftover expired / lapsed sign-ups are left as they are.
+-- Before a delete: refuse while the event has paid or confirmed (free) sign-ups or
+-- spots held for a checkout in progress. Leftover expired / lapsed sign-ups are left
+-- as they are.
 create or replace function public.workshops_before_delete()
 returns trigger
 language plpgsql
@@ -142,11 +193,11 @@ begin
 
   if exists (
     select 1 from public.workshop_signups as s
-    where s.workshop = old.id and s.status = 'paid'
+    where s.workshop = old.id and s.status in ('paid', 'confirmed')
   ) then
     raise exception using
       errcode = 'restrict_violation',
-      message = 'This workshop has paid sign-ups, so it can''t be deleted.',
+      message = 'People have signed up for this event, so it can''t be deleted.',
       hint = 'Hide it instead: it stays off the site and its sign-ups are kept.';
   end if;
 
@@ -156,7 +207,7 @@ begin
   ) then
     raise exception using
       errcode = 'restrict_violation',
-      message = 'Someone is paying for this workshop right now, so it can''t be deleted yet.',
+      message = 'Someone is paying for this event right now, so it can''t be deleted yet.',
       hint = 'Hide it, then try again in about half an hour.';
   end if;
 
@@ -233,10 +284,11 @@ create policy "Owners can see sign-ups"
   to authenticated
   using ((select public.is_owner()));
 
--- For the owner page: spots taken in every workshop in the table, soonest first, as
--- paid_spots (paid sign-ups) and held_spots (checkouts in progress, not yet expired).
--- Their sum is what counts against capacity. Workshops with nothing taken get zeros.
--- Owners only: anyone else gets an error.
+-- For the owner page: spots taken in every event in the table, soonest first, as
+-- paid_spots (booked for good: paid sign-ups, and confirmed ones for free events) and
+-- held_spots (checkouts in progress, not yet expired). Their sum is what counts
+-- against capacity. Events with nothing taken get zeros. Owners only: anyone else
+-- gets an error.
 --
 --   const { data, error } = await supabase.rpc("workshop_spots_taken");
 --   // [{ workshop: "paint-a-piece", paid_spots: 3, held_spots: 1 }, ...]
@@ -257,7 +309,7 @@ begin
   return query
   select
     w.id,
-    coalesce(sum(s.quantity) filter (where s.status = 'paid'), 0)::integer,
+    coalesce(sum(s.quantity) filter (where s.status in ('paid', 'confirmed')), 0)::integer,
     coalesce(sum(s.quantity) filter (where s.status = 'pending' and s.expires_at > now()), 0)::integer
   from public.workshops as w
   left join public.workshop_signups as s on s.workshop = w.id

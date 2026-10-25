@@ -6,7 +6,7 @@ A one-page site for the Studio 414 studio space, in plain HTML, CSS and JavaScri
 
 The owners add and edit workshops (name, date, times, description, spots, price, and whether it's hidden) on the owner page, `/admin.html`. They are stored in the `workshops` table ([`supabase/workshops.sql`](supabase/workshops.sql) describes it). Until the owner page's Workshops section is ready, edit them in **Table Editor → workshops**. It starts with two workshops, each with 10 spots at $59.99 CAD a spot: "Paint a piece" (`paint-a-piece`) on 7 November 2026 and "Hand building" (`hand-building`) on 5 December 2026.
 
-A visitor signs up with their name and email, books 1 spot or more (up to the spots left), and can give a friend's name. Each email gets one order per workshop. A workshop drops off the list once its day is over in Toronto time (change `STUDIO_TIME_ZONE` in [`workshop-checkout`](supabase/functions/workshop-checkout/index.ts) if the studio is in another time zone). A workshop with paid sign-ups can't be deleted (hide it instead), and its spots can't go below those already taken.
+A visitor signs up with their name and email, books 1 spot or more (up to the spots left), and can give a friend's name. Each email gets one order per workshop. A workshop drops off the list once its day is over in Toronto time (change `STUDIO_TIME_ZONE` in [`workshop-checkout`](supabase/functions/workshop-checkout/index.ts) if the studio is in another time zone). A workshop with sign-ups can't be deleted (hide it instead), and its spots can't go below those already taken. A free event (price 0) needs no Stripe: people sign up the same way without paying, or, when the owners turn sign-ups off for it, it is just shown with its details.
 
 The code is written but not deployed. Do everything in Stripe **test mode** first. Stripe secret keys only go into Supabase secrets, never into the site's files.
 
@@ -35,8 +35,8 @@ The code is written but not deployed. Do everything in Stripe **test mode** firs
 
    ```json
    {"workshops":[
-     {"id":"paint-a-piece","name":"Paint a piece","date":"2026-11-07","startTime":null,"endTime":null,"description":null,"price":5999,"currency":"cad","capacity":10,"taken":0,"remaining":10},
-     {"id":"hand-building","name":"Hand building","date":"2026-12-05","startTime":null,"endTime":null,"description":null,"price":5999,"currency":"cad","capacity":10,"taken":0,"remaining":10}
+     {"id":"paint-a-piece","name":"Paint a piece","date":"2026-11-07","startTime":null,"endTime":null,"description":null,"price":5999,"currency":"cad","signups":true,"capacity":10,"taken":0,"remaining":10},
+     {"id":"hand-building","name":"Hand building","date":"2026-12-05","startTime":null,"endTime":null,"description":null,"price":5999,"currency":"cad","signups":true,"capacity":10,"taken":0,"remaining":10}
    ]}
    ```
 
@@ -60,7 +60,7 @@ The code is written but not deployed. Do everything in Stripe **test mode** firs
    supabase functions deploy stripe-webhook --no-verify-jwt
    ```
 
-**Who signed up:** Supabase **Table Editor → workshop_signups**, filtered to `status` = `paid` and the workshop's id in `workshop`. Each row is one order: `name`, `email`, `quantity` (spots paid for) and `friend_name` (if they gave one).
+**Who signed up:** Supabase **Table Editor → workshop_signups**, filtered to `status` = `paid` (`confirmed` for free events) and the workshop's id in `workshop`. Each row is one order: `name`, `email`, `quantity` (spots booked) and `friend_name` (if they gave one).
 
 ## Set up the owner page
 
