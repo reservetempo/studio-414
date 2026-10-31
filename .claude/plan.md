@@ -6,9 +6,6 @@ Managed by the main session (see CLAUDE.md). `/z <items>` adds tasks; `/z` works
 
 - The website framework (tasks 93-121) moved on 2026-10-31 to its own folder, `C:\Users\DomPC\Desktop\admin-framework`, with its own plan in `.claude/plan.md` there (its remaining tasks and its Done list). Work on it in a chat opened in that folder.
 
-#### 122. Drop the framework's preview config
-In `.claude/launch.json`, remove the `website-framework` configuration. It served `C:/Users/DomPC/Desktop/websites/website-framework`, which moved to `C:\Users\DomPC\Desktop\admin-framework` (with its own `site` config there), so it now points at a folder that doesn't exist. Leave the `studio-414` configuration exactly as it is. Done: `launch.json` is valid JSON (check that Python's `json` module loads it) holding only the `studio-414` configuration. Nothing on the site changes, so no preview is needed.
-
 ### Owner editing and events (tasks 79-89): facts every task shares
 
 - The user's answers (2026-10-25):
@@ -78,6 +75,7 @@ Every theme task: start from `themes/README.md` (the guide) and the shared facts
 
 ## Done
 
+- 122. Drop the framework's preview config: `1448f39`. Removed the `website-framework` entry from `.claude/launch.json` (the framework moved to `C:\Users\DomPC\Desktop\admin-framework`, with its own `site` config); only `studio-414` is left.
 - 92. Preview frame shows the desktop site, scaled to fit: `47580d3`. Cause confirmed: at 1366x768 the framed site was 997x738 (below comments.css's 1100px), so the comment section didn't float and edit mode couldn't pick it. preview.js fits the iframe with a ResizeObserver on `.preview-stage`: laid out at least 1280x720 in the stage's proportions, translate+scale to fit and centre, unscaled when the stage is big enough; preview.css stage `position: relative; overflow: hidden`, iframe absolute with `transform-origin: 0 0`. Checked: comment section, card, 414 and photo select, move and resize at 0.78 scale; Look changes and layoutedit messages still reach; 375px no horizontal scroll; 1920x1080 unscaled. Beyond the brief: when scaled, the page is never laid out taller than wide; on stacked phones the frame is `min(85dvh, 100vw)` tall (each a one-line undo). On phones it's ~0.29 scale, fiddly to drag. Ran ~104k tokens.
 - 91. Fix setup.sql's header about deleting comments: `31b7e0e`. Comment only: visitors can't delete comments; owners can once comments-owner.sql is run; re-run it whenever setup.sql is re-run (setup.sql revokes all from anon and authenticated).
 - 84. Hide the comment section: `6bd2842`. Layout section "Show the comment section" checkbox (live, unsaved until Save; Undo/Back reset it); with `commentsHidden` the section is hidden (also from screen readers) and comments aren't fetched; loads once when shown again; edit mode unselects it. Limit: on a first visit (no cached layout) comments may show briefly before the saved layout hides them.
