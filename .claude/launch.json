@@ -6,12 +6,6 @@
       "runtimeExecutable": "python",
       "runtimeArgs": ["-m", "http.server", "8000"],
       "port": 8000
-    },
-    {
-      "name": "website-framework",
-      "runtimeExecutable": "python",
-      "runtimeArgs": ["-m", "http.server", "8001", "--directory", "C:/Users/DomPC/Desktop/websites/website-framework"],
-      "port": 8001
     }
   ]
 }
