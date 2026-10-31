@@ -6,6 +6,9 @@ Managed by the main session (see CLAUDE.md). `/z <items>` adds tasks; `/z` works
 
 - The website framework (tasks 93-121) moved on 2026-10-31 to its own folder, `C:\Users\DomPC\Desktop\admin-framework`, with its own plan in `.claude/plan.md` there (its remaining tasks and its Done list). Work on it in a chat opened in that folder.
 
+#### 122. Drop the framework's preview config
+In `.claude/launch.json`, remove the `website-framework` configuration. It served `C:/Users/DomPC/Desktop/websites/website-framework`, which moved to `C:\Users\DomPC\Desktop\admin-framework` (with its own `site` config there), so it now points at a folder that doesn't exist. Leave the `studio-414` configuration exactly as it is. Done: `launch.json` is valid JSON (check that Python's `json` module loads it) holding only the `studio-414` configuration. Nothing on the site changes, so no preview is needed.
+
 ### Owner editing and events (tasks 79-89): facts every task shares
 
 - The user's answers (2026-10-25):
